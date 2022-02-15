@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { ChromeMessage, Sender } from "../types";
 import { getCurrentTabUId, getCurrentTabUrl } from "../chrome/utils";
+import { Button } from "@mui/material";
 
 export const Home = () => {
     const [url, setUrl] = useState<string>('');
@@ -59,6 +60,8 @@ export const Home = () => {
                 <p>
                     {url}
                 </p>
+                <TextField id="outlined-basic" label="Text" variant="outlined" />
+                <Button variant="contained">Encrypt</Button>
                 <button onClick={sendTestMessage}>SEND MESSAGE</button>
                 <button onClick={sendRemoveMessage}>Remove logo</button>
                 <p>Response from content:</p>
