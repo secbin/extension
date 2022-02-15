@@ -144,3 +144,8 @@ fabric.properties
 
 # Built Visual Studio Code Extensions
 *.vsix
+
+node_modules
+build
+yarn.lock
+package-lock.json
