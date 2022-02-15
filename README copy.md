@@ -5,6 +5,8 @@
 ## 2. How to build this extension:
 
 ```
+$ yarn
+$ yarn upgrade
 $ yarn run build
 ```
 
