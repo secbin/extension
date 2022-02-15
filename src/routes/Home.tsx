@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { ChromeMessage, Sender } from "../types";
 import { getCurrentTabUId, getCurrentTabUrl } from "../chrome/utils";
-import { Button } from "@mui/material";
+import { Button, TextField } from "@mui/material";
 
 export const Home = () => {
     const [url, setUrl] = useState<string>('');
