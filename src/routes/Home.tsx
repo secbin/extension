@@ -3,10 +3,14 @@ import { useHistory } from "react-router-dom";
 import { ChromeMessage, Sender } from "../types";
 import { getCurrentTabUId, getCurrentTabUrl } from "../chrome/utils";
 import { Button, TextField } from "@mui/material";
+import usePasteBinSearch from '../hooks/usePasteBinSearch'
+
 
 export const Home = () => {
+    const [query, setQuery] = useState<string>('');
     const [url, setUrl] = useState<string>('');
     const [responseFromContent, setResponseFromContent] = useState<string>('');
+    const [ciphertext, setCiphertext] = usePasteBinSearch(query);
 
     let {push} = useHistory();
 
@@ -64,6 +68,14 @@ export const Home = () => {
                 <Button variant="contained">Encrypt</Button>
                 <button onClick={sendTestMessage}>SEND MESSAGE</button>
                 <button onClick={sendRemoveMessage}>Remove logo</button>
+                <form  onSubmit={(e) => {
+                  e.preventDefault();
+                    console.log(query);
+                    setQuery(query)
+                }}>
+                  <input value={query} placeholder="Enter The Paste Bin Key" onChange={e => setQuery(e.target.value)} />
+                  <button  type="submit">Decrypt</button>
+                </form>
                 <p>Response from content:</p>
                 <p>
                     {responseFromContent}
