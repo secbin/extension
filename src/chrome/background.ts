@@ -32,7 +32,7 @@ chrome.runtime.onSuspend.addListener(() => {
 });
 
 
-// Design choose: any encrption will return the cipher text and the key.
+// Design choice: any encrption will return the cipher text and the key.
 // if we replace clipboad with ciphertext/url, how should we return key?
         // 1. return key as alert();
         // 2. display key and ciphertext in popup window.
