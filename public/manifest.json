@@ -28,7 +28,8 @@
   ],
   "permissions": [
     "activeTab",
-    "contextMenus"
+    "contextMenus",
+    "clipboardWrite"
   ],
   "optional_permissions": [
     "<all_urls>"

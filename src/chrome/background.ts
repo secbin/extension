@@ -1,4 +1,6 @@
+import { copyTextClipboard } from "../chrome/utils";
 export {}
+
 /** Fired when the extension is first installed,
  *  when the extension is updated to a new version,
  *  and when Chrome is updated to a new version. */
@@ -53,5 +55,6 @@ chrome.contextMenus.create(pasteBinMenuItem);
 chrome.contextMenus.create(clipboardMenuItem);
 
 chrome.contextMenus.onClicked.addListener( (clickData) => {
+    copyTextClipboard(clickData.selectionText);
     alert(clickData.menuItemId + "\n" + clickData.selectionText);
 })
