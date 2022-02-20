@@ -28,5 +28,30 @@ chrome.runtime.onStartup.addListener(() => {
  *  be sent and the page won't be unloaded. */
 chrome.runtime.onSuspend.addListener(() => {
     console.log('[background.js] onSuspend')
-    alert('[background.js] onSuspend');
+   // alert('[background.js] onSuspend');
 });
+
+
+// Design choose: any encrption will return the cipher text and the key.
+// if we replace clipboad with ciphertext/url, how should we return key?
+        // 1. return key as alert();
+        // 2. display key and ciphertext in popup window.
+
+var pasteBinMenuItem = {
+    "id": "pasteBin",
+    "title": "Share via PasteBin", //name of menu
+    "contexts": ['selection'] // what type of content menu appears on
+}
+
+var clipboardMenuItem = {
+    "id": "clipboardMenuItem",
+    "title": "Encrpyt to Clipboard",
+    "contexts": ['selection']
+}
+
+chrome.contextMenus.create(pasteBinMenuItem);
+chrome.contextMenus.create(clipboardMenuItem);
+
+chrome.contextMenus.onClicked.addListener( (clickData) => {
+    alert(clickData.menuItemId + "\n" + clickData.selectionText);
+})
