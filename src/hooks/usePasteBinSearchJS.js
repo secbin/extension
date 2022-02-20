@@ -21,11 +21,18 @@ function usePasteBinSearchJS(query){
      setLoading(true);
      try {
        const response = await fetch(
-         // `https://scrape.pastebin/api_scrape_item.php?i=${query}`,
-          `https://reqbin.com/echo/get/json`,
-          { signal: controller.signal }
+        // `https://api.cl1p.net/${query}`,
+        // `https://cors-anywhere.herokuapp.com/https://api.cl1p.net/${query}`,
+          //`https://pastebin.com/raw/${query}`,
+            `https://cors-anywhere.herokuapp.com/https://pastebin.com/raw/${query}`,
+          //`https://cors-anywhere.herokuapp.com/https://scrape.pastebin.com/api_scrape_item.php?i=${query}`,
+          //`https://reqbin.com/echo/get/json`,
+          {
+          signal: controller.signal,
+
+         }
        );
-       responseBody = await response.json();
+       responseBody = await response.text();
      } catch (e) {
        if (e instanceof DOMException) {
          console.log("== HTTP request cancelled")

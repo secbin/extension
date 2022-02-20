@@ -20,7 +20,7 @@ return ( ciphertext ? (
   //   <p> {ciphertext[i].success}</p>
   // ))};
   // </div>
-  <p>It worky kinda </p>
+  <p>Output goes Here</p>
 
 ): <ErrorPage/>
 
@@ -31,6 +31,7 @@ function Ciphertext({query}:any){
   const [ciphertext, setCiphertext] = usePasteBinSearchJS(query);
 
 //  console.log(query);
+
 
   return(
     <div>
