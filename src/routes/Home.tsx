@@ -112,7 +112,11 @@ export const Home = () => {
         });
     };
 
-
+function encryptSubmit(e:any){
+  e.preventDefault();
+    console.log("Encrypt Value: "+ encryptValue);
+    setEncryptQuery(encryptValue);
+}
     return (
         <div className="App">
             <header className="App-header">
@@ -121,15 +125,15 @@ export const Home = () => {
                 <p>
                     {url}
                 </p>
-                <form  onSubmit={(e) => {
-                  e.preventDefault();
-                    console.log("Encrypt Value: "+ encryptValue);
-                    setEncryptQuery(encryptValue);
-
-                }}>
+                <form>
                 <input value={encryptValue} id="outlined-basic"  onChange={e => setEncryptValue(e.target.value)}/>
-                <Button type="submit" variant="contained">Encrypt</Button>
+                <Button type="submit" onClick={encryptSubmit} >Encrypt</Button>
                 </form>
+
+
+
+
+
 
 
                 <form  onSubmit={(e) => {
