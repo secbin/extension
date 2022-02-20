@@ -21,7 +21,7 @@ function usePasteBinSearch(query:any ){
      try {
        const response = await fetch(
          `https://scrape.pastebin.com/api_scrape_item.php?i=${query}`,
-         
+
           { signal: controller.signal }
        );
        responseBody = await response.json();

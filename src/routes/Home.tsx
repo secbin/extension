@@ -5,6 +5,7 @@ import { getCurrentTabUId, getCurrentTabUrl } from "../chrome/utils";
 import { Button, TextField } from "@mui/material";
 import usePasteBinSearch from '../hooks/usePasteBinSearch'
 import usePasteBinSearchJS from '../hooks/usePasteBinSearchJS'
+import usePasteBinPost from '../hooks/usePasteBinPost';
 function ErrorPage(){
 
   return (
@@ -26,7 +27,25 @@ return ( ciphertext ? (
 
 )
 
+
 }
+
+
+function Plaintext({encryptQuery}:any){
+  const [pasteBinLink, error] = usePasteBinPost(encryptQuery);
+
+  //console.log(encryptQuery);
+
+
+  return(
+    <div>
+    <CiphertextItem ciphertext={encryptQuery}/>
+    </div>
+
+  )
+}
+
+
 function Ciphertext({query}:any){
   const [ciphertext, setCiphertext] = usePasteBinSearchJS(query);
 
@@ -44,6 +63,8 @@ function Ciphertext({query}:any){
 export const Home = () => {
     const [query, setQuery] = useState<string>('');
     const [inputValue, setInputValue] = useState<string>('');
+    const [encryptQuery, setEncryptQuery] = useState<string>('');
+    const [encryptValue, setEncryptValue] = useState<string>('');
     const [url, setUrl] = useState<string>('');
     const [responseFromContent, setResponseFromContent] = useState<string>('');
     const [ciphertext, setCiphertext] = useState([]);
@@ -100,10 +121,17 @@ export const Home = () => {
                 <p>
                     {url}
                 </p>
-                <TextField id="outlined-basic" label="Text" variant="outlined" />
-                <Button variant="contained">Encrypt</Button>
-                <button onClick={sendTestMessage}>SEND MESSAGE</button>
-                <button onClick={sendRemoveMessage}>Remove logo</button>
+                <form  onSubmit={(e) => {
+                  e.preventDefault();
+                    console.log("Encrypt Value: "+ encryptValue);
+                    setEncryptQuery(encryptValue);
+
+                }}>
+                <input value={encryptValue} id="outlined-basic"  onChange={e => setEncryptValue(e.target.value)}/>
+                <Button type="submit" variant="contained">Encrypt</Button>
+                </form>
+
+
                 <form  onSubmit={(e) => {
                   e.preventDefault();
                     console.log(inputValue);
@@ -113,12 +141,17 @@ export const Home = () => {
                   <input value={inputValue} placeholder="Enter The Paste Bin Key" onChange={e => setInputValue(e.target.value)} />
                   <button  type="submit">Decrypt</button>
                 </form>
+                <button onClick={sendTestMessage}>SEND MESSAGE</button>
+                <button onClick={sendRemoveMessage}>Remove logo</button>
                 <p>Response from content:</p>
                 <p>
                     {responseFromContent}
                 </p>
                 <div>
                     <Ciphertext query={query}/>
+                </div>
+                <div>
+                    <Plaintext encryptQuery={encryptQuery}/>
                 </div>
                 <button onClick={() => {
                     push('/about')
