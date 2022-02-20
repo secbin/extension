@@ -34,10 +34,12 @@ chrome.runtime.onSuspend.addListener(() => {
 });
 
 
+
 // Design choice: any encrption will return the cipher text and the key.
 // if we replace clipboad with ciphertext/url, how should we return key?
         // 1. return key as alert();
         // 2. display key and ciphertext in popup window.
+
 
 var pasteBinMenuItem = {
     "id": "pasteBin",
@@ -49,7 +51,8 @@ var clipboardMenuItem = {
     "id": "clipboardMenuItem",
     "title": "Encrpyt to Clipboard",
     "contexts": ['selection']
-}
+} // if we allow user to select/choose the key, might need to add children to these menus
+  // if keys are random and stored in password manager then not a problem
 
 chrome.contextMenus.create(pasteBinMenuItem);
 chrome.contextMenus.create(clipboardMenuItem);
