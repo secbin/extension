@@ -40,9 +40,8 @@ return ( ciphertext ? (
 // PasteBinLink is the link returned from the post request.
 function Plaintext({encryptQuery}:any){
   //
-  //const [pasteBinLink, error] = usePasteBinPost(encryptQuery);
+  const [pasteBinLink, error] = usePasteBinPost(encryptQuery);
 
-  //console.log(encryptQuery);
 
 
   return(
@@ -124,10 +123,10 @@ export const Home = () => {
     };
 
 // This handles submitting the plaintext to the state variable from the form when the button is clicked.
-function encryptSubmit(e:any){
-  e.preventDefault();
-    console.log("Encrypt Value: "+ encryptValue);
-    setEncryptQuery(encryptValue);
+function encryptSubmit(ciphertext:any){
+
+    console.log("Encrypt Value: "+ ciphertext);
+    setEncryptQuery(ciphertext);
 }
 
 
@@ -135,6 +134,7 @@ function encryptSubmit(e:any){
         var result = encryptText(textbox, "password", "AES-GCM"); // password and Mode are optional
 
         setResponseFromContent(result.CipherTXT);
+        encryptSubmit(result.CipherTXT);
     };
 
     var textbox = ""
@@ -153,11 +153,6 @@ function encryptSubmit(e:any){
                 <p>
                     {url}
                 </p>
-
-                <form>
-                <input value={encryptValue} id="outlined-basic"  onChange={e => setEncryptValue(e.target.value)}/>
-                <Button type="submit" onClick={encryptSubmit} >Encrypt</Button>
-                </form>
 
                 <form  onSubmit={(e) => {
                   e.preventDefault();
