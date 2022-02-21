@@ -34,6 +34,15 @@ chrome.runtime.onSuspend.addListener(() => {
 });
 
 
+// storage changed
+// chrome.storage.onChanged.addListener(function (changes, namespace) {
+//     for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
+//       console.log(
+//         `Storage key "${key}" in namespace "${namespace}" changed.`,
+//         `Old value was "${oldValue}", new value is "${newValue}".`
+//       );
+//     }
+//   });
 
 // Design choice: any encrption will return the cipher text and the key.
 // if we replace clipboad with ciphertext/url, how should we return key?
