@@ -25,6 +25,7 @@ function usePasteBinSearchJS(query){
         // `https://cors-anywhere.herokuapp.com/https://api.cl1p.net/${query}`,
           //`https://pastebin.com/raw/${query}`,
            // `https://cors-anywhere.herokuapp.com/https://pastebin.com/raw/${query}`,
+           // `http://localhost:8080/https://pastebin.com/raw/${query}`,
           //`https://cors-anywhere.herokuapp.com/https://scrape.pastebin.com/api_scrape_item.php?i=${query}`,
           //`https://reqbin.com/echo/get/json`,
           {

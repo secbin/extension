@@ -19,17 +19,19 @@ function ErrorPage() {
 
 
 //This represents the text to be displayed for a plaintext or a ciphertext
-function CiphertextItem({ ciphertext }: any) {
-    return (ciphertext ? (
-        // <div>
-        // {Object.keys(ciphertext).map((keyName, i) => (
-        //
-        //   <p> {ciphertext[i].success}</p>
-        // ))};
-        // </div>
-        <p>Output goes Here</p>
-
-    ) : <ErrorPage />
+function CiphertextItem({ciphertext}:any){
+return ( ciphertext ? (
+  // <div>
+  // {Object.keys(ciphertext).map((keyName, i) => (
+  //
+  //   <p> {ciphertext[i].success}</p>
+  // ))};
+  // </div>
+  <div>
+  <p>Your Ciphertext: </p>
+  <p>{ciphertext}</p>
+  </div>
+): <ErrorPage/>
 
     )
 
@@ -40,18 +42,18 @@ function CiphertextItem({ ciphertext }: any) {
 // encryptQuery is the Plaintext
 //usePasteBinPost is the hook for posting to pasteBin
 // PasteBinLink is the link returned from the post request.
-function Plaintext({ encryptQuery }: any) {
-    //
-    //const [pasteBinLink, error] = usePasteBinPost(encryptQuery);
 
-    //console.log(encryptQuery);
+function Plaintext({encryptQuery}:any){
+  //
+  const [pasteBinLink, error] = usePasteBinPost(encryptQuery);
 
 
-    return (
-        // <div>
-        // <CiphertextItem ciphertext={pasteBinLink}/>
-        // </div>
-        <p> Figure out how to fix the post request being called from the start. </p>
+
+  return(
+    // <div>
+    // <CiphertextItem ciphertext={pasteBinLink}/>
+    // </div>
+    <p></p>
 
     )
 }
@@ -139,18 +141,19 @@ export const Home = () => {
 
     }
 
-    // This handles submitting the plaintext to the state variable from the form when the button is clicked.
-    function encryptSubmit(e: any) {
-        e.preventDefault();
-        console.log("Encrypt Value: " + encryptValue);
-        setEncryptQuery(encryptValue);
-    }
+// This handles submitting the plaintext to the state variable from the form when the button is clicked.
+function encryptSubmit(ciphertext:any){
+
+    console.log("Encrypt Value: "+ ciphertext);
+    setEncryptQuery(ciphertext);
+}
 
 
     const encryptWrapper = () => {
         var result = encryptText(textbox, "password", "AES-GCM"); // password and Mode are optional
 
         setResponseFromContent(result.CipherTXT);
+        encryptSubmit(result.CipherTXT);
     };
 
     var textbox = ""
@@ -170,13 +173,8 @@ export const Home = () => {
                     {url}
                 </p>
 
-                <form>
-                    <input value={encryptValue} id="outlined-basic" onChange={e => setEncryptValue(e.target.value)} />
-                    <Button type="submit" onClick={encryptSubmit} >Encrypt</Button>
-                </form>
-
-                <form onSubmit={(e) => {
-                    e.preventDefault();
+                <form  onSubmit={(e) => {
+                  e.preventDefault();
                     console.log(inputValue);
                     setQuery(inputValue);
 
