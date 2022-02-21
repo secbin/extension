@@ -2,10 +2,13 @@ import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { ChromeMessage, Sender } from "../types";
 import { getCurrentTabUId, getCurrentTabUrl } from "../chrome/utils";
+
 import { Button, TextField } from "@mui/material";
-import usePasteBinSearch from '../hooks/usePasteBinSearch'
+
 import usePasteBinSearchJS from '../hooks/usePasteBinSearchJS'
 import usePasteBinPost from '../hooks/usePasteBinPost';
+
+
 function ErrorPage(){
 
   return (
@@ -13,6 +16,8 @@ function ErrorPage(){
   )
 }
 
+
+//This represents the text to be displayed for a plaintext or a ciphertext
 function CiphertextItem({ciphertext}:any){
 return ( ciphertext ? (
   // <div>
@@ -30,22 +35,28 @@ return ( ciphertext ? (
 
 }
 
-
+// This function takes in the plaintext from the form
+// encryptQuery is the Plaintext
+//usePasteBinPost is the hook for posting to pasteBin
+// PasteBinLink is the link returned from the post request.
 function Plaintext({encryptQuery}:any){
-  const [pasteBinLink, error] = usePasteBinPost(encryptQuery);
+  //
+  //const [pasteBinLink, error] = usePasteBinPost(encryptQuery);
 
   //console.log(encryptQuery);
 
 
   return(
-    <div>
-    <CiphertextItem ciphertext={encryptQuery}/>
-    </div>
+    // <div>
+    // <CiphertextItem ciphertext={pasteBinLink}/>
+    // </div>
+    <p> Figure out how to fix the post request being called from the start. </p>
 
   )
 }
 
-
+//This function gets the ciphertext from pasteBin
+// The ciphertext is stored in the ciphertext state  variable
 function Ciphertext({query}:any){
   const [ciphertext, setCiphertext] = usePasteBinSearchJS(query);
 
@@ -68,7 +79,6 @@ export const Home = () => {
     const [url, setUrl] = useState<string>('');
     const [responseFromContent, setResponseFromContent] = useState<string>('');
     const [ciphertext, setCiphertext] = useState([]);
-    //const [ciphertext, setCiphertext] = usePasteBinSearch(query);
     let {push} = useHistory();
 
     /**
@@ -111,7 +121,7 @@ export const Home = () => {
                 });
         });
     };
-
+// This handles submitting the plaintext to the state variable from the form when the button is clicked.
 function encryptSubmit(e:any){
   e.preventDefault();
     console.log("Encrypt Value: "+ encryptValue);
@@ -129,12 +139,6 @@ function encryptSubmit(e:any){
                 <input value={encryptValue} id="outlined-basic"  onChange={e => setEncryptValue(e.target.value)}/>
                 <Button type="submit" onClick={encryptSubmit} >Encrypt</Button>
                 </form>
-
-
-
-
-
-
 
                 <form  onSubmit={(e) => {
                   e.preventDefault();
