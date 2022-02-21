@@ -148,3 +148,4 @@ fabric.properties
 node_modules
 build
 package-lock.json
+yarn.lock

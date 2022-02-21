@@ -1,14 +1,86 @@
 import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { ChromeMessage, Sender } from "../types";
-import { getCurrentTabUId, getCurrentTabUrl,storeData,getData } from "../chrome/utils";
+import { getCurrentTabUId, getCurrentTabUrl,storeData,getData,encryptText } from "../chrome/utils";
 import { Button, TextField } from "@mui/material";
 
+import usePasteBinSearchJS from '../hooks/usePasteBinSearchJS'
+import usePasteBinPost from '../hooks/usePasteBinPost';
+
+
+function ErrorPage(){
+
+  return (
+    <h2> Sorry, the Decryption you were looking for is not valid. </h2>
+  )
+}
+
+
+//This represents the text to be displayed for a plaintext or a ciphertext
+function CiphertextItem({ciphertext}:any){
+return ( ciphertext ? (
+  // <div>
+  // {Object.keys(ciphertext).map((keyName, i) => (
+  //
+  //   <p> {ciphertext[i].success}</p>
+  // ))};
+  // </div>
+  <p>Output goes Here</p>
+
+): <ErrorPage/>
+
+)
+
+
+}
+
+// This function takes in the plaintext from the form
+// encryptQuery is the Plaintext
+//usePasteBinPost is the hook for posting to pasteBin
+// PasteBinLink is the link returned from the post request.
+function Plaintext({encryptQuery}:any){
+  //
+  //const [pasteBinLink, error] = usePasteBinPost(encryptQuery);
+
+  //console.log(encryptQuery);
+
+
+  return(
+    // <div>
+    // <CiphertextItem ciphertext={pasteBinLink}/>
+    // </div>
+    <p> Figure out how to fix the post request being called from the start. </p>
+
+  )
+}
+
+//This function gets the ciphertext from pasteBin
+// The ciphertext is stored in the ciphertext state  variable
+function Ciphertext({query}:any){
+  const [ciphertext, setCiphertext] = usePasteBinSearchJS(query);
+
+//  console.log(query);
+
+
+  return(
+    <div>
+      <CiphertextItem ciphertext={ciphertext}/>
+    </div>
+
+  )
+}
+
 export const Home = () => {
+    const [query, setQuery] = useState<string>('');
+    const [inputValue, setInputValue] = useState<string>('');
+    const [encryptQuery, setEncryptQuery] = useState<string>('');
+    const [encryptValue, setEncryptValue] = useState<string>('');
     const [url, setUrl] = useState<string>('');
     const [responseFromContent, setResponseFromContent] = useState<string>('');
 
+    const [ciphertext, setCiphertext] = useState([]);
     let {push} = useHistory();
+
 
     /**
      * Get current URL
@@ -67,6 +139,27 @@ export const Home = () => {
         });
     };
 
+// This handles submitting the plaintext to the state variable from the form when the button is clicked.
+function encryptSubmit(e:any){
+  e.preventDefault();
+    console.log("Encrypt Value: "+ encryptValue);
+    setEncryptQuery(encryptValue);
+}
+
+
+    const encryptWrapper = () => {
+        var result = encryptText(textbox, "password", "AES-GCM"); // password and Mode are optional
+
+        setResponseFromContent(result.CipherTXT);
+    };
+
+    var textbox = ""
+
+    const textUpdate = (event: any) => {
+        textbox = event.target.value;
+    };
+
+
 
     return (
         <div className="App">
@@ -76,8 +169,25 @@ export const Home = () => {
                 <p>
                     {url}
                 </p>
-                <TextField id="outlined-basic" label="Text" variant="outlined" />
-                <Button variant="contained">Encrypt</Button>
+
+                <form>
+                <input value={encryptValue} id="outlined-basic"  onChange={e => setEncryptValue(e.target.value)}/>
+                <Button type="submit" onClick={encryptSubmit} >Encrypt</Button>
+                </form>
+
+                <form  onSubmit={(e) => {
+                  e.preventDefault();
+                    console.log(inputValue);
+                    setQuery(inputValue);
+
+                }}>
+                  <input value={inputValue} placeholder="Enter The Paste Bin Key" onChange={e => setInputValue(e.target.value)} />
+                  <button  type="submit">Decrypt</button>
+                </form>
+
+                <TextField id="outlined-basic" label="Text" variant="outlined" onChange={textUpdate}/>
+                <Button variant="contained" onClick={encryptWrapper}>Encrypt</Button>
+
                 <button onClick={sendTestMessage}>SEND MESSAGE</button>
                 <button onClick={sendRemoveMessage}>Remove logo</button>
                 <button onClick={storeDataWrapper}>Put Data</button>
@@ -86,6 +196,12 @@ export const Home = () => {
                 <p>
                     {responseFromContent}
                 </p>
+                <div>
+                    <Ciphertext query={query}/>
+                </div>
+                <div>
+                    <Plaintext encryptQuery={encryptQuery}/>
+                </div>
                 <button onClick={() => {
                     push('/about')
                 }}>About page
