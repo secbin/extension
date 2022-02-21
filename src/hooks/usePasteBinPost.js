@@ -23,7 +23,7 @@ if (encryptQuery){
     redirect: 'follow'
   };
 
-  fetch("https://cors-anywhere.herokuapp.com/https://pastebin.com/api/api_post.php", requestOptions)
+  fetch("http://localhost:8080/https://pastebin.com/api/api_post.php", requestOptions)
     .then(response => response.text())
     .then(result => console.log(result))
     .catch(error => console.log('error', error));

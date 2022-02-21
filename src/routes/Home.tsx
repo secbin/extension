@@ -25,8 +25,10 @@ return ( ciphertext ? (
   //   <p> {ciphertext[i].success}</p>
   // ))};
   // </div>
-  <p>Output goes Here</p>
-
+  <div>
+  <p>Your Ciphertext: </p>
+  <p>{ciphertext}</p>
+  </div>
 ): <ErrorPage/>
 
 )
