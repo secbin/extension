@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { ChromeMessage, Sender } from "../types";
-import { getCurrentTabUId, getCurrentTabUrl } from "../chrome/utils";
+import { getCurrentTabUId, getCurrentTabUrl,storeData,getData } from "../chrome/utils";
 import { Button, TextField } from "@mui/material";
 
 export const Home = () => {
@@ -51,6 +51,22 @@ export const Home = () => {
         });
     };
 
+    const storeDataWrapper = () => {
+        const message: ChromeMessage = {
+            from: Sender.React,
+            message: "delete logo",
+        }
+
+        getCurrentTabUId((id) => {
+            id && chrome.tabs.sendMessage(
+                id,
+                message,
+                (response) => {
+                    setResponseFromContent(response);
+                });
+        });
+    };
+
 
     return (
         <div className="App">
@@ -64,6 +80,8 @@ export const Home = () => {
                 <Button variant="contained">Encrypt</Button>
                 <button onClick={sendTestMessage}>SEND MESSAGE</button>
                 <button onClick={sendRemoveMessage}>Remove logo</button>
+                <button onClick={storeDataWrapper}>Put Data</button>
+                <button onClick={sendRemoveMessage}>Get Data</button>
                 <p>Response from content:</p>
                 <p>
                     {responseFromContent}
