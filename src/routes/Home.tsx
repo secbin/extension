@@ -5,6 +5,9 @@ import { getCurrentTabUId, getCurrentTabUrl } from "../chrome/utils";
 import { Button, TextField } from "@mui/material";
 import usePasteBinSearch from '../hooks/usePasteBinSearch'
 import usePasteBinSearchJS from '../hooks/usePasteBinSearchJS'
+import History from "./History";
+import CustomizedMenus from "./DropDownButton";
+import CustomizedInputBase from "./SmartTextBox";
 function ErrorPage(){
 
   return (
@@ -95,15 +98,19 @@ export const Home = () => {
     return (
         <div className="App">
             <header className="App-header">
-                <p>Home</p>
-                <p>URL:</p>
-                <p>
-                    {url}
-                </p>
+                {/*<p>Home</p>*/}
+                {/*<p>URL:</p>*/}
+                {/*<p>*/}
+                {/*    {url}*/}
+                {/*</p>*/}
+                <CustomizedInputBase/>
                 <TextField id="outlined-basic" label="Text" variant="outlined" />
+                <Button />
+                <CustomizedMenus />
+                <History />
                 <Button variant="contained">Encrypt</Button>
                 <button onClick={sendTestMessage}>SEND MESSAGE</button>
-                <button onClick={sendRemoveMessage}>Remove logo</button>
+                {/*<button onClick={sendRemoveMessage}>Remove logo</button>*/}
                 <form  onSubmit={(e) => {
                   e.preventDefault();
                     console.log(inputValue);
@@ -111,7 +118,7 @@ export const Home = () => {
 
                 }}>
                   <input value={inputValue} placeholder="Enter The Paste Bin Key" onChange={e => setInputValue(e.target.value)} />
-                  <button  type="submit">Decrypt</button>
+                  <button type="submit">Decrypt</button>
                 </form>
                 <p>Response from content:</p>
                 <p>
