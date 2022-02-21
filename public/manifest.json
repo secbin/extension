@@ -1,5 +1,5 @@
 {
-  "name": "Hello Extensions",
+  "name": "secureBin",
   "description" : "Base Level Extension",
   "version": "1.0",
   "manifest_version": 2,
@@ -27,7 +27,9 @@
     }
   ],
   "permissions": [
-    "activeTab"
+    "activeTab",
+    "contextMenus",
+    "clipboardWrite"
   ],
   "optional_permissions": [
     "<all_urls>"
