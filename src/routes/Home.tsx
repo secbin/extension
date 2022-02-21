@@ -48,7 +48,7 @@ function Plaintext({encryptQuery}:any){
     // <div>
     // <CiphertextItem ciphertext={pasteBinLink}/>
     // </div>
-    <p> Figure out how to fix the post request being called from the start. </p>
+    <p></p>
 
   )
 }
