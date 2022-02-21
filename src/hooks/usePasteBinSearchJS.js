@@ -21,10 +21,10 @@ function usePasteBinSearchJS(query){
      setLoading(true);
      try {
        const response = await fetch(
-        // `https://api.cl1p.net/${query}`,
+         `https://cors.securebin.workers.dev/?https://pastebin.com/raw/${query}`,
         // `https://cors-anywhere.herokuapp.com/https://api.cl1p.net/${query}`,
           //`https://pastebin.com/raw/${query}`,
-            `https://cors-anywhere.herokuapp.com/https://pastebin.com/raw/${query}`,
+           // `https://cors-anywhere.herokuapp.com/https://pastebin.com/raw/${query}`,
           //`https://cors-anywhere.herokuapp.com/https://scrape.pastebin.com/api_scrape_item.php?i=${query}`,
           //`https://reqbin.com/echo/get/json`,
           {
