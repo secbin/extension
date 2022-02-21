@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { ChromeMessage, Sender } from "../types";
-import { getCurrentTabUId, getCurrentTabUrl } from "../chrome/utils";
+import { getCurrentTabUId, getCurrentTabUrl, encryptText} from "../chrome/utils";
 import { Button, TextField } from "@mui/material";
 
 export const Home = () => {
     const [url, setUrl] = useState<string>('');
     const [responseFromContent, setResponseFromContent] = useState<string>('');
 
-    let {push} = useHistory();
+    let { push } = useHistory();
 
     /**
      * Get current URL
@@ -51,6 +51,18 @@ export const Home = () => {
         });
     };
 
+    const encryptWrapper = () => {
+        var result = encryptText(textbox, "password", "AES-GCM"); // password and Mode are optional
+
+        setResponseFromContent(result.CipherTXT);
+    };
+
+    var textbox = ""
+
+    const textUpdate = (event: any) => {
+        textbox = event.target.value;
+    };
+
 
     return (
         <div className="App">
@@ -60,8 +72,8 @@ export const Home = () => {
                 <p>
                     {url}
                 </p>
-                <TextField id="outlined-basic" label="Text" variant="outlined" />
-                <Button variant="contained">Encrypt</Button>
+                <TextField id="outlined-basic" label="Text" variant="outlined" onChange={textUpdate}/>
+                <Button variant="contained" onClick={encryptWrapper}>Encrypt</Button>
                 <button onClick={sendTestMessage}>SEND MESSAGE</button>
                 <button onClick={sendRemoveMessage}>Remove logo</button>
                 <p>Response from content:</p>
