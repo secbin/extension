@@ -13,7 +13,7 @@ if (encryptQuery){
 
   var urlencoded = new URLSearchParams();
   urlencoded.append("api_dev_key", "bYYcefkxnd18LJMggTKIH2Vg8m8QP-N0");
-  urlencoded.append("api_paste_code", "test");
+  urlencoded.append("api_paste_code", encryptQuery);
   urlencoded.append("api_option", "paste");
 
   var requestOptions = {
