@@ -1,3 +1,10 @@
+// constant keys for accessing storage
+export enum Storage {
+    API_KEY = "api_key",
+    ENC_MODE = "enc_mode",
+    THEME = "theme"
+  }
+
 export const setItem = (key: string, value: any, callback?: () => void) => {
     chrome.storage.sync.set({ [key]: value }, callback)
 }
