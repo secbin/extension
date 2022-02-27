@@ -149,8 +149,8 @@ function encryptSubmit(ciphertext:any){
     const encryptWrapper = () => {
         var result = encryptText(textbox, "password", "AES-GCM"); // password and Mode are optional
 
-        setResponseFromContent(result.CipherTXT);
-        encryptSubmit(result.CipherTXT);
+        setResponseFromContent(result.C_TXT);
+        encryptSubmit(result.C_TXT);
     };
 
     var textbox = ""
