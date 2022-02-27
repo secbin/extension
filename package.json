@@ -2,7 +2,11 @@
   "name": "chrome-react-extension-example",
   "version": "0.1.0",
   "private": true,
+<<<<<<< HEAD
   "proxy": "https://cors-anywhere.herokuapp.com/",
+=======
+  "proxy": "http://0.0.0.0:8080",
+>>>>>>> 96ae4ac3b2b604aada9948387908739d4cd2c0ec
   "dependencies": {
     "@craco/craco": "^5.8.0",
     "@emotion/react": "^11.7.1",
@@ -16,10 +20,16 @@
     "@types/node": "^12.0.0",
     "@types/react": "^16.9.53",
     "@types/react-dom": "^16.9.8",
+<<<<<<< HEAD
     "cors-anywhere": "^0.4.4",
     "node-forge": "^1.2.1",
     "clsx": "^1.1.1",
     "pastebin-js": "^1.0.6",
+=======
+    "clsx": "^1.1.1",
+    "pastebin-js": "^1.0.6",
+    "pastebin-ts": "^1.2.0",
+>>>>>>> 96ae4ac3b2b604aada9948387908739d4cd2c0ec
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "react-router-dom": "^5.2.0",

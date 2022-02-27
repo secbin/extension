@@ -7,7 +7,11 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import { Settings } from './routes/Settings'
 import { useHistory } from "react-router-dom";
 
+<<<<<<< HEAD
 // import usePasteBinSearch from './hooks/usePasteBinSearch';
+=======
+import usePasteBinSearch from './hooks/usePasteBinSearch';
+>>>>>>> 96ae4ac3b2b604aada9948387908739d4cd2c0ec
 import './App.css';
 import {AppBar, IconButton, Toolbar, Typography } from '@mui/material';
 import { ChevronLeft } from '@mui/icons-material';

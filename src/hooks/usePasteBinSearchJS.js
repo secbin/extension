@@ -1,14 +1,11 @@
 import React, {useState, useEffect } from 'react'
-
+import PasteBinApi from 'pastebin-js'
 
 function usePasteBinSearchJS(query){
   const [result, setResult] = useState([]);
-  //const [result, setResult] = useState<string>('');
-  //const [responseFromContent, setResponseFromContent] = useState<string>('');
-  //const [setResult] = useState([]);
-  //let result : string[] = [];
   const [ loading, setLoading ] = useState(false);
   const [ error, setError ] = useState(false);
+<<<<<<< HEAD
   const apiKey = "wlhKnA7nnD5FDKtLebQLDUszOn6TituB";
   const url ="https://pastebin.com/raw/";
   useEffect(() => {
@@ -30,34 +27,22 @@ function usePasteBinSearchJS(query){
           //`https://reqbin.com/echo/get/json`,
           {
           signal: controller.signal,
+=======
+  var fs =require('fs');
+>>>>>>> 96ae4ac3b2b604aada9948387908739d4cd2c0ec
 
-         }
-       );
-       responseBody = await response.text();
-     } catch (e) {
-       if (e instanceof DOMException) {
-         console.log("== HTTP request cancelled")
-       } else {
-         setError(true);
-         throw e;
-       }
-     }
-     if (!ignore) {
-       setLoading(false);
-       setError(false);
-       console.log(responseBody);
-       setResult(responseBody || []);
-       //result = responseBody;
-     }
-   }
-   if (query) {
-     fetchSearchResults()
-   }
-   return () => {
-     controller.abort();
-     ignore = true;
-   }
- }, [ query ]);
+  var pastebin = new PasteBinApi();
+  pastebin
+  .getPaste(query)
+  .then(function (data) {
+    // data contains the raw paste
+    console.log(data);
+    setResult(data)
+  })
+  .fail(function (err) {
+    // Something went wrong
+    console.log(err);
+  })
 
  return [ result, error ];
 }
