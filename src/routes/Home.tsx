@@ -46,14 +46,14 @@ return ( ciphertext ? (
 function Plaintext({encryptQuery}:any){
   //
   const [pasteBinLink, error] = usePasteBinPost(encryptQuery);
+console.log(error);
+console.log("PASTE BIN LINK IN THEORY: ", pasteBinLink);
 
-
-
-  return( pasteBinLink== undefined ?(
+  return( pasteBinLink ?(
     <div>
-    <a href={pasteBinLink}>link text</a>
+    <p>{pasteBinLink}</p>
     </div>
-  ): <p></p>);
+  ): <p>No Link</p>);
 }
 
 //This function gets the ciphertext from pasteBin
@@ -147,10 +147,12 @@ function encryptSubmit(ciphertext:any){
 
 
     const encryptWrapper = () => {
-        var result = encryptText(textbox, "password", "AES-GCM"); // password and Mode are optional
-
-        setResponseFromContent(result.C_TXT);
-        encryptSubmit(result.C_TXT);
+        //var result = encryptText(textbox, "password", "AES-GCM"); // password and Mode are optional
+        //
+        // setResponseFromContent(result.C_TXT);
+        // encryptSubmit(result.C_TXT);
+        setResponseFromContent("random");
+        encryptSubmit("random");
     };
 
     var textbox = ""
