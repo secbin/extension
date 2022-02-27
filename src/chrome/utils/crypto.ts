@@ -50,7 +50,7 @@ export function encryptText(text: string, password?: string, mode?: string){
     let tag = cipher.mode.tag;
     let cTXT = forge.util.encode64(cipher.output.data);
 
-    return {C_TXT: cTXT, IV: iv, Key: key, Tag: tag.toString()}
+    return {C_TXT: cTXT, IV: iv, Key: key, Tag: tag.getByte.toString()}
 };
 
 export function decryptText(cTXT: string|null, key: string|null, iv:string|null, tag:string|null, mode: string|null): string{
