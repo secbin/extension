@@ -49,13 +49,11 @@ function Plaintext({encryptQuery}:any){
 
 
 
-  return(
-    // <div>
-    // <CiphertextItem ciphertext={pasteBinLink}/>
-    // </div>
-    <p></p>
-
-    )
+  return( pasteBinLink== undefined ?(
+    <div>
+    <a href={pasteBinLink}>link text</a>
+    </div>
+  ): <p></p>);
 }
 
 //This function gets the ciphertext from pasteBin
