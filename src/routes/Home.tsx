@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { ChromeMessage, Sender } from "../types";
 import { getCurrentTabUId, getCurrentTabUrl } from "../chrome/utils";
-import { getItem, setItem } from "../chrome/utils/storage";
+import { getItem, setItem, Storage} from "../chrome/utils/storage";
 import { encryptText } from "../chrome/utils/crypto";
 import { Button, TextField } from "@mui/material";
 
@@ -126,14 +126,13 @@ export const Home = () => {
     };
 
     function storeDataWrapper() {
-        //storeData("key_test", textbox);
-        setItem("key_test", textbox);
+        setItem(Storage.ENC_MODE, textbox);
     }
 
     function getDataWrapper() {
 
-        getItem("key_test", (data) => {
-            const res = data["key_test"] || []
+        getItem(Storage.ENC_MODE, (data) => {
+            const res = data[Storage.ENC_MODE] || []
             alert(res)
         })
 
