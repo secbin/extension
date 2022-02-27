@@ -201,6 +201,10 @@ function encryptSubmit(ciphertext:any){
                     push('/about')
                 }}>About page
                 </button>
+                <button onClick={() => {
+                    push('/newhome')
+                }}>New Home
+                </button>
             </header>
         </div>
     )
