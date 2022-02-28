@@ -46,14 +46,14 @@ return ( ciphertext ? (
 function Plaintext({encryptQuery}:any){
   //
   const [pasteBinLink, error] = usePasteBinPost(encryptQuery);
+console.log(error);
+console.log("PASTE BIN LINK IN THEORY: ", pasteBinLink);
 
-
-
-  return( pasteBinLink== undefined ?(
+  return( pasteBinLink ?(
     <div>
-    <a href={pasteBinLink}>link text</a>
+    <p>{pasteBinLink}</p>
     </div>
-  ): <p></p>);
+  ): <p>No Link</p>);
 }
 
 //This function gets the ciphertext from pasteBin
@@ -203,6 +203,10 @@ function encryptSubmit(ciphertext:any){
                 <button onClick={() => {
                     push('/about')
                 }}>About page
+                </button>
+                <button onClick={() => {
+                    push('/newhome')
+                }}>New Home
                 </button>
             </header>
         </div>
