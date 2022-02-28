@@ -3,7 +3,7 @@ import { useHistory } from "react-router-dom";
 import { ChromeMessage, Sender } from "../types";
 import { getCurrentTabUId, getCurrentTabUrl } from "../chrome/utils";
 import { getItem, setItem, Storage} from "../chrome/utils/storage";
-import { encryptText } from "../chrome/utils/crypto";
+import { encrypt, decrypt } from "../chrome/utils/crypto";
 import { Button, TextField } from "@mui/material";
 
 import usePasteBinSearchJS from '../hooks/usePasteBinSearchJS'
@@ -147,10 +147,13 @@ function encryptSubmit(ciphertext:any){
 
 
     const encryptWrapper = () => {
-        var result = encryptText(textbox, "password", "AES-GCM"); // password and Mode are optional
+        var result = encrypt(textbox, "password123"); // password and Mode are optional
 
-        setResponseFromContent(result.C_TXT);
-        encryptSubmit(result.C_TXT);
+        var dect = decrypt(result.data, result.key); // password and Mode are optional
+        console.log("Decrypted Value: " + dect);
+
+        setResponseFromContent(dect);
+        encryptSubmit(result.data);
     };
 
     var textbox = ""
