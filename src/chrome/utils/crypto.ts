@@ -1,28 +1,23 @@
 import forge from 'node-forge';
 import { getItem, Storage} from "./storage";
 
-export function encrypt(pTXT: string, password?: string): string{
+export function encrypt(data: string, password?: string){
+    // Get mode from storage
     let mode: forge.cipher.Algorithm = 'AES-GCM'
-
     getItem(Storage.ENC_MODE, (data) => {
         mode = data[Storage.ENC_MODE] || "AES-GCM"
     })
-
-    const encRes = encryptText(pTXT, password, mode)
-    const cTXT = encodeC_TXT(encRes.C_TXT, encRes.IV, encRes.Tag, mode)
-
-    return cTXT
+    
+    // encrypt data
+    const encRes = encryptText(data, password, mode)
+    // encode data to string
+    const cTXT = JSON.stringify(encRes.CipherData);
+    
+    return {data: cTXT, key: encRes.Key}
 }
-
-export function decrypt(cTXT: string, key: string): string{
-    let decode = decodeC_TXT(cTXT)
-    let pTXT = decryptText(decode.C_TXT, decode.IV, decode.Tag, key, decode.Mode)
-    return pTXT
-}
-
 
 // Encrpts a string using the AES algorithm. Optional parameter: Password, AES Mode
-export function encryptText(text: string, password?: string, mode?: string){
+function encryptText(text: string, password?: string, mode?: string){
     // password is used to generate key, if none gen random
     if (password === undefined) {
     password = forge.random.getBytesSync(48).toString();
@@ -41,41 +36,46 @@ export function encryptText(text: string, password?: string, mode?: string){
     let iv = forge.random.getBytesSync(16);
 
     // Encrypt the text
-    
     let cipher = forge.cipher.createCipher(mode as forge.cipher.Algorithm, key);
     cipher.start({ iv: iv });
     cipher.update(forge.util.createBuffer(text));
     cipher.finish();
 
-    let tag = cipher.mode.tag;
+    // encode bytes to base64
     let cTXT = forge.util.encode64(cipher.output.data);
+    let tag = forge.util.encode64(cipher.mode.tag.bytes().toString());
+    iv = forge.util.encode64(iv);
+    key = forge.util.encode64(key)
 
-    return {C_TXT: cTXT, IV: iv, Key: key, Tag: tag.getByte.toString()}
+    return {CipherData: 
+            {C_TXT: cTXT, IV: iv, Mode: mode, Tag: tag},
+             Key: key}
 };
 
-export function decryptText(cTXT: string|null, key: string|null, iv:string|null, tag:string|null, mode: string|null): string{
+export function decrypt(cData: string, key: string): string{
+    let r = JSON.parse(cData)
+    let pTXT = decryptText(r.C_TXT, key, r.IV, r.Tag, r.Mode)
+    return pTXT
+}
+
+function decryptText(cTXT: string|null, key: string|null, iv:string|null, tag:string|null, mode: string|null): string{
     if(cTXT === null || key === null || iv === null || tag === null || mode === null) {
         return "Error"
     }
-
+    // decode base64 to bytes
+    cTXT = forge.util.decode64(cTXT);
+    tag = forge.util.decode64(tag);
+    iv = forge.util.decode64(iv);
+    key = forge.util.decode64(key)
+    
     let decipher = forge.cipher.createDecipher(mode as forge.cipher.Algorithm, key);
     decipher.start({
       iv: iv,
-      tag: new forge.util.ByteStringBuffer(tag)
+     tag: new forge.util.ByteStringBuffer(tag)
     });
-    decipher.update(forge.util.createBuffer(forge.util.decode64(cTXT)));
+
+    decipher.update(forge.util.createBuffer(cTXT));
     decipher.finish();
     let decrypted = decipher.output.data;
     return decrypted;
-};
-
-// Encapsulates encryptText object into a single single string which is shared to pastebin
-export function encodeC_TXT(cTXT: string, iv:string, tag:string, mode: string): string {
-    return `secureBin&iv=${iv}&mode=${mode}&tag=${tag}&cTXT=${cTXT}`; //stored in url param format
-};
-
-// parses string in url param format 'secureBin&iv=${iv}&mode=${mode}&tag=${tag}&cTXT=${cTXT}'
-export function decodeC_TXT(cipherTag: string){
-    var cp = new URLSearchParams(cipherTag);
-    return {C_TXT: cp.get("cTXT"), IV: cp.get("iv"), Mode: cp.get("mode"), Tag: cp.get("tag")};
 };
