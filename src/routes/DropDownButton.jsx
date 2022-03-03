@@ -33,9 +33,9 @@ import { makeStyles, createStyles } from '@mui/styles';
 
 const useStyles = makeStyles(theme => ({
     counterContainer: {
-        alignSelf: 'center',
-        marginLeft: 15,
-        marginBottom: 12
+        // alignContent: 'center',
+        margin: 15,
+        marginTop: 17
     },
     counter: {
         fontSize: 11,
@@ -177,14 +177,14 @@ export default function CustomizedMenus() {
               autoFocus
               rows={8}
               onChange={checkTypeOfText}
-              placeholder="Type or paste (⌘ + V) text you want to encrypt here, paste a Pastebin.com link, or ciphertext you want to here..."
+              placeholder="Type or paste (⌘ + V) text you want to encrypt or a Pastebin.com link or ciphertext you want to decrypt here..."
               inputProps={{ 'aria-label': 'text to encrypt or decrypt', 'height': '300px' }}
           />
 
         <Divider />
       <div className={classes.bottomSection}>
       <TextCounter textLength={text.length}/>
-      <Card style={{width: '230px', textAlign: 'center', backgroundColor: '#1D6BC6', color: 'white', margin: 10, borderRadius: 50, marginLeft: 'auto'}}>
+      <Card style={{minWidth: 100, textAlign: 'center', backgroundColor: '#1D6BC6', color: 'white', margin: 15, borderRadius: 50, marginLeft: 'auto'}}>
       <ListItemButton sx={{ ml: 1, flex: 1, height: 40, textAlign: 'center', fontWeight: 800 }}
         onClick={performAction}
         id="demo-customized-button"
@@ -199,7 +199,7 @@ export default function CustomizedMenus() {
           <ListItemText>{menu}</ListItemText>
           {/*<Divider sx={{ height: 28, m: 0.5, color: 'white', borderColor: 'white' }} orientation="vertical" />*/}
           <IconButton color="primary" sx={{ p: '10px' }} sx={{ color: 'white'}} onClick={handleClick}
-                      aria-label="directions">
+                      aria-label="encryption/decryption options">
               <KeyboardArrowDownIcon />
           </IconButton>
       </ListItemButton>
