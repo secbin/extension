@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, {useContext, useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { ChromeMessage, Sender } from "../types";
 import { getCurrentTabUId, getCurrentTabUrl } from "../chrome/utils";
@@ -9,6 +9,7 @@ import History from "./History";
 import CustomizedMenus from "./DropDownButton";
 import CustomizedInputBase from "./SmartTextBox";
 import { ChevronRight } from "@mui/icons-material";
+import { ConfigContext } from "../ConfigContext";
 function ErrorPage(){
 
   return (
@@ -51,6 +52,8 @@ export const Settings = () => {
     const [url, setUrl] = useState<string>('');
     const [responseFromContent, setResponseFromContent] = useState<string>('');
     const [ciphertext, setCiphertext] = useState([]);
+
+    // const {appConfig, setAppConfig} = useContext(ConfigContext)
     //const [ciphertext, setCiphertext] = usePasteBinSearch(query);
     let {push} = useHistory();
 

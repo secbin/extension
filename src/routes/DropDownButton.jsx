@@ -85,7 +85,7 @@ export default function CustomizedMenus() {
 
   const performAction = (e) => {
       let buttonText = e.target.innerText || "";
-      console.log(buttonText, " == ", "Create Pastebin")
+      // console.log(buttonText, " == ", "Create Pastebin")
       if(buttonText === "Create Pastebin") {
           alert("clicked")
           const [pasteBinLink, error] = usePasteBinPost("hello this is a test");
@@ -135,13 +135,13 @@ export default function CustomizedMenus() {
               autoFocus
               rows={8}
               onChange={checkTypeOfText}
-              placeholder="Type or paste (⌘ + V) text you want to encrypt here, paste a Pastebin.com link, or ciphertext you want to here."
+              placeholder="Type or paste (⌘ + V) text you want to encrypt here, paste a Pastebin.com link, or ciphertext you want to here..."
               inputProps={{ 'aria-label': 'text to encrypt or decrypt', 'height': '300px' }}
           />
 
         <Divider />
-        <Card style={{width: '230px', textAlign: 'center', backgroundColor: '#1D6BC6', color: 'white', margin: 10, borderRadius: 50}}>
-      <ListItemButton sx={{ ml: 1, flex: 1, height: 45}}
+        <Card style={{width: '230px', textAlign: 'center', backgroundColor: '#1D6BC6', color: 'white', margin: 10, borderRadius: 50, marginLeft: 'auto'}}>
+      <ListItemButton sx={{ ml: 1, flex: 1, height: 45 }}
         onClick={performAction}
         id="demo-customized-button"
         aria-controls={open ? 'demo-customized-menu' : undefined}
