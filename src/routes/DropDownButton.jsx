@@ -34,7 +34,8 @@ import { makeStyles, createStyles } from '@mui/styles';
 const useStyles = makeStyles(theme => ({
     counterContainer: {
         alignSelf: 'center',
-        margin: 10,
+        marginLeft: 15,
+        marginBottom: 12
     },
     counter: {
         fontSize: 11,
@@ -184,7 +185,7 @@ export default function CustomizedMenus() {
       <div className={classes.bottomSection}>
       <TextCounter textLength={text.length}/>
       <Card style={{width: '230px', textAlign: 'center', backgroundColor: '#1D6BC6', color: 'white', margin: 10, borderRadius: 50, marginLeft: 'auto'}}>
-      <ListItemButton sx={{ ml: 1, flex: 1, height: 45 }}
+      <ListItemButton sx={{ ml: 1, flex: 1, height: 40, textAlign: 'center', fontWeight: 800 }}
         onClick={performAction}
         id="demo-customized-button"
         aria-controls={open ? 'demo-customized-menu' : undefined}
