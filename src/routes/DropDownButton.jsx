@@ -128,21 +128,20 @@ export default function CustomizedMenus() {
   // @ts-ignore
   return (
       <>
-      <Paper
-          component="form"
-          sx={{ p: '2px 4px', display: 'flex', alignItems: 'center', width: 250, maxHeight: 300, overflow: 'auto' }}
-      >
+          <div>
           <InputBase
-              sx={{ ml: 1, flex: 1 }}
+              sx={{ width: 440, minHeight: 300, maxHeight: 300, overflow: 'hidden', fontSize: 24, backgroundColor: 'white', textAlign: 'left', padding: 2}}
               multiline
+              autoFocus
+              rows={8}
               onChange={checkTypeOfText}
-              placeholder="Enter a PasteBin link or ciphertext to decrypt, plaintext to encrypt"
-              inputProps={{ 'aria-label': 'search google maps', 'rows': '5'  }}
+              placeholder="Type or paste (⌘ + V) text you want to encrypt here, paste a Pastebin.com link, or ciphertext you want to here."
+              inputProps={{ 'aria-label': 'text to encrypt or decrypt', 'height': '300px' }}
           />
-      </Paper>
-    <div>
-      <Card style={{width: '230px', textAlign: 'center', backgroundColor: '#1D6BC6', color: 'white'}}>
-      <ListItemButton sx={{ ml: 1, flex: 1 }}
+
+        <Divider />
+        <Card style={{width: '230px', textAlign: 'center', backgroundColor: '#1D6BC6', color: 'white', margin: 10, borderRadius: 50}}>
+      <ListItemButton sx={{ ml: 1, flex: 1, height: 45}}
         onClick={performAction}
         id="demo-customized-button"
         aria-controls={open ? 'demo-customized-menu' : undefined}
@@ -154,8 +153,8 @@ export default function CustomizedMenus() {
 
       >
           <ListItemText>{menu}</ListItemText>
-          <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
-          <IconButton color="primary" sx={{ p: '10px' }} onClick={handleClick}
+          {/*<Divider sx={{ height: 28, m: 0.5, color: 'white', borderColor: 'white' }} orientation="vertical" />*/}
+          <IconButton color="primary" sx={{ p: '10px' }} sx={{ color: 'white'}} onClick={handleClick}
                       aria-label="directions">
               <KeyboardArrowDownIcon />
           </IconButton>
