@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { ChromeMessage, Sender } from "../types";
 import { getCurrentTabUId, getCurrentTabUrl } from "../chrome/utils";
-import { getItem, setItem } from "../chrome/utils/storage";
-import { encryptText } from "../chrome/utils/crypto";
+import { getItem, setItem, Storage} from "../chrome/utils/storage";
+import { encrypt, decrypt } from "../chrome/utils/crypto";
 import { Button, TextField } from "@mui/material";
 
 import usePasteBinSearchJS from '../hooks/usePasteBinSearchJS'
@@ -53,14 +53,14 @@ return ( ciphertext ? (
 function Plaintext({encryptQuery}:any){
   //
   const [pasteBinLink, error] = usePasteBinPost(encryptQuery);
+console.log(error);
+console.log("PASTE BIN LINK IN THEORY: ", pasteBinLink);
 
-
-
-  return( pasteBinLink== undefined ?(
+  return( pasteBinLink ?(
     <div>
-    <a href={pasteBinLink}>link text</a>
+    <p>{pasteBinLink}</p>
     </div>
-  ): <p></p>);
+  ): <p>No Link</p>);
 }
 
 //This function gets the ciphertext from pasteBin
@@ -133,14 +133,13 @@ export const Home = () => {
     };
 
     function storeDataWrapper() {
-        //storeData("key_test", textbox);
-        setItem("key_test", textbox);
+        setItem(Storage.ENC_MODE, textbox);
     }
 
     function getDataWrapper() {
 
-        getItem("key_test", (data) => {
-            const res = data["key_test"] || []
+        getItem(Storage.ENC_MODE, (data) => {
+            const res = data[Storage.ENC_MODE] || []
             alert(res)
         })
 
@@ -155,10 +154,13 @@ function encryptSubmit(ciphertext:any){
 
 
     const encryptWrapper = () => {
-        var result = encryptText(textbox, "password", "AES-GCM"); // password and Mode are optional
+        var result = encrypt(textbox, "password123"); // password and Mode are optional
 
-        setResponseFromContent(result.CipherTXT);
-        encryptSubmit(result.CipherTXT);
+        var dect = decrypt(result.data, result.key); // password and Mode are optional
+        console.log("Decrypted Value: " + dect);
+
+        setResponseFromContent(dect);
+        encryptSubmit(result.data);
     };
 
     var textbox = ""
@@ -229,6 +231,10 @@ function encryptSubmit(ciphertext:any){
                 <button onClick={() => {
                     push('/about')
                 }}>About page
+                </button>
+                <button onClick={() => {
+                    push('/newhome')
+                }}>New Home
                 </button>
             </header>
         </div>

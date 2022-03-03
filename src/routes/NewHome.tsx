@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { ChromeMessage, Sender } from "../types";
 import { getCurrentTabUId, getCurrentTabUrl } from "../chrome/utils";
-import { Button, TextField, Typography } from "@mui/material";
+import { Button, Divider, TextField, Typography } from "@mui/material";
 // import usePasteBinSearch from '../hooks/usePasteBinSearch'
 // import usePasteBinSearchJS from '../hooks/usePasteBinSearchJS'
 import History from "./History";
@@ -98,12 +98,12 @@ export const NewHome = () => {
     return (
         <div className="App">
             <header className="App-header">
-                <Typography variant="h6" component="h6">
-                    Paste in an existing pastebin link, plain text, or text you want to decrypt or encrypt.
-                </Typography>
-                <CustomizedInputBase/>
+                {/*<Typography variant="h6" component="h6">*/}
+                {/*    Paste in an existing pastebin link, plain text, or text you want to decrypt or encrypt.*/}
+                {/*</Typography>*/}
+                {/*<CustomizedInputBase/>*/}
                 <CustomizedMenus />
-                <History />
+                {/*<History />*/}
                 {/*<button onClick={sendTestMessage}>SEND MESSAGE</button>*/}
                 {/*<button onClick={sendRemoveMessage}>Remove logo</button>*/}
                 {/*<form  onSubmit={(e) => {*/}
