@@ -9,4 +9,4 @@ export const defaultSettings = {
 
 }
 
-export const MAX_TEXT_LENGTH = 2048
+export const MAX_TEXT_LENGTH = 512

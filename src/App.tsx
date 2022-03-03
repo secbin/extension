@@ -38,12 +38,12 @@ const useStyles = makeStyles(theme => ({
     hoverStyle: {
         '&:hover': {
             transition: '0.15s',
-            transform: 'scale(1.03)'
+            transform: 'scale(1.05)'
         },
         '&:active': {
             transition: '0.08s',
             opacity: 0.9,
-            transform: 'scale(1.05)'
+            transform: 'scale(1.07)'
         },
         transition: '0.15s'
     }
@@ -72,11 +72,11 @@ export const App = () => {
                         {/*<Typography variant="h6" color="inherit" component="div">*/}
                         {/*    SecureBin*/}
                         {/*</Typography>*/}
-                        <IconButton className={classes.hoverStyle} aria-label="menu" sx={{ mr: 1 }} onClick={() => { push('/settings')}}>
-                            <SettingsIcon />
-                        </IconButton>
-                        <IconButton className={classes.hoverStyle} aria-label="menu" onClick={() => { push('/history')}}>
+                        <IconButton className={classes.hoverStyle} aria-label="menu" sx={{ mr: 1 }} disableRipple onClick={() => { push('/history')}}>
                             <HistoryIcon />
+                        </IconButton>
+                        <IconButton className={classes.hoverStyle} aria-label="menu" disableRipple onClick={() => { push('/settings')}}>
+                            <SettingsIcon />
                         </IconButton>
                         </div>
                     </Toolbar>

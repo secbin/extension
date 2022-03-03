@@ -25,7 +25,31 @@ import usePasteBinSearchJS from '../hooks/usePasteBinSearchJS'
 // import usePasteBinPost from '../hooks/usePasteBinPost';
 import usePasteBinPost from '../hooks/usePasteBinPost2';
 import { MAX_TEXT_LENGTH } from '../constants'
+import ErrorIcon from '@mui/icons-material/Error';
+import { Typography } from '@mui/material';
+import clsx from 'clsx';
+import { makeStyles, createStyles } from '@mui/styles';
 
+
+const useStyles = makeStyles(theme => ({
+    counterContainer: {
+        alignSelf: 'center',
+        margin: 10,
+    },
+    counter: {
+        fontSize: 11,
+    },
+    red: {
+        color: 'red',
+        fontWeight: 600
+    },
+    grey: {
+        color: 'grey'
+    },
+    bottomSection: {
+        display: 'flex',
+    },
+}));
 
 
 const StyledMenu = styled((props) => (
@@ -33,7 +57,7 @@ const StyledMenu = styled((props) => (
       open={false} elevation={0}
       anchorOrigin={{
         vertical: 'bottom',
-        horizontal: 'right',
+        horizontal: 'left',
       }}
       transformOrigin={{
         vertical: 'top',
@@ -68,14 +92,20 @@ const StyledMenu = styled((props) => (
   },
 }));
 
-export function TextCounter() {
-    let maxTextLenght = MAX_TEXT_LENGTH;
-
-
+export function TextCounter(props) {
+    const classes = useStyles();
+    let safe = props.textLength < MAX_TEXT_LENGTH
+    return (
+        <div className={classes.counterContainer}>
+        {!safe && <ErrorIcon className={clsx(classes.red, classes.counter)} sx={{mr: 0.5, mb: -0.25}}/>}
+        <Typography className={clsx(safe ? classes.grey : classes.red, classes.counter)} variant={'p'}>{props.textLength}/{MAX_TEXT_LENGTH}</Typography>
+        </div>
+    );
 }
 
 
 export default function CustomizedMenus() {
+  const classes = useStyles();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const [text, setText] = React.useState("");
@@ -113,7 +143,10 @@ export default function CustomizedMenus() {
   const checkTypeOfText = (e) => {
     setText(e.target.value);
     let buttonText = e.target.value || "";
-    if(buttonText.includes("pastebin.com")) {
+    if(e.target.value.length > MAX_TEXT_LENGTH) {
+        setButtonEnabled(false)
+    }
+    else if(buttonText.includes("pastebin.com")) {
         // console.log("PASTE BIN LINK FOUND")
         setMenu("Decrypt Pastebin")
         setButtonEnabled(true)
@@ -148,7 +181,9 @@ export default function CustomizedMenus() {
           />
 
         <Divider />
-        <Card style={{width: '230px', textAlign: 'center', backgroundColor: '#1D6BC6', color: 'white', margin: 10, borderRadius: 50, marginLeft: 'auto'}}>
+      <div className={classes.bottomSection}>
+      <TextCounter textLength={text.length}/>
+      <Card style={{width: '230px', textAlign: 'center', backgroundColor: '#1D6BC6', color: 'white', margin: 10, borderRadius: 50, marginLeft: 'auto'}}>
       <ListItemButton sx={{ ml: 1, flex: 1, height: 45 }}
         onClick={performAction}
         id="demo-customized-button"
@@ -178,24 +213,29 @@ export default function CustomizedMenus() {
         open={open}
         onClose={e => handleClose(menu)}
       >
-        <MenuItem onClick={e => handleClose("Encrypt Plaintext")} disableRipple>
+          <MenuItem sx={{ fontWeight: 700, color: 'grey' }} disabled dense disableRipple>
+              Select Action
+          </MenuItem>
+          <Divider/>
+        <MenuItem onClick={e => handleClose("Encrypt Plaintext")} dense disableRipple>
           <LockIcon />
           Encrypt Plaintext
         </MenuItem>
-        <MenuItem onClick={e => handleClose("Encrypt Pastebin")} disableRipple>
+        <MenuItem onClick={e => handleClose("Encrypt Pastebin")} dense disableRipple>
           <LockIcon />
           Encrypt Pastebin
         </MenuItem>
         <Divider sx={{ my: 0.5 }} />
-        <MenuItem onClick={e => handleClose("Decrypt Plaintext")} disableRipple>
+        <MenuItem onClick={e => handleClose("Decrypt Plaintext")} dense disableRipple>
           <LockOpenIcon />
           Decrypt Plaintext
         </MenuItem>
-        <MenuItem onClick={e => handleClose("Decrypt Pastebin")} disableRipple>
+        <MenuItem onClick={e => handleClose("Decrypt Pastebin")} dense disableRipple>
           <LockOpenIcon />
           Decrypt Pastebin
         </MenuItem>
       </StyledMenu>
+      </div>
     </div>
       </>
   );
