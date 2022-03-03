@@ -11,6 +11,8 @@ import { useHistory } from "react-router-dom";
 import './App.css';
 import {AppBar, IconButton, Toolbar, Typography } from '@mui/material';
 import { ChevronLeft } from '@mui/icons-material';
+import History from "./routes/History";
+import HistoryIcon from '@mui/icons-material/History';
 
 export const App = () => {
     let {push, goBack} = useHistory();
@@ -28,6 +30,9 @@ export const App = () => {
                     <IconButton edge="end" color="inherit" aria-label="menu" sx={{ mr: 2 }} onClick={() => { push('/settings')}}>
                         <SettingsIcon />
                     </IconButton>
+                    <IconButton edge="end" color="inherit" aria-label="menu" sx={{ mr: 2 }} onClick={() => { push('/history')}}>
+                        <HistoryIcon />
+                    </IconButton>
                 </Toolbar>
             </AppBar>
         </div>
@@ -40,6 +45,9 @@ export const App = () => {
             </Route>
             <Route path="/settings">
                 <Settings/>
+            </Route>
+            <Route path="/history">
+                <History/>
             </Route>
             <Route path="/">
                 <Home/>

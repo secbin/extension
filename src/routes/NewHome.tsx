@@ -101,7 +101,7 @@ export const NewHome = () => {
                 <Typography variant="h6" component="h6">
                     Paste in an existing pastebin link, plain text, or text you want to decrypt or encrypt.
                 </Typography>
-                <CustomizedInputBase/>
+                {/*<CustomizedInputBase/>*/}
                 <CustomizedMenus />
                 <History />
                 {/*<button onClick={sendTestMessage}>SEND MESSAGE</button>*/}
