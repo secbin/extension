@@ -24,7 +24,7 @@ import InputBase from '@mui/material/InputBase';
 import usePasteBinSearchJS from '../hooks/usePasteBinSearchJS'
 // import usePasteBinPost from '../hooks/usePasteBinPost';
 import usePasteBinPost from '../hooks/usePasteBinPost2';
-
+import { MAX_TEXT_LENGTH } from '../constants'
 
 
 
@@ -68,9 +68,17 @@ const StyledMenu = styled((props) => (
   },
 }));
 
+export function TextCounter() {
+    let maxTextLenght = MAX_TEXT_LENGTH;
+
+
+}
+
+
 export default function CustomizedMenus() {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
+  const [text, setText] = React.useState("");
   const [buttonEnabled, setButtonEnabled] = React.useState(false)
   const [menu, setMenu] = React.useState("Encrypt")
   const handleClick = (event) => {
@@ -103,8 +111,8 @@ export default function CustomizedMenus() {
   }
 
   const checkTypeOfText = (e) => {
-
-    let buttonText = e.target.value || ""
+    setText(e.target.value);
+    let buttonText = e.target.value || "";
     if(buttonText.includes("pastebin.com")) {
         // console.log("PASTE BIN LINK FOUND")
         setMenu("Decrypt Pastebin")

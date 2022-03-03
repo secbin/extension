@@ -1,6 +1,6 @@
 {
-  "name": "secureBin",
-  "description" : "Base Level Extension",
+  "name": "Securebin",
+  "description" : "Securely encrypt your text on Pastebin.com",
   "version": "1.0",
   "manifest_version": 2,
   "browser_action": {

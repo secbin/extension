@@ -29,7 +29,23 @@ function reducer(state: any, action: any) {
 const useStyles = makeStyles(theme => ({
     root: {
         boxShadow: "none",
-        backgroundColor: "#fff"
+        backgroundColor: "#fff",
+        marginBottom: 64,
+    },
+    content: {
+        marginTop: 64,
+    },
+    hoverStyle: {
+        '&:hover': {
+            transition: '0.15s',
+            transform: 'scale(1.03)'
+        },
+        '&:active': {
+            transition: '0.08s',
+            opacity: 0.9,
+            transform: 'scale(1.05)'
+        },
+        transition: '0.15s'
     }
 }));
 
@@ -45,10 +61,10 @@ export const App = () => {
         // <ConfigContext.Provider>
             <>
                 <div>
-                <AppBar className={classes.root} position="static" enableColorOnDark>
+                <AppBar className={classes.root} position="fixed" enableColorOnDark>
 
                     <Toolbar >
-                        <img src="/securebinlogo.svg" alt="Kitten" />
+                        <img className={classes.hoverStyle} src="/securebinlogo.svg" alt="logo" onClick={() => { push('/home')}}/>
                         <div style={{marginLeft: 'auto'}}>
                         {/*<IconButton edge="start" color="inherit" aria-label="menu" sx={{ mr: 2 }} onClick={() => { goBack()}}>*/}
                         {/*    <ChevronLeft />*/}
@@ -56,10 +72,10 @@ export const App = () => {
                         {/*<Typography variant="h6" color="inherit" component="div">*/}
                         {/*    SecureBin*/}
                         {/*</Typography>*/}
-                        <IconButton edge="end" aria-label="menu" sx={{ mr: 2 }} onClick={() => { push('/settings')}}>
+                        <IconButton className={classes.hoverStyle} aria-label="menu" sx={{ mr: 1 }} onClick={() => { push('/settings')}}>
                             <SettingsIcon />
                         </IconButton>
-                        <IconButton edge="end" aria-label="menu" sx={{ mr: 2 }} onClick={() => { push('/history')}}>
+                        <IconButton className={classes.hoverStyle} aria-label="menu" onClick={() => { push('/history')}}>
                             <HistoryIcon />
                         </IconButton>
                         </div>
@@ -67,7 +83,8 @@ export const App = () => {
                     <Divider/>
                 </AppBar>
             </div>
-            <Switch>
+            <div className={classes.content}>
+            <Switch >
                 <Route path="/about">
                     <About/>
                 </Route>
@@ -81,9 +98,10 @@ export const App = () => {
                     <History/>
                 </Route>
                 <Route path="/">
-                    <Home/>
+                    <NewHome/>
                 </Route>
             </Switch>
+            </div>
             </>
         // </ConfigContext.Provider>
 
