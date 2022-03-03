@@ -50,6 +50,18 @@ const useStyles = makeStyles(theme => ({
     bottomSection: {
         display: 'flex',
     },
+    hoverStyle: {
+        '&:hover': {
+            transition: '0.15s',
+            transform: 'scale(1.02)'
+        },
+        '&:active': {
+            transition: '0.08s',
+            opacity: 0.9,
+            transform: 'scale(1.035)'
+        },
+        transition: '0.15s'
+    }
 }));
 
 
@@ -184,7 +196,9 @@ export default function CustomizedMenus() {
         <Divider />
       <div className={classes.bottomSection}>
       <TextCounter textLength={text.length}/>
-      <Card style={{minWidth: 100, textAlign: 'center', backgroundColor: '#1D6BC6', color: 'white', margin: 15, borderRadius: 50, marginLeft: 'auto'}}>
+      <Card
+          className={classes.hoverStyle}
+          style={{minWidth: 100, textAlign: 'center', backgroundColor: '#1D6BC6', color: 'white', margin: 15, borderRadius: 50, marginLeft: 'auto'}}>
       <ListItemButton sx={{ ml: 1, flex: 1, height: 40, textAlign: 'center', fontWeight: 800 }}
         onClick={performAction}
         id="demo-customized-button"
