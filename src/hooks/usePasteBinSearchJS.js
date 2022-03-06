@@ -7,7 +7,6 @@ function usePasteBinSearchJS(query){
   const [ error, setError ] = useState(false);
   const apiKey = "wlhKnA7nnD5FDKtLebQLDUszOn6TituB";
   const url ="https://pastebin.com/raw/";
-console.log(query);
 const array = query.split("/");
 if(array[3]){
   query=array[3];
