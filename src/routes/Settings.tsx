@@ -126,24 +126,23 @@ export const Settings = () => {
     });
   };
 
+
   const getSetting = (key: string) =>{
-    getDataWrapper()
     getItem(key, (data) => {
       const res = data[Storage.ENC_MODE] || []
-      console.log(res);
+      console.log(res); // returns nothing
       return res;
     })
     return "Not Set"
   };
 
-function getDataWrapper() {
-
-  getItem(Storage.API_KEY, (data) => {
-      const res = data[Storage.API_KEY] || []
-      alert(res)
-      console.log("res", res);
+function getDataWrapper(key: string):any {
+  getItem(key, (data) => {
+      const res = data[key] || []
+      alert(res) 
+      console.log("res", res); // returns something
+      return res
   })
-
 }
 
 
@@ -178,7 +177,7 @@ function getDataWrapper() {
         <Typography variant={'h4'}>Pastebin API</Typography>
         <Card classes={{ root: classes.card }}>
           <ListItem>
-            <ListItemText primary="PasteBin API Key" secondary={getSetting(Storage.API_KEY)} />
+            <ListItemText primary="PasteBin API Key" secondary={getDataWrapper(Storage.API_KEY)} />
             {/*<Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />*/}
             <IconButton color="primary" sx={{ p: '10px' }} 
               aria-label="directions" 
