@@ -154,23 +154,26 @@ export default function CustomizedMenus() {
   };
 
   const performAction = (e) => {
-      let buttonText = e.target.innerText || "";
-      // console.log(buttonText, " == ", "Create Pastebin")
-      if(buttonText === "Encrypt to Pastebin") {
-          console.log(text);
-          //sets the pasteBinLink to output of usePasteBinPost
-          setPostLink(text);
+    let buttonText = e.target.innerText || "";
+    // console.log(buttonText, " == ", "Create Pastebin")
+    if(buttonText === "Encrypt to Pastebin") {
+        console.log(text);
+        //sets the pasteBinLink to output of usePasteBinPost
+        setPasteBinLink(text);
+    }else if (buttonText === "Encrypt Plaintext") {
+      let res = encrypt(text)
+      console.log(res.data) //TODO - new window or somthing
+      console.log(res.key)
+    } else if (buttonText === "Decrypt Pastebin") {
+      // not working but it should be.
+      setLink(text);
 
-
-      } else if (buttonText === "Decrypt Pastebin") {
-        setLink(text);
-
-      } else if (buttonText === "Decrypt Ciphertext"){
-        let key = prompt("Please enter your key"); //TODO - Decrypt will probably need two text boxes
-        let res = decrypt(text, key)
-        console.log(res)
-      }
-  }
+    } else if (buttonText === "Decrypt Ciphertext"){
+      let key = prompt("Please enter your key"); //TODO - Decrypt will probably need two text boxes
+      let res = decrypt(text, key)
+      console.log(res)
+    }
+}
 
   const checkTypeOfText = (e) => {
     setText(e.target.value);
