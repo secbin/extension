@@ -66,8 +66,7 @@ const useStyles = makeStyles(theme => ({
         fontSize: 14,
     },
     list: {
-        marginLeft: 20,
-        marginRight: 20,
+        padding: 20,
     }
 }));
 
@@ -129,7 +128,7 @@ export const Settings = () => {
     return (
         <div>
             <Typography variant='h2' className={classes.pageHeading} >Settings</Typography>
-                <List className={classes.list} sx={{ width: '100%' }}>
+                <List className={classes.list}>
                     <Typography variant={'h4'}>Dark Mode</Typography>
                     <Card classes={{root: classes.card}}>
                     <ListItem>

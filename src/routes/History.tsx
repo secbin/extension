@@ -8,10 +8,10 @@ import ImageIcon from '@mui/icons-material/Image';
 import WorkIcon from '@mui/icons-material/Work';
 import BeachAccessIcon from '@mui/icons-material/BeachAccess';
 import DirectionsIcon from '@mui/icons-material/Directions';
-import {Button, Divider, IconButton, Paper, Typography } from '@mui/material';
+import {Button, Card, Divider, IconButton, Paper, Typography } from '@mui/material';
 import { ChevronRight } from '@mui/icons-material';
 import { makeStyles, createStyles } from '@mui/styles';
-
+import LockOpenIcon from '@mui/icons-material/LockOpen';
 
 const useStyles = makeStyles(theme => ({
     card: {
@@ -32,8 +32,7 @@ const useStyles = makeStyles(theme => ({
         fontSize: 14,
     },
     list: {
-        marginLeft: 20,
-        marginRight: 20,
+        padding: 20,
     }
 }));
 
@@ -67,23 +66,26 @@ export default function History() {
     let options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
 
     const classes = useStyles();
+    //TODO Add moment JS to calculate time
     return (
         <>
         {/*<p style={{textAlign: 'left'}}>History</p>*/}
             <Typography variant='h2' className={classes.pageHeading}>History</Typography>
-            <List sx={{ width: '100%', maxWidth: 360 }}>
+            <List className={classes.list} >
             {historyItems.map((item) => {
-                return (
+            return (
+            <>
+            <Typography variant={'h4'}>Today</Typography>
+            <Card variant="outlined" classes={{root: classes.card}}>
+                <ListItem key={item.url}>
+                    <ListItemText primary={item.url} secondary={item.date.toLocaleString('en-US')} />
+                    <IconButton color="primary" aria-label="Unlock CipherText">
+                      <LockOpenIcon />
+                    </IconButton>
+                </ListItem>
+            </Card>
 
-            <ListItem key={item.url}>
-                <Button variant="outlined" style={{margin: "6px", textAlign: 'left'}}>
-                <ListItemText primary={item.url} secondary={item.date.toLocaleString('en-US')} />
-                <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
-                <IconButton color="primary" sx={{ p: '10px' }} aria-label="directions">
-                  <ChevronRight />
-                </IconButton>
-                </Button>
-            </ListItem>
+            </>
             )
             })}
         </List>

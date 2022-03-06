@@ -32,7 +32,7 @@ const useStyles = makeStyles(theme => ({
     root: {
         boxShadow: "none",
         backgroundColor: "#fff",
-        marginBottom: 64,
+        // marginBottom: 64,
     },
     content: {
         marginTop: 64,
@@ -191,6 +191,8 @@ export const App = () => {
     // const theme = useTheme();
 
     return (
+        // <div className="App">
+        //     <header className="App-header">
         <ThemeProvider theme={theme}>
         {/*// <ConfigContext.Provider>*/}
             <>
@@ -245,6 +247,5 @@ export const App = () => {
             </>
         {/*// </ConfigContext.Provider>*/}
         </ThemeProvider>
-
             )
 };

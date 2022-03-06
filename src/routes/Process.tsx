@@ -48,27 +48,6 @@ const useStyles = makeStyles(theme => ({
     blue: {
         color: 'cadetblue'
     },
-    card: {
-        borderRadius: 6,
-        border: '1px solid #E0E0E0',
-        boxShadow: '0 0 7px 0 rgba(0,0,0,0.04)',
-        // backgroundColor: theme.palette.primary.light,
-        // color: theme.palette.primary.contrastText,
-        // boxShadow: "none",
-        marginBottom: 14,
-    },
-    pageHeading: {
-        paddingLeft: 20,
-        paddingTop: 20,
-        marginBottom: 10,
-    },
-    listItemText: {
-        fontSize: 14,
-    },
-    list: {
-        marginLeft: 20,
-        marginRight: 20,
-    }
 
 }));
 
@@ -112,7 +91,7 @@ export default function Process() {
             <Card className={classes.copybox}>
                 <InputBase placeholder={"jaslkdj3ouroqejdnfskf"} value={'jaslkdykjhgjy97yhuhkhikuhkjhkjhkjj3ou'} />
                 <IconButton>
-                   <ContentPasteIcon className={classes.blue}/>
+                   <ContentPasteIcon color="primary"/>
                 </IconButton>
             </Card>
         </div>
