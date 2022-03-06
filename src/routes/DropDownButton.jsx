@@ -173,8 +173,6 @@ export default function CustomizedMenus() {
         let res = decrypt(text, key)
         console.log(res)
       }
-
-
   }
 
   const checkTypeOfText = (e) => {
