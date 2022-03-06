@@ -2,7 +2,8 @@ import React, { useContext, useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { ChromeMessage, Sender } from "../types";
 import { getCurrentTabUId, getCurrentTabUrl } from "../chrome/utils";
-import { Button, Card, Checkbox, Divider, IconButton, List, ListItem, ListItemText, Paper, Select, TextField, Typography } from "@mui/material";
+import { Button, Card, Checkbox, Divider, IconButton, List, ListItem, ListItemText,
+  MenuItem, Paper, Select, TextField, Typography } from "@mui/material";
 // import usePasteBinSearch from '../hooks/usePasteBinSearch'
 import usePasteBinSearchJS from '../hooks/usePasteBinSearchJS'
 import History from "./History";
@@ -80,6 +81,7 @@ export const Settings = () => {
   const [url, setUrl] = useState<string>('');
   const [responseFromContent, setResponseFromContent] = useState<string>('');
   const [ciphertext, setCiphertext] = useState([]);
+  const [apiKey, setApiKey] = useState("");
 
   // const {appConfig, setAppConfig} = useContext(ConfigContext)
   //const [ciphertext, setCiphertext] = usePasteBinSearch(query);
@@ -89,10 +91,16 @@ export const Settings = () => {
    * Get current URL
    */
   useEffect(() => {
+
+    getDataWrapper(Storage.API_KEY);
+
     getCurrentTabUrl((url) => {
       setUrl(url || 'undefined');
     })
   }, []);
+
+
+  // console.log("GETTING API KEY: ", getDataWrapper(Storage.API_KEY))
 
   const sendTestMessage = () => {
     const message: ChromeMessage = {
@@ -126,6 +134,17 @@ export const Settings = () => {
     });
   };
 
+  const encryptionMethods = [
+      {
+        prettyName: "argon2",
+        value: "ARGON2_HASH",
+      },
+      {
+        prettyName: "sha2",
+        value: "SHA2_HASH",
+      },
+  ];
+
 
   const getSetting = (key: string) =>{
     getItem(key, (data) => {
@@ -139,7 +158,10 @@ export const Settings = () => {
 function getDataWrapper(key: string):any {
   getItem(key, (data) => {
       const res = data[key] || []
-      alert(res) 
+      if(res) {
+        setApiKey(res);
+      }
+      // alert(res)
       console.log("res", res); // returns something
       return res
   })
@@ -168,23 +190,31 @@ function getDataWrapper(key: string):any {
               onClick={() => setItem(Storage.ENC_MODE, "AES-GCM")}
               labelId="demo-simple-select-label"
               id="demo-simple-select"
-              value="AES-GCM"
+              value="ARGON2_HASH"
               label="AES-GCM"
-            />
+            >
+              {encryptionMethods.map((item) => (
+                <MenuItem key={item.value} value={item.value}>{item.prettyName}</MenuItem>
+              ))}
+            </Select>
           </ListItem>
         </Card>
 
         <Typography variant={'h4'}>Pastebin API</Typography>
         <Card classes={{ root: classes.card }}>
           <ListItem>
-            <ListItemText primary="PasteBin API Key" secondary={getDataWrapper(Storage.API_KEY)} />
+            <ListItemText primary="PasteBin API Key" secondary={apiKey} />
             {/*<Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />*/}
             <IconButton color="primary" sx={{ p: '10px' }} 
               aria-label="directions" 
-             onClick={() => setItem(Storage.API_KEY, "23ourwfodifkhjklfquhdkajdh")}>
+             >
               <ChevronRight />
             </IconButton>
           </ListItem>
+          <TextField placeholder={apiKey}> </TextField>
+          <Button onClick={() => setItem(Storage.API_KEY, "23ourwfodifkhjklfquhdkajdh")}>
+            Set New Api Key
+          </Button>
         </Card>
       </List>
     </div>

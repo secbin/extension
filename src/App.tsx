@@ -6,13 +6,10 @@ import { NewHome } from "./routes/NewHome";
 import SettingsIcon from '@mui/icons-material/Settings';
 import { Settings } from './routes/Settings'
 import { useHistory } from "react-router-dom";
-
-// import usePasteBinSearch from './hooks/usePasteBinSearch';
 import usePasteBinSearch from './hooks/usePasteBinSearchJS';
 import './App.css';
 import {AppBar, createMuiTheme, createTheme, Divider, IconButton, ThemeProvider, Toolbar, Typography, useTheme } from '@mui/material';
 import { makeStyles, createStyles } from '@mui/styles';
-
 import { ChevronLeft } from '@mui/icons-material';
 import History from "./routes/History";
 import HistoryIcon from '@mui/icons-material/History';
@@ -65,69 +62,6 @@ declare module '@mui/material/styles' {
         };
     }
 }
-
-// import { ThemeOptions } from '@material-ui/core/styles/createMuiTheme';
-
-// declare module '@mui/material/styles' {
-//     interface theme {
-//         palette: {
-//         type: 'light',
-//         primary: {
-//             main: '#3f51b5',
-//         },
-//         secondary: {
-//             main: '#00acf5',
-//         },
-//         text: {
-//             secondary: 'rgba(0,0,0,0.54)',
-//         },
-//     },
-//     typography: {
-//         h1: {
-//             fontSize: 36,
-//             fontWeight: 700,
-//         },
-//         h2: {
-//             fontSize: 24,
-//             fontWeight: 800,
-//         },
-//         h3: {
-//             fontSize: 14,
-//             fontWeight: 700,
-//             opacity: 0.7,
-//         },
-//         h4: {
-//             fontSize: 14,
-//             fontWeight: 500,
-//             opacity: 0.7,
-//         },
-//         subtitle2: {
-//             fontSize: 12,
-//             fontWeight: 400,
-//             opacity: 0.6,
-//         },
-//         body1: {
-//             fontSize: 22,
-//             lineHeight: 1.2,
-//         },
-//         button: {
-//             fontSize: 14,
-//             textTransform: 'none',
-//             fontWeight: 600,
-//         },
-//     },
-//     props: {
-//         MuiButtonBase: {
-//             disableRipple: true,
-//         },
-//         MuiAppBar: {
-//             color: 'transparent',
-//         },
-//     },
-//     shape: {
-//         borderRadius: 4,
-//     },
-// }};
 
 const theme = createMuiTheme({
         palette: {
@@ -195,7 +129,7 @@ export const App = () => {
         // <div className="App">
         //     <header className="App-header">
         <ThemeProvider theme={theme}>
-        {/*// <ConfigContext.Provider>*/}
+         {/*<ConfigContext.Provider>*/}
             <>
                 <div>
                 <AppBar className={classes.root} position="fixed" enableColorOnDark>
@@ -246,7 +180,7 @@ export const App = () => {
             </Switch>
             </div>
             </>
-        {/*// </ConfigContext.Provider>*/}
+        {/*</ConfigContext.Provider>*/}
         </ThemeProvider>
             )
 };
