@@ -147,7 +147,7 @@ function encryptSubmit(ciphertext:any){
 
 
     const encryptWrapper = () => {
-        var result = encrypt(textbox, "password123"); // password and Mode are optional
+        var result = encrypt(textbox); //Mode are optional
 
         var dect = decrypt(result.data, result.key); // password and Mode are optional
         console.log("Decrypted Value: " + dect);

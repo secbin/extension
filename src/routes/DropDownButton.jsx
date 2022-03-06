@@ -29,6 +29,7 @@ import ErrorIcon from '@mui/icons-material/Error';
 import { Typography } from '@mui/material';
 import clsx from 'clsx';
 import { makeStyles, createStyles } from '@mui/styles';
+import { encrypt, decrypt } from "../chrome/utils/crypto";
 
 
 const useStyles = makeStyles(theme => ({
@@ -150,18 +151,23 @@ export default function CustomizedMenus() {
 
   const performAction = (e) => {
       let buttonText = e.target.innerText || "";
-      // console.log(buttonText, " == ", "Create Pastebin")
-      if(buttonText === "Create Pastebin") {
+      // console.log(buttonText, " == ", "Encrypt to Pastebin")
+      if(buttonText === "Encrypt to Pastebin") {
           alert("clicked")
          // const [pasteBinLink, error] = usePasteBinPost("hello this is a test");
           //console.log(error);
          // alert("PASTE BIN LINK IN THEORY: ", pasteBinLink);
 
+      }else if (buttonText === "Encrypt Plaintext") {
+        let res = encrypt(text)
+        console.log(res.data) //TODO - new window or somthing
+        console.log(res.key)
       } else if (buttonText === "Decrypt Pastebin") {
 
-
       } else if (buttonText === "Decrypt Ciphertext"){
-
+        let key = prompt("Please enter your key"); //TODO - Decrypt will probably need two text boxes
+        let res = decrypt(text, key)
+        console.log(res)
       }
 
 
@@ -177,14 +183,14 @@ export default function CustomizedMenus() {
         // console.log("PASTE BIN LINK FOUND")
         setMenu("Decrypt Pastebin")
         setButtonEnabled(true)
-    } else if (buttonText.includes("=")) {
+    } else if (buttonText.includes("C_TXT")) {
         // console.log("ENCRYPTED TEXT FOUND")
         setMenu("Decrypt Ciphertext")
         setButtonEnabled(true)
 
     } else if (buttonText){
         // console.log("PLAINTEXT FOUND")
-        setMenu("Create Pastebin")
+        setMenu("Encrypt to Pastebin")
         setButtonEnabled(true)
     } else {
         setButtonEnabled(false)
@@ -200,7 +206,7 @@ export default function CustomizedMenus() {
   //   }
 
 
-    let hey = clsx(text.length < 30 && classes.large)
+  let hey = clsx(text.length < 30 && classes.large)
   return (
       <>
           <div>
@@ -258,9 +264,9 @@ export default function CustomizedMenus() {
           <LockIcon />
           Encrypt Plaintext
         </MenuItem>
-        <MenuItem onClick={e => handleClose("Encrypt Pastebin")} dense disableRipple>
+        <MenuItem onClick={e => handleClose("Encrypt to Pastebin")} dense disableRipple>
           <LockIcon />
-          Encrypt Pastebin
+          Encrypt to Pastebin
         </MenuItem>
         <Divider sx={{ my: 0.5 }} />
         <MenuItem onClick={e => handleClose("Decrypt Plaintext")} dense disableRipple>
