@@ -81,7 +81,9 @@ export const Settings = () => {
   const [url, setUrl] = useState<string>('');
   const [responseFromContent, setResponseFromContent] = useState<string>('');
   const [ciphertext, setCiphertext] = useState([]);
-  const [apiKey, setApiKey] = useState("");
+  const [APIKEY, setApiKey] = useState("");
+  const [ENC_MODE, setEncMode] = useState("");
+  const [THEME, setTheme] = useState("");
 
   // const {appConfig, setAppConfig} = useContext(ConfigContext)
   //const [ciphertext, setCiphertext] = usePasteBinSearch(query);
@@ -92,15 +94,13 @@ export const Settings = () => {
    */
   useEffect(() => {
 
-    getDataWrapper(Storage.API_KEY);
+    getSettings();
 
     getCurrentTabUrl((url) => {
       setUrl(url || 'undefined');
     })
   }, []);
 
-
-  // console.log("GETTING API KEY: ", getDataWrapper(Storage.API_KEY))
 
   const sendTestMessage = () => {
     const message: ChromeMessage = {
@@ -136,34 +136,34 @@ export const Settings = () => {
 
   const encryptionMethods = [
       {
-        prettyName: "argon2",
-        value: "ARGON2_HASH",
+        prettyName: "AES CBC",
+        value: "AES-CBC",
       },
       {
-        prettyName: "sha2",
-        value: "SHA2_HASH",
+        prettyName: "AES CTR",
+        value: "AES-CTR",
       },
+      {
+        prettyName: "AES GCM",
+        value: "AES-GCM",
+      },
+      {
+        prettyName: "3DES CBC",
+        value: "3DES-CBC",
+      }
   ];
 
+function getSettings():any {
+  getItem(Storage.API_KEY, (data) => {
+      setApiKey(data[Storage.API_KEY]);
+  })
 
-  const getSetting = (key: string) =>{
-    getItem(key, (data) => {
-      const res = data[Storage.ENC_MODE] || []
-      console.log(res); // returns nothing
-      return res;
-    })
-    return "Not Set"
-  };
+  getItem(Storage.ENC_MODE, (data) => {
+    setEncMode(data[Storage.ENC_MODE]);
+  })
 
-function getDataWrapper(key: string):any {
-  getItem(key, (data) => {
-      const res = data[key] || []
-      if(res) {
-        setApiKey(res);
-      }
-      // alert(res)
-      console.log("res", res); // returns something
-      return res
+  getItem(Storage.THEME, (data) => {
+    setTheme(data[Storage.THEME]);
   })
 }
 
@@ -187,14 +187,16 @@ function getDataWrapper(key: string):any {
             <ListItemText primary="Encryption Algorithm" />
             {/*<Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />*/}
             <Select
-              onClick={() => setItem(Storage.ENC_MODE, "AES-GCM")}
               labelId="demo-simple-select-label"
               id="demo-simple-select"
               value="ARGON2_HASH"
-              label="AES-GCM"
+              label={ENC_MODE}
             >
               {encryptionMethods.map((item) => (
-                <MenuItem key={item.value} value={item.value}>{item.prettyName}</MenuItem>
+                <MenuItem key={item.value}
+                onClick={() => setItem(Storage.ENC_MODE, item.value)}
+                value={item.value}>{item.prettyName}
+                </MenuItem>
               ))}
             </Select>
           </ListItem>
@@ -203,7 +205,7 @@ function getDataWrapper(key: string):any {
         <Typography variant={'h4'}>Pastebin API</Typography>
         <Card classes={{ root: classes.card }}>
           <ListItem>
-            <ListItemText primary="PasteBin API Key" secondary={apiKey} />
+            <ListItemText primary="PasteBin API Key" secondary={APIKEY} />
             {/*<Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />*/}
             <IconButton color="primary" sx={{ p: '10px' }} 
               aria-label="directions" 
@@ -211,7 +213,7 @@ function getDataWrapper(key: string):any {
               <ChevronRight />
             </IconButton>
           </ListItem>
-          <TextField placeholder={apiKey}> </TextField>
+          <TextField placeholder={APIKEY}> </TextField>
           <Button onClick={() => setItem(Storage.API_KEY, "23ourwfodifkhjklfquhdkajdh")}>
             Set New Api Key
           </Button>
