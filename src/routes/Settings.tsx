@@ -2,7 +2,7 @@ import React, {useContext, useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { ChromeMessage, Sender } from "../types";
 import { getCurrentTabUId, getCurrentTabUrl } from "../chrome/utils";
-import { Button, Checkbox, Divider, IconButton, List, ListItem, ListItemText, Paper, Select, TextField, Typography } from "@mui/material";
+import { Button, Card, Checkbox, Divider, IconButton, List, ListItem, ListItemText, Paper, Select, TextField, Typography } from "@mui/material";
 // import usePasteBinSearch from '../hooks/usePasteBinSearch'
 import usePasteBinSearchJS from '../hooks/usePasteBinSearchJS'
 import History from "./History";
@@ -10,6 +10,7 @@ import CustomizedMenus from "./DropDownButton";
 import CustomizedInputBase from "./SmartTextBox";
 import { ChevronRight } from "@mui/icons-material";
 import { ConfigContext } from "../ConfigContext";
+import { makeStyles, createStyles } from '@mui/styles';
 function ErrorPage(){
 
   return (
@@ -46,7 +47,33 @@ function Ciphertext({query}:any){
   )
 }
 
+const useStyles = makeStyles(theme => ({
+    card: {
+        borderRadius: 6,
+        border: '1px solid #E0E0E0',
+        boxShadow: '0 0 7px 0 rgba(0,0,0,0.04)',
+        // backgroundColor: theme.palette.primary.light,
+        // color: theme.palette.primary.contrastText,
+        // boxShadow: "none",
+        marginBottom: 14,
+    },
+    pageHeading: {
+        paddingLeft: 20,
+        paddingTop: 20,
+        marginBottom: 10,
+    },
+    listItemText: {
+        fontSize: 14,
+    },
+    list: {
+        marginLeft: 20,
+        marginRight: 20,
+    }
+}));
+
+
 export const Settings = () => {
+    const classes = useStyles();
     const [query, setQuery] = useState<string>('');
     const [inputValue, setInputValue] = useState<string>('');
     const [url, setUrl] = useState<string>('');
@@ -100,22 +127,23 @@ export const Settings = () => {
 
 
     return (
-        <div className="App">
-            <header className="App-header">
-                <List sx={{ width: '100%', maxWidth: 360 }}>
-                    <Paper style={{margin: "6px", textAlign: 'left'}}>
-
+        <div>
+            <Typography variant='h2' className={classes.pageHeading} >Settings</Typography>
+                <List className={classes.list} sx={{ width: '100%' }}>
+                    <Typography variant={'h4'}>Dark Mode</Typography>
+                    <Card classes={{root: classes.card}}>
                     <ListItem>
-                            <ListItemText primary="Dark Mode" secondary="Enabled" />
-                            <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
+                            <ListItemText
+                                primary="Dark Mode"/>
+                            {/*<Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />*/}
                             <Checkbox defaultChecked />
                     </ListItem>
-                    </Paper>
+                    </Card>
 
-                <Paper style={{margin: "6px", textAlign: 'left'}}>
+                <Card classes={{root: classes.card}}>
                     <ListItem>
-                        <ListItemText primary="Encryption Algorithm" secondary="argon2" />
-                        <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
+                        <ListItemText primary="Encryption Algorithm" />
+                        {/*<Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />*/}
                         <Select
                             labelId="demo-simple-select-label"
                             id="demo-simple-select"
@@ -123,18 +151,19 @@ export const Settings = () => {
                             label="Age"
                         />
                     </ListItem>
-                </Paper>
-                <Paper style={{margin: "6px", textAlign: 'left'}}>
+                </Card>
+
+                    <Typography variant={'h4'}>Pastebin API</Typography>
+                    <Card classes={{root: classes.card}}>
                     <ListItem>
                         <ListItemText primary="PasteBin API Key" secondary="23ourwfodifkhjklfquhdkajdh" />
-                        <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
+                        {/*<Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />*/}
                         <IconButton color="primary" sx={{ p: '10px' }} aria-label="directions">
                             <ChevronRight />
                         </IconButton>
                     </ListItem>
-                </Paper>
+                </Card>
                 </List>
-            </header>
         </div>
     )
 }

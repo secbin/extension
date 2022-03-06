@@ -35,7 +35,7 @@ const useStyles = makeStyles(theme => ({
     counterContainer: {
         // alignContent: 'center',
         margin: 15,
-        marginTop: 17
+        marginTop: 10
     },
     counter: {
         fontSize: 11,
@@ -61,6 +61,18 @@ const useStyles = makeStyles(theme => ({
             transform: 'scale(1.035)'
         },
         transition: '0.15s'
+    },
+    large: {
+        fontSize: '36px',
+    },
+    medium: {
+        fontSize: 20,
+    },
+    small: {
+        fontSize: 14,
+    },
+    tiny: {
+        fontSize: 14,
     }
 }));
 
@@ -124,6 +136,8 @@ export default function CustomizedMenus() {
   const [text, setText] = React.useState("");
   const [buttonEnabled, setButtonEnabled] = React.useState(false)
   const [menu, setMenu] = React.useState("Encrypt")
+
+  const inputSize = text.length
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
 
@@ -180,14 +194,22 @@ export default function CustomizedMenus() {
 
   // @ts-ignore
   // @ts-ignore
+  //   switch(length) {
+  //       case length < 100:
+  //           return action.payload;
+  //   }
+
+
+    let hey = clsx(text.length < 30 && classes.large)
   return (
       <>
           <div>
           <InputBase
-              sx={{ width: 440, minHeight: 300, maxHeight: 300, overflow: 'hidden', fontSize: 24, backgroundColor: 'white', textAlign: 'left', padding: 2}}
+              className={clsx(text.length < 30 && '24')}
+              sx={{ width: 440, height: 464, overflow: 'hidden', fontSize: clsx(text.length < 350 ? '24px' : '16px'), backgroundColor: 'white', textAlign: 'left', padding: 2}}
               multiline
               autoFocus
-              rows={8}
+              rows={clsx(text.length < 350 ? 13 : 20)}
               onChange={checkTypeOfText}
               placeholder="Type or paste (⌘ + V) text you want to encrypt or a Pastebin.com link or ciphertext you want to decrypt here..."
               inputProps={{ 'aria-label': 'text to encrypt or decrypt', 'height': '300px' }}

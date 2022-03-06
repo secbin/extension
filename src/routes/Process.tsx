@@ -8,12 +8,46 @@ import ImageIcon from '@mui/icons-material/Image';
 import WorkIcon from '@mui/icons-material/Work';
 import BeachAccessIcon from '@mui/icons-material/BeachAccess';
 import DirectionsIcon from '@mui/icons-material/Directions';
-import {Button, Divider, IconButton, Paper, Typography } from '@mui/material';
+import {Button, Card, Divider, IconButton, InputAdornment, InputBase, Paper, TextField, Typography } from '@mui/material';
 import { ChevronRight } from '@mui/icons-material';
-import { makeStyles, createStyles } from '@mui/styles';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ContentPasteIcon from '@mui/icons-material/ContentPaste';
 
+import { makeStyles, createStyles } from '@mui/styles';
+// import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 const useStyles = makeStyles(theme => ({
+    icon: {
+        fontSize: 80,
+        width: '100%',
+        color: 'green',
+        margin: 20,
+    },
+    center: {
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        textAlign: 'center',
+        alignItems: 'center',
+    },
+    copybox: {
+        paddingLeft: 10,
+        margin: 15,
+        borderRadius: 6,
+        border: '1px solid #E0E0E0',
+        boxShadow: '0 0 7px 0 rgba(0,0,0,0.04)',
+        // backgroundColor: theme.palette.primary.light,
+        // color: theme.palette.primary.contrastText,
+        // boxShadow: "none",
+        marginBottom: 14,
+    },
+    heading: {
+        width: '400px',
+    },
+    blue: {
+        color: 'cadetblue'
+    },
     card: {
         borderRadius: 6,
         border: '1px solid #E0E0E0',
@@ -35,9 +69,12 @@ const useStyles = makeStyles(theme => ({
         marginLeft: 20,
         marginRight: 20,
     }
+
 }));
 
-export default function History() {
+
+export default function Process() {
+    const classes = useStyles();
 
     const historyItems = [
         {
@@ -66,28 +103,21 @@ export default function History() {
 
     let options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
 
-    const classes = useStyles();
+
     return (
         <>
-        {/*<p style={{textAlign: 'left'}}>History</p>*/}
-            <Typography variant='h2' className={classes.pageHeading}>History</Typography>
-            <List sx={{ width: '100%', maxWidth: 360 }}>
-            {historyItems.map((item) => {
-                return (
-
-            <ListItem key={item.url}>
-                <Button variant="outlined" style={{margin: "6px", textAlign: 'left'}}>
-                <ListItemText primary={item.url} secondary={item.date.toLocaleString('en-US')} />
-                <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
-                <IconButton color="primary" sx={{ p: '10px' }} aria-label="directions">
-                  <ChevronRight />
+        <div className={classes.center}>
+            <CheckCircleIcon className={classes.icon}/>
+            <Typography variant={'h2'}>Created Ciphertext</Typography>
+            <Card className={classes.copybox}>
+                <InputBase placeholder={"jaslkdj3ouroqejdnfskf"} value={'jaslkdykjhgjy97yhuhkhikuhkjhkjhkjj3ou'} />
+                <IconButton>
+                   <ContentPasteIcon className={classes.blue}/>
                 </IconButton>
-                </Button>
-            </ListItem>
-            )
-            })}
-        </List>
+            </Card>
+        </div>
         </>
+
     );
 }
 

@@ -7,18 +7,20 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import { Settings } from './routes/Settings'
 import { useHistory } from "react-router-dom";
 
-
 // import usePasteBinSearch from './hooks/usePasteBinSearch';
 import './App.css';
-import {AppBar, Divider, IconButton, Toolbar, Typography } from '@mui/material';
+import {AppBar, createMuiTheme, createTheme, Divider, IconButton, ThemeProvider, Toolbar, Typography, useTheme } from '@mui/material';
 import { makeStyles, createStyles } from '@mui/styles';
 
 import { ChevronLeft } from '@mui/icons-material';
 import History from "./routes/History";
 import HistoryIcon from '@mui/icons-material/History';
+import AcUnitIcon from '@mui/icons-material/AcUnit';
 import { ConfigContext } from './ConfigContext';
 import { defaultSettings } from './constants'
 import logoimg from '../assets/img/securebinlogo.svg'
+import {green, purple } from '@mui/material/colors';
+import Process from './routes/Process';
 function reducer(state: any, action: any) {
     switch(action.type) {
         case "add":
@@ -49,6 +51,134 @@ const useStyles = makeStyles(theme => ({
     }
 }));
 
+declare module '@mui/material/styles' {
+    interface Theme {
+        status: {
+            danger: string;
+        };
+    }
+    // allow configuration using `createTheme`
+    interface ThemeOptions {
+        status?: {
+            danger?: string;
+        };
+    }
+}
+
+// import { ThemeOptions } from '@material-ui/core/styles/createMuiTheme';
+
+// declare module '@mui/material/styles' {
+//     interface theme {
+//         palette: {
+//         type: 'light',
+//         primary: {
+//             main: '#3f51b5',
+//         },
+//         secondary: {
+//             main: '#00acf5',
+//         },
+//         text: {
+//             secondary: 'rgba(0,0,0,0.54)',
+//         },
+//     },
+//     typography: {
+//         h1: {
+//             fontSize: 36,
+//             fontWeight: 700,
+//         },
+//         h2: {
+//             fontSize: 24,
+//             fontWeight: 800,
+//         },
+//         h3: {
+//             fontSize: 14,
+//             fontWeight: 700,
+//             opacity: 0.7,
+//         },
+//         h4: {
+//             fontSize: 14,
+//             fontWeight: 500,
+//             opacity: 0.7,
+//         },
+//         subtitle2: {
+//             fontSize: 12,
+//             fontWeight: 400,
+//             opacity: 0.6,
+//         },
+//         body1: {
+//             fontSize: 22,
+//             lineHeight: 1.2,
+//         },
+//         button: {
+//             fontSize: 14,
+//             textTransform: 'none',
+//             fontWeight: 600,
+//         },
+//     },
+//     props: {
+//         MuiButtonBase: {
+//             disableRipple: true,
+//         },
+//         MuiAppBar: {
+//             color: 'transparent',
+//         },
+//     },
+//     shape: {
+//         borderRadius: 4,
+//     },
+// }};
+
+const theme = createMuiTheme({
+        palette: {
+        // type: light,
+        primary: {
+            main: '#3f51b5',
+        },
+        secondary: {
+            main: '#00acf5',
+        },
+        text: {
+            secondary: 'rgba(0,0,0,0.54)',
+        },
+    },
+    typography: {
+        h1: {
+            fontSize: 36,
+            fontWeight: 700,
+        },
+        h2: {
+            fontSize: 24,
+            fontWeight: 800,
+        },
+        h3: {
+            fontSize: 14,
+            fontWeight: 700,
+            opacity: 0.7,
+        },
+        h4: {
+            fontSize: 14,
+            fontWeight: 500,
+            opacity: 0.7,
+            marginBottom: 12,
+            paddingTop: 12,
+        },
+        subtitle2: {
+            fontSize: 12,
+            fontWeight: 400,
+            opacity: 0.6,
+        },
+        body1: {
+            fontSize: 15,
+            lineHeight: 1.2,
+            fontWeight: 500,
+        },
+        button: {
+            fontSize: 14,
+            textTransform: 'none',
+            fontWeight: 600,
+        },
+    }
+});
 
 export const App = () => {
 
@@ -57,8 +187,12 @@ export const App = () => {
     let {push, goBack} = useHistory();
     const classes = useStyles();
 
+
+    // const theme = useTheme();
+
     return (
-        // <ConfigContext.Provider>
+        <ThemeProvider theme={theme}>
+        {/*// <ConfigContext.Provider>*/}
             <>
                 <div>
                 <AppBar className={classes.root} position="fixed" enableColorOnDark>
@@ -72,6 +206,9 @@ export const App = () => {
                         {/*<Typography variant="h6" color="inherit" component="div">*/}
                         {/*    SecureBin*/}
                         {/*</Typography>*/}
+                        <IconButton className={classes.hoverStyle} aria-label="menu" sx={{ mr: 1 }} disableRipple onClick={() => { push('/processing')}}>
+                            <AcUnitIcon />
+                        </IconButton>
                         <IconButton className={classes.hoverStyle} aria-label="menu" sx={{ mr: 1 }} disableRipple onClick={() => { push('/history')}}>
                             <HistoryIcon />
                         </IconButton>
@@ -97,13 +234,17 @@ export const App = () => {
                 <Route path="/history">
                     <History/>
                 </Route>
+                <Route path="/processing">
+                    <Process/>
+                </Route>
                 <Route path="/">
                     <NewHome/>
                 </Route>
             </Switch>
             </div>
             </>
-        // </ConfigContext.Provider>
+        {/*// </ConfigContext.Provider>*/}
+        </ThemeProvider>
 
             )
 };
