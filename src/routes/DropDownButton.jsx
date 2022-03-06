@@ -22,8 +22,8 @@ import SearchIcon from '@mui/icons-material/Search';
 import DirectionsIcon from '@mui/icons-material/Directions';
 import InputBase from '@mui/material/InputBase';
 import usePasteBinSearchJS from '../hooks/usePasteBinSearchJS'
-// import usePasteBinPost from '../hooks/usePasteBinPost';
-import usePasteBinPost from '../hooks/usePasteBinPost2';
+import usePasteBinPost from '../hooks/usePasteBinPost';
+//import usePasteBinPost from '../hooks/usePasteBinPost2';
 import { MAX_TEXT_LENGTH } from '../constants'
 import ErrorIcon from '@mui/icons-material/Error';
 import { Typography } from '@mui/material';
@@ -134,6 +134,10 @@ export default function CustomizedMenus() {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const [text, setText] = React.useState("");
+  const [link, setLink] = React.useState("");
+  const [pasteBinLink, setPasteBinLink] = usePasteBinPost(text);
+  const [searchPasteBin, setSearchPasteBin] = usePasteBinSearchJS(link);
+
   const [buttonEnabled, setButtonEnabled] = React.useState(false)
   const [menu, setMenu] = React.useState("Encrypt")
 
@@ -152,12 +156,15 @@ export default function CustomizedMenus() {
       let buttonText = e.target.innerText || "";
       // console.log(buttonText, " == ", "Create Pastebin")
       if(buttonText === "Create Pastebin") {
-          alert("clicked")
-          const [pasteBinLink, error] = usePasteBinPost("hello this is a test");
-          console.log(error);
-          alert("PASTE BIN LINK IN THEORY: ", pasteBinLink);
+          console.log(text);
+
+          //sets the pasteBinLink to output of usePasteBinPost
+          setPasteBinLink(text);
+
 
       } else if (buttonText === "Decrypt Pastebin") {
+        // not working but it should be.
+        setLink(text);
 
 
       } else if (buttonText === "Decrypt Ciphertext"){
@@ -186,6 +193,7 @@ export default function CustomizedMenus() {
         // console.log("PLAINTEXT FOUND")
         setMenu("Create Pastebin")
         setButtonEnabled(true)
+
     } else {
         setButtonEnabled(false)
     }
@@ -272,7 +280,11 @@ export default function CustomizedMenus() {
           Decrypt Pastebin
         </MenuItem>
       </StyledMenu>
+
       </div>
+      {pasteBinLink ? <p>{pasteBinLink}</p> : <p> Sorry Invalid Link</p> }
+      {searchPasteBin ? <p>{searchPasteBin}</p> : <p> Sorry Invalid Link</p> }
+
     </div>
       </>
   );
