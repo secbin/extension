@@ -22,8 +22,8 @@ import SearchIcon from '@mui/icons-material/Search';
 import DirectionsIcon from '@mui/icons-material/Directions';
 import InputBase from '@mui/material/InputBase';
 import usePasteBinSearchJS from '../hooks/usePasteBinSearchJS'
-// import usePasteBinPost from '../hooks/usePasteBinPost';
-import usePasteBinPost from '../hooks/usePasteBinPost2';
+import usePasteBinPost from '../hooks/usePasteBinPost';
+//import usePasteBinPost from '../hooks/usePasteBinPost2';
 import { MAX_TEXT_LENGTH } from '../constants'
 import ErrorIcon from '@mui/icons-material/Error';
 import { Typography } from '@mui/material';
@@ -153,9 +153,9 @@ export default function CustomizedMenus() {
       // console.log(buttonText, " == ", "Create Pastebin")
       if(buttonText === "Create Pastebin") {
           alert("clicked")
-          const [pasteBinLink, error] = usePasteBinPost("hello this is a test");
-          console.log(error);
-          alert("PASTE BIN LINK IN THEORY: ", pasteBinLink);
+         // const [pasteBinLink, error] = usePasteBinPost("hello this is a test");
+          //console.log(error);
+         // alert("PASTE BIN LINK IN THEORY: ", pasteBinLink);
 
       } else if (buttonText === "Decrypt Pastebin") {
 
