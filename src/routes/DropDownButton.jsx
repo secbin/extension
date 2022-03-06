@@ -134,8 +134,9 @@ export default function CustomizedMenus() {
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const [text, setText] = React.useState("");
+  const [link, setLink] = React.useState("");
   const [pasteBinLink, setPasteBinLink] = usePasteBinPost(text);
-  const [searchPasteBin, setSearchPasteBin] = usePasteBinSearchJS(text);
+  const [searchPasteBin, setSearchPasteBin] = usePasteBinSearchJS(link);
 
   const [buttonEnabled, setButtonEnabled] = React.useState(false)
   const [menu, setMenu] = React.useState("Encrypt")
@@ -163,7 +164,8 @@ export default function CustomizedMenus() {
 
       } else if (buttonText === "Decrypt Pastebin") {
         // not working but it should be.
-        setSearchPasteBin(text);
+        setLink(text);
+
 
       } else if (buttonText === "Decrypt Ciphertext"){
 
@@ -278,8 +280,11 @@ export default function CustomizedMenus() {
           Decrypt Pastebin
         </MenuItem>
       </StyledMenu>
-      {pasteBinLink ? <p>{pasteBinLink}</p> : <p> Sorry Invalid Link</p> }
+
       </div>
+      {pasteBinLink ? <p>{pasteBinLink}</p> : <p> Sorry Invalid Link</p> }
+      {searchPasteBin ? <p>{searchPasteBin}</p> : <p> Sorry Invalid Link</p> }
+
     </div>
       </>
   );
