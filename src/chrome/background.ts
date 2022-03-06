@@ -1,5 +1,5 @@
 import { copyTextClipboard } from "../chrome/utils";
-export {}
+import { encrypt, decrypt } from "../chrome/utils/crypto";
 
 /** Fired when the extension is first installed,
  *  when the extension is updated to a new version,
@@ -58,15 +58,43 @@ var pasteBinMenuItem = {
 
 var clipboardMenuItem = {
     "id": "clipboardMenuItem",
-    "title": "Encrpyt to Clipboard",
+    "title": "Encrypt to Clipboard",
     "contexts": ['selection']
-} // if we allow user to select/choose the key, might need to add children to these menus
-  // if keys are random and stored in password manager then not a problem
+}
+var decryptMenuItem = {
+    "id": "decryptText",
+    "title": "Decrypt Text",
+    "contexts": ['selection']
+}
+
 
 chrome.contextMenus.create(pasteBinMenuItem);
 chrome.contextMenus.create(clipboardMenuItem);
+chrome.contextMenus.create(decryptMenuItem);
 
 chrome.contextMenus.onClicked.addListener( (clickData) => {
-    copyTextClipboard(clickData.selectionText);
-    alert(clickData.menuItemId + "\n" + clickData.selectionText);
+    let text = clickData.selectionText
+    if(text === undefined){
+        alert("Please select some text")
+        return
+    }
+
+    if(clickData.menuItemId === "pasteBin"){
+        alert("TODO not implemented")
+    }
+    else if(clickData.menuItemId === "clipboardMenuItem"){
+        let res = encrypt(text);
+        console.log(res)
+        copyTextClipboard(res.data);
+    }
+    else if (clickData.menuItemId === "decryptText"){
+        let key = prompt("Please enter your key");
+        if(key === null){
+            return
+        }else if(!text.includes("C_TXT")){
+            alert("Invalid ciphertext")
+        }
+        let res = decrypt(text, key);
+        console.log(res);
+    }
 })

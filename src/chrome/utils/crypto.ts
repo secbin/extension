@@ -1,7 +1,7 @@
 import forge from 'node-forge';
 import { getItem, Storage} from "./storage";
 
-export function encrypt(data: string, password?: string){
+export function encrypt(data: string){
     // Get mode from storage
     let mode: forge.cipher.Algorithm = 'AES-GCM'
     getItem(Storage.ENC_MODE, (data) => {
@@ -9,7 +9,7 @@ export function encrypt(data: string, password?: string){
     })
     
     // encrypt data
-    const encRes = encryptText(data, password, mode)
+    const encRes = encryptText(data, mode)
     // encode data to string
     const cTXT = JSON.stringify(encRes.CipherData);
     
@@ -17,11 +17,9 @@ export function encrypt(data: string, password?: string){
 }
 
 // Encrpts a string using the AES algorithm. Optional parameter: Password, AES Mode
-function encryptText(text: string, password?: string, mode?: string){
+function encryptText(text: string, mode?: string){
     // password is used to generate key, if none gen random
-    if (password === undefined) {
-    password = forge.random.getBytesSync(48).toString();
-    }
+    let password = forge.random.getBytesSync(48).toString();
     
     // if not mode is specified, use AES-GCM
     if(mode === undefined) {
