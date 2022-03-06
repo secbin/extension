@@ -8,13 +8,32 @@ import ImageIcon from '@mui/icons-material/Image';
 import WorkIcon from '@mui/icons-material/Work';
 import BeachAccessIcon from '@mui/icons-material/BeachAccess';
 import DirectionsIcon from '@mui/icons-material/Directions';
-import {Button, Card, Divider, IconButton, Paper, Typography } from '@mui/material';
+import {Button, Card, Divider, IconButton, InputAdornment, InputBase, Paper, TextField, Typography } from '@mui/material';
 import { ChevronRight } from '@mui/icons-material';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import ContentPasteIcon from '@mui/icons-material/ContentPaste';
+
 import { makeStyles, createStyles } from '@mui/styles';
-import LockOpenIcon from '@mui/icons-material/LockOpen';
+// import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 const useStyles = makeStyles(theme => ({
-    card: {
+    icon: {
+        fontSize: 80,
+        width: '100%',
+        color: 'green',
+        margin: 20,
+    },
+    center: {
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        textAlign: 'center',
+        alignItems: 'center',
+    },
+    copybox: {
+        paddingLeft: 10,
+        margin: 15,
         borderRadius: 6,
         border: '1px solid #E0E0E0',
         boxShadow: '0 0 7px 0 rgba(0,0,0,0.04)',
@@ -23,20 +42,18 @@ const useStyles = makeStyles(theme => ({
         // boxShadow: "none",
         marginBottom: 14,
     },
-    pageHeading: {
-        paddingLeft: 20,
-        paddingTop: 20,
-        marginBottom: 10,
+    heading: {
+        width: '400px',
     },
-    listItemText: {
-        fontSize: 14,
+    blue: {
+        color: 'cadetblue'
     },
-    list: {
-        padding: 20,
-    }
+
 }));
 
-export default function History() {
+
+export default function Process() {
+    const classes = useStyles();
 
     const historyItems = [
         {
@@ -65,31 +82,21 @@ export default function History() {
 
     let options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
 
-    const classes = useStyles();
-    //TODO Add moment JS to calculate time
+
     return (
         <>
-        {/*<p style={{textAlign: 'left'}}>History</p>*/}
-            <Typography variant='h2' className={classes.pageHeading}>History</Typography>
-            <List className={classes.list} >
-            {historyItems.map((item) => {
-            return (
-            <>
-            <Typography variant={'h4'}>Today</Typography>
-            <Card variant="outlined" classes={{root: classes.card}}>
-                <ListItem key={item.url}>
-                    <ListItemText primary={item.url} secondary={item.date.toLocaleString('en-US')} />
-                    <IconButton color="primary" aria-label="Unlock CipherText">
-                      <LockOpenIcon />
-                    </IconButton>
-                </ListItem>
+        <div className={classes.center}>
+            <CheckCircleIcon className={classes.icon}/>
+            <Typography variant={'h2'}>Created Ciphertext</Typography>
+            <Card className={classes.copybox}>
+                <InputBase placeholder={"jaslkdj3ouroqejdnfskf"} value={'jaslkdykjhgjy97yhuhkhikuhkjhkjhkjj3ou'} />
+                <IconButton>
+                   <ContentPasteIcon color="primary"/>
+                </IconButton>
             </Card>
-
-            </>
-            )
-            })}
-        </List>
+        </div>
         </>
+
     );
 }
 

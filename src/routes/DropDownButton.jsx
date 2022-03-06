@@ -24,8 +24,57 @@ import InputBase from '@mui/material/InputBase';
 import usePasteBinSearchJS from '../hooks/usePasteBinSearchJS'
 // import usePasteBinPost from '../hooks/usePasteBinPost';
 import usePasteBinPost from '../hooks/usePasteBinPost2';
+import { MAX_TEXT_LENGTH } from '../constants'
+import ErrorIcon from '@mui/icons-material/Error';
+import { Typography } from '@mui/material';
+import clsx from 'clsx';
+import { makeStyles, createStyles } from '@mui/styles';
 
 
+const useStyles = makeStyles(theme => ({
+    counterContainer: {
+        // alignContent: 'center',
+        margin: 15,
+        marginTop: 10
+    },
+    counter: {
+        fontSize: 11,
+    },
+    red: {
+        color: 'red',
+        fontWeight: 600
+    },
+    grey: {
+        color: 'grey'
+    },
+    bottomSection: {
+        display: 'flex',
+    },
+    hoverStyle: {
+        '&:hover': {
+            transition: '0.15s',
+            transform: 'scale(1.02)'
+        },
+        '&:active': {
+            transition: '0.08s',
+            opacity: 0.9,
+            transform: 'scale(1.035)'
+        },
+        transition: '0.15s'
+    },
+    large: {
+        fontSize: '36px',
+    },
+    medium: {
+        fontSize: 20,
+    },
+    small: {
+        fontSize: 14,
+    },
+    tiny: {
+        fontSize: 14,
+    }
+}));
 
 
 const StyledMenu = styled((props) => (
@@ -33,7 +82,7 @@ const StyledMenu = styled((props) => (
       open={false} elevation={0}
       anchorOrigin={{
         vertical: 'bottom',
-        horizontal: 'right',
+        horizontal: 'left',
       }}
       transformOrigin={{
         vertical: 'top',
@@ -68,11 +117,27 @@ const StyledMenu = styled((props) => (
   },
 }));
 
+export function TextCounter(props) {
+    const classes = useStyles();
+    let safe = props.textLength < MAX_TEXT_LENGTH
+    return (
+        <div className={classes.counterContainer}>
+        {!safe && <ErrorIcon className={clsx(classes.red, classes.counter)} sx={{mr: 0.5, mb: -0.25}}/>}
+        <Typography className={clsx(safe ? classes.grey : classes.red, classes.counter)} variant={'p'}>{props.textLength}/{MAX_TEXT_LENGTH}</Typography>
+        </div>
+    );
+}
+
+
 export default function CustomizedMenus() {
+  const classes = useStyles();
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
+  const [text, setText] = React.useState("");
   const [buttonEnabled, setButtonEnabled] = React.useState(false)
   const [menu, setMenu] = React.useState("Encrypt")
+
+  const inputSize = text.length
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
 
@@ -103,9 +168,12 @@ export default function CustomizedMenus() {
   }
 
   const checkTypeOfText = (e) => {
-
-    let buttonText = e.target.value || ""
-    if(buttonText.includes("pastebin.com")) {
+    setText(e.target.value);
+    let buttonText = e.target.value || "";
+    if(e.target.value.length > MAX_TEXT_LENGTH) {
+        setButtonEnabled(false)
+    }
+    else if(buttonText.includes("pastebin.com")) {
         // console.log("PASTE BIN LINK FOUND")
         setMenu("Decrypt Pastebin")
         setButtonEnabled(true)
@@ -126,22 +194,34 @@ export default function CustomizedMenus() {
 
   // @ts-ignore
   // @ts-ignore
+  //   switch(length) {
+  //       case length < 100:
+  //           return action.payload;
+  //   }
+
+
+    let hey = clsx(text.length < 30 && classes.large)
   return (
       <>
           <div>
           <InputBase
-              sx={{ width: 440, minHeight: 300, maxHeight: 300, overflow: 'hidden', fontSize: 24, backgroundColor: 'white', textAlign: 'left', padding: 2}}
+              className={clsx(text.length < 30 && '24')}
+              sx={{ width: 440, height: 464, overflow: 'hidden', fontSize: clsx(text.length < 350 ? '24px' : '16px'), backgroundColor: 'white', textAlign: 'left', padding: 2}}
               multiline
               autoFocus
-              rows={8}
+              rows={clsx(text.length < 350 ? 13 : 20)}
               onChange={checkTypeOfText}
-              placeholder="Type or paste (⌘ + V) text you want to encrypt here, paste a Pastebin.com link, or ciphertext you want to here..."
+              placeholder="Type or paste (⌘ + V) text you want to encrypt or a Pastebin.com link or ciphertext you want to decrypt here..."
               inputProps={{ 'aria-label': 'text to encrypt or decrypt', 'height': '300px' }}
           />
 
         <Divider />
-        <Card style={{width: '230px', textAlign: 'center', backgroundColor: '#1D6BC6', color: 'white', margin: 10, borderRadius: 50, marginLeft: 'auto'}}>
-      <ListItemButton sx={{ ml: 1, flex: 1, height: 45 }}
+      <div className={classes.bottomSection}>
+      <TextCounter textLength={text.length}/>
+      <Card
+          className={classes.hoverStyle}
+          style={{minWidth: 100, textAlign: 'center', backgroundColor: '#1D6BC6', color: 'white', margin: 15, borderRadius: 50, marginLeft: 'auto'}}>
+      <ListItemButton sx={{ ml: 1, flex: 1, height: 40, textAlign: 'center', fontWeight: 800 }}
         onClick={performAction}
         id="demo-customized-button"
         aria-controls={open ? 'demo-customized-menu' : undefined}
@@ -155,7 +235,7 @@ export default function CustomizedMenus() {
           <ListItemText>{menu}</ListItemText>
           {/*<Divider sx={{ height: 28, m: 0.5, color: 'white', borderColor: 'white' }} orientation="vertical" />*/}
           <IconButton color="primary" sx={{ p: '10px' }} sx={{ color: 'white'}} onClick={handleClick}
-                      aria-label="directions">
+                      aria-label="encryption/decryption options">
               <KeyboardArrowDownIcon />
           </IconButton>
       </ListItemButton>
@@ -170,24 +250,29 @@ export default function CustomizedMenus() {
         open={open}
         onClose={e => handleClose(menu)}
       >
-        <MenuItem onClick={e => handleClose("Encrypt Plaintext")} disableRipple>
+          <MenuItem sx={{ fontWeight: 700, color: 'grey' }} disabled dense disableRipple>
+              Select Action
+          </MenuItem>
+          <Divider/>
+        <MenuItem onClick={e => handleClose("Encrypt Plaintext")} dense disableRipple>
           <LockIcon />
           Encrypt Plaintext
         </MenuItem>
-        <MenuItem onClick={e => handleClose("Encrypt Pastebin")} disableRipple>
+        <MenuItem onClick={e => handleClose("Encrypt Pastebin")} dense disableRipple>
           <LockIcon />
           Encrypt Pastebin
         </MenuItem>
         <Divider sx={{ my: 0.5 }} />
-        <MenuItem onClick={e => handleClose("Decrypt Plaintext")} disableRipple>
+        <MenuItem onClick={e => handleClose("Decrypt Plaintext")} dense disableRipple>
           <LockOpenIcon />
           Decrypt Plaintext
         </MenuItem>
-        <MenuItem onClick={e => handleClose("Decrypt Pastebin")} disableRipple>
+        <MenuItem onClick={e => handleClose("Decrypt Pastebin")} dense disableRipple>
           <LockOpenIcon />
           Decrypt Pastebin
         </MenuItem>
       </StyledMenu>
+      </div>
     </div>
       </>
   );

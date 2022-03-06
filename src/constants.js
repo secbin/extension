@@ -7,7 +7,6 @@ export const defaultSettings = {
 
 
 
-
-
-
 }
+
+export const MAX_TEXT_LENGTH = 512
