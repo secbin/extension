@@ -7,17 +7,15 @@ import { encrypt, decrypt } from "../chrome/utils/crypto";
 import { Button, TextField } from "@mui/material";
 
 import usePasteBinSearchJS from '../hooks/usePasteBinSearchJS'
-<<<<<<< HEAD
+
 import usePasteBinPost from '../hooks/usePasteBinPost';
 
 
-function ErrorPage() {
-=======
+
 import History from "./History";
 import CustomizedMenus from "./DropDownButton";
 import CustomizedInputBase from "./SmartTextBox";
 function ErrorPage(){
->>>>>>> 96ae4ac3b2b604aada9948387908739d4cd2c0ec
 
     return (
         <h2> Sorry, the Decryption you were looking for is not valid. </h2>
@@ -174,14 +172,14 @@ function encryptSubmit(ciphertext:any){
     return (
         <div className="App">
             <header className="App-header">
-<<<<<<< HEAD
+
                 <p>Home</p>
                 <p>URL:</p>
                 <p>
                     {url}
                 </p>
 
-=======
+
                 {/*<p>Home</p>*/}
                 {/*<p>URL:</p>*/}
                 {/*<p>*/}
@@ -195,20 +193,18 @@ function encryptSubmit(ciphertext:any){
                 <Button variant="contained">Encrypt</Button>
                 <button onClick={sendTestMessage}>SEND MESSAGE</button>
                 {/*<button onClick={sendRemoveMessage}>Remove logo</button>*/}
->>>>>>> 96ae4ac3b2b604aada9948387908739d4cd2c0ec
                 <form  onSubmit={(e) => {
                   e.preventDefault();
                     console.log(inputValue);
                     setQuery(inputValue);
 
                 }}>
-<<<<<<< HEAD
+
                     <input value={inputValue} placeholder="Enter The Paste Bin Key" onChange={e => setInputValue(e.target.value)} />
                     <button type="submit">Decrypt</button>
-=======
+
                   <input value={inputValue} placeholder="Enter The Paste Bin Key" onChange={e => setInputValue(e.target.value)} />
                   <button type="submit">Decrypt</button>
->>>>>>> 96ae4ac3b2b604aada9948387908739d4cd2c0ec
                 </form>
 
                 <TextField id="outlined-basic" label="Text" variant="outlined" onChange={textUpdate} />
