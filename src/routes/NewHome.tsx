@@ -4,7 +4,7 @@ import { ChromeMessage, Sender } from "../types";
 import { getCurrentTabUId, getCurrentTabUrl } from "../chrome/utils";
 import { Button, Divider, TextField, Typography } from "@mui/material";
 // import usePasteBinSearch from '../hooks/usePasteBinSearch'
-import usePasteBinSearchJS from '../hooks/usePasteBinSearchJS'
+// import usePasteBinSearchJS from '../hooks/usePasteBinSearchJS'
 import History from "./History";
 import CustomizedMenus from "./DropDownButton";
 import CustomizedInputBase from "./SmartTextBox";
@@ -30,19 +30,19 @@ return ( ciphertext ? (
 )
 
 }
-function Ciphertext({query}:any){
-  const [ciphertext, setCiphertext] = usePasteBinSearchJS(query);
-
-//  console.log(query);
-
-
-  return(
-    <div>
-      <CiphertextItem ciphertext={ciphertext}/>
-    </div>
-
-  )
-}
+// function Ciphertext({query}:any){
+//   // const [ciphertext, setCiphertext] = usePasteBinSearchJS(query);
+//
+// //  console.log(query);
+//
+//
+//   return(
+//     <div>
+//       <CiphertextItem ciphertext={ciphertext}/>
+//     </div>
+//
+//   )
+// }
 
 export const NewHome = () => {
     const [query, setQuery] = useState<string>('');

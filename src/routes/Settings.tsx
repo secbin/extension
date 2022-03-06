@@ -11,41 +11,7 @@ import CustomizedInputBase from "./SmartTextBox";
 import { ChevronRight } from "@mui/icons-material";
 import { ConfigContext } from "../ConfigContext";
 import { makeStyles, createStyles } from '@mui/styles';
-function ErrorPage(){
 
-  return (
-    <h2> Sorry, the Decryption you were looking for is not valid. </h2>
-  )
-}
-
-function CiphertextItem({ciphertext}:any){
-return ( ciphertext ? (
-  // <div>
-  // {Object.keys(ciphertext).map((keyName, i) => (
-  //
-  //   <p> {ciphertext[i].success}</p>
-  // ))};
-  // </div>
-  <p>Output goes Here</p>
-
-): <ErrorPage/>
-
-)
-
-}
-function Ciphertext({query}:any){
-  const [ciphertext, setCiphertext] = usePasteBinSearchJS(query);
-
-//  console.log(query);
-
-
-  return(
-    <div>
-      <CiphertextItem ciphertext={ciphertext}/>
-    </div>
-
-  )
-}
 
 const useStyles = makeStyles(theme => ({
     card: {

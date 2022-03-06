@@ -8,6 +8,7 @@ import { Settings } from './routes/Settings'
 import { useHistory } from "react-router-dom";
 
 // import usePasteBinSearch from './hooks/usePasteBinSearch';
+import usePasteBinSearch from './hooks/usePasteBinSearchJS';
 import './App.css';
 import {AppBar, createMuiTheme, createTheme, Divider, IconButton, ThemeProvider, Toolbar, Typography, useTheme } from '@mui/material';
 import { makeStyles, createStyles } from '@mui/styles';
