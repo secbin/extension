@@ -72,7 +72,7 @@ chrome.contextMenus.create(pasteBinMenuItem);
 chrome.contextMenus.create(clipboardMenuItem);
 chrome.contextMenus.create(decryptMenuItem);
 
-chrome.contextMenus.onClicked.addListener( (clickData) => {
+chrome.contextMenus.onClicked.addListener( async (clickData) => {
     let text = clickData.selectionText
     if(text === undefined){
         alert("Please select some text")
@@ -85,7 +85,7 @@ chrome.contextMenus.onClicked.addListener( (clickData) => {
     else if(clickData.menuItemId === "clipboardMenuItem"){
         let res = encrypt(text);
         console.log(res)
-        copyTextClipboard(res.data);
+        copyTextClipboard((await res).data);
     }
     else if (clickData.menuItemId === "decryptText"){
         let key = prompt("Please enter your key");

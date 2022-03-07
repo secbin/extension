@@ -1,15 +1,12 @@
 import forge from 'node-forge';
-import { getItem, Storage} from "./storage";
+import { getItemAsync, Storage} from "./storage";
 
-export function encrypt(data: string){
-    // Get mode from storage
-    let mode: forge.cipher.Algorithm = 'AES-GCM'
-    getItem(Storage.ENC_MODE, (data) => {
-        mode = data[Storage.ENC_MODE] || "AES-GCM"
-    })
-    
+export async function encrypt(data: string){
+    let mode = await getItemAsync(Storage.ENC_MODE) as string
+    let len = await getItemAsync(Storage.KEY_LENGTH) as number
+
     // encrypt data
-    const encRes = encryptText(data, mode)
+    const encRes = encryptText(data, mode, len)
     // encode data to string
     const cTXT = JSON.stringify(encRes.CipherData);
     
@@ -17,20 +14,9 @@ export function encrypt(data: string){
 }
 
 // Encrpts a string using the AES algorithm. Optional parameter: Password, AES Mode
-function encryptText(text: string, mode?: string){
-    // password is used to generate key, if none gen random
-    let password = forge.random.getBytesSync(48).toString();
-    
-    // if not mode is specified, use AES-GCM
-    if(mode === undefined) {
-        mode = "AES-GCM"
-    }
-
-    // generate key from password
-    let salt = forge.random.getBytesSync(128);
-    let key = forge.pkcs5.pbkdf2(password, salt, 10000, 32);
-
-    // set IV
+function encryptText(text: string, mode: string, len: number){
+    // Note: a key size of 16 bytes will use AES-128, 24 => AES-192, 32 => AES-256
+    let key = forge.random.getBytesSync(len);
     let iv = forge.random.getBytesSync(16);
 
     // Encrypt the text
@@ -41,7 +27,10 @@ function encryptText(text: string, mode?: string){
 
     // encode bytes to base64
     let cTXT = forge.util.encode64(cipher.output.data);
-    let tag = forge.util.encode64(cipher.mode.tag.bytes().toString());
+    let tag = ""
+    if (mode === "AES-GCM"){
+        tag = forge.util.encode64(cipher.mode.tag.bytes().toString());
+    }
     iv = forge.util.encode64(iv);
     key = forge.util.encode64(key)
 
