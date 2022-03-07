@@ -136,19 +136,19 @@ export const Settings = () => {
 
   const encryptionMethods = [
       {
-        prettyName: "AES CBC",
+        prettyName: "AES-CBC",
         value: "AES-CBC",
       },
       {
-        prettyName: "AES CTR",
+        prettyName: "AES-CTR",
         value: "AES-CTR",
       },
       {
-        prettyName: "AES GCM",
+        prettyName: "AES-GCM",
         value: "AES-GCM",
       },
       {
-        prettyName: "3DES CBC",
+        prettyName: "3DES-CBC",
         value: "3DES-CBC",
       }
   ];
@@ -189,7 +189,7 @@ function getSettings():any {
             <Select
               labelId="demo-simple-select-label"
               id="demo-simple-select"
-              value="ARGON2_HASH"
+              value={ENC_MODE}
               label={ENC_MODE}
             >
               {encryptionMethods.map((item) => (
