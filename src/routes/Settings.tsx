@@ -84,6 +84,7 @@ export const Settings = () => {
   const [APIKEY, setApiKey] = useState("");
   const [ENC_MODE, setEncMode] = useState("");
   const [THEME, setTheme] = useState("");
+  const [KEY_LENGTH, setKeyLength] = useState("");
 
   // const {appConfig, setAppConfig} = useContext(ConfigContext)
   //const [ciphertext, setCiphertext] = usePasteBinSearch(query);
@@ -146,12 +147,24 @@ export const Settings = () => {
       {
         prettyName: "AES-GCM",
         value: "AES-GCM",
-      },
-      {
-        prettyName: "3DES-CBC",
-        value: "3DES-CBC",
       }
   ];
+
+  // Note: a key size of 16 bytes will use AES-128, 24 => AES-192, 32 => AES-256
+  const keyLengths = [
+    {
+      prettyName: "128",
+      value: 16,
+    },
+    {
+      prettyName: "192",
+      value: 24,
+    },
+    {
+      prettyName: "256",
+      value: 32,
+    }
+];
 
 function getSettings():any {
   getItem(Storage.API_KEY, (data) => {
@@ -165,6 +178,11 @@ function getSettings():any {
   getItem(Storage.THEME, (data) => {
     setTheme(data[Storage.THEME]);
   })
+
+  getItem(Storage.KEY_LENGTH, (data) => {
+    setKeyLength(data[Storage.KEY_LENGTH]);
+  })
+
 }
 
 
@@ -195,6 +213,22 @@ function getSettings():any {
               {encryptionMethods.map((item) => (
                 <MenuItem key={item.value}
                 onClick={() => setItem(Storage.ENC_MODE, item.value)}
+                value={item.value}>{item.prettyName}
+                </MenuItem>
+              ))}
+            </Select>
+
+
+            {/* // Note: a key size of 16 bytes will use AES-128, 24 => AES-192, 32 => AES-256 */}
+            <Select
+              labelId="demo-simple-select-label"
+              id="demo-simple-select"
+              value={KEY_LENGTH}
+              label={KEY_LENGTH}
+            >
+              {keyLengths.map((item) => (
+                <MenuItem key={item.value}
+                onClick={() => setItem(Storage.KEY_LENGTH, item.value)}
                 value={item.value}>{item.prettyName}
                 </MenuItem>
               ))}

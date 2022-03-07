@@ -151,8 +151,8 @@ function encryptSubmit(ciphertext:any){
 }
 
 
-    const encryptWrapper = () => {
-        var result = encrypt(textbox); //Mode are optional
+    const encryptWrapper = async () => {
+        var result = await encrypt(textbox); //Mode are optional
 
         var dect = decrypt(result.data, result.key); // password and Mode are optional
         console.log("Decrypted Value: " + dect);
