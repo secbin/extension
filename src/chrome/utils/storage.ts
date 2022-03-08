@@ -3,7 +3,8 @@ export enum Storage {
     API_KEY = "api_key",
     ENC_MODE = "enc_mode",
     KEY_LENGTH = "key_length",
-    THEME = "theme"
+    THEME = "theme",
+    HISTORY = "history"
   }
 
 export const setItem = (key: string, value: any, callback?: () => void) => {
@@ -13,6 +14,42 @@ export const setItem = (key: string, value: any, callback?: () => void) => {
 export const getItem = (key: string | string[], callback: (items: { [key: string]: any; }) => void) => {
     return chrome.storage.sync.get(key, callback)
 }
+
+export const getItemAtIndex = (key: string | string[], index: number, callback: (items: { [key: string]: any; }) => void) => {
+    getItem(Storage.API_KEY, (data) => {
+        const result = data[Storage.API_KEY];
+        if (result && result.length > index) {
+            return result[index]
+
+        }
+    })
+}
+
+export const addItem = (key: string, value: any, callback?: () => void) => {
+    getItem(Storage.API_KEY, (data) => {
+        let result = data[Storage.API_KEY];
+        if(!result) {
+            result = [];
+        }
+        result.push(value);
+        return chrome.storage.sync.set({ [key]: result }, callback)
+    })
+}
+
+export const removeItem = (key: string, value: any, index: number, callback?: () => void) => {
+    getItem(Storage.API_KEY, (data) => {
+        let result = data[Storage.API_KEY];
+        if(result && result.length > index) {
+            result.splice(index, 1);
+        }
+        return chrome.storage.sync.set({ [key]: result }, callback)
+    })
+}
+
+export const clearItems = (key: string, value: any, callback?: () => void) => {
+    return chrome.storage.sync.set({ [key]: [] }, callback)
+}
+
 
 export const getItemAsync = async (key: string) => {
     return new Promise((resolve, reject) => {
