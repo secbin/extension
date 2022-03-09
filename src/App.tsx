@@ -17,6 +17,8 @@ import AcUnitIcon from '@mui/icons-material/AcUnit';
 import { ConfigContext } from './ConfigContext';
 import { DEFAULT_CONTEXT } from './constants'
 import logoimg from '../assets/img/securebinlogo.svg'
+import logoimg_dark from '../assets/img/securebinlogo_dark.svg'
+
 import {green, purple } from '@mui/material/colors';
 import Process from './routes/Process';
 function reducer(state: any, action: any) {

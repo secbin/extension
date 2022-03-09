@@ -24,6 +24,15 @@ const useStyles = makeStyles(theme => ({
   },
   list: {
     padding: 20,
+  },
+  menuItem: {
+    height: 10,
+    boxShadow: "none"
+  },
+  select: {
+    height: 32,
+    marginBottom: 8,
+    marginTop: 8,
   }
 }));
 
@@ -64,7 +73,7 @@ function getSettings():any {
   })
 }
 
-const setKeyLeng = (e: any) => {
+const keyLengthHandler = (e: any) => {
   setItem(Storage.KEY_LENGTH, e.target.value)
   setKeyLength(e.target.value);
   console.log(KEY_LENGTH)
@@ -75,7 +84,7 @@ const setKeyLeng = (e: any) => {
   })
 }
 
-const setEncMod = (e: any) => {
+const encModeHandler = (e: any) => {
   setItem(Storage.ENC_MODE, e.target.value);
   setEncMode(e.target.value);
 }
@@ -123,13 +132,15 @@ const resetSettings = (e: any) => {
           <ListItem>
             <ListItemText primary="Encryption Algorithm" />
             <Select
+              className={classes.select}
               value={ENC_MODE}
               label={ENC_MODE}
-              onChange={setEncMod}
+              onChange={encModeHandler}
             >
               {ENCRYPTION_METHODS.map((item) => (
-                <MenuItem key={item.value}
-                value={item.value}>{item.prettyName}
+                <MenuItem classes={{root: classes.menuItem}}
+                          key={item.value}
+                          value={item.value}>{item.prettyName}
                 </MenuItem>
               ))}
             </Select>
@@ -142,11 +153,13 @@ const resetSettings = (e: any) => {
 
             {/* // Note: a key size of 16 bytes will use AES-128, 24 => AES-192, 32 => AES-256 */}
             <Select
+                className={classes.select}
                 value={KEY_LENGTH}
-                onChange={setKeyLeng}
+                onChange={keyLengthHandler}
             >
               {KEY_LENGTHS.map((item) => (
-                  <MenuItem key={item.value}
+                  <MenuItem className={classes.menuItem}
+                            key={item.value}
                             value={item.value}>{item.prettyName}
                   </MenuItem>
               ))}
