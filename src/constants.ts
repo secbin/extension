@@ -1,14 +1,17 @@
-export const defaultContext = {
-    pastebinApiKey: "",
-    darkMode: false,
+export const DEFAULT_CONTEXT = {
+    theme: false,
+    api_key: "",
+    enc_mode: "AES-CBC",
+    key_length: 16,
+    history: []
 }
 
 export enum Storage {
-        API_KEY = "api_key",
-        ENC_MODE = "enc_mode",
-        KEY_LENGTH = "key_length",
-        THEME = "theme",
-        HISTORY = "history",
+    API_KEY = "api_key",
+    ENC_MODE = "enc_mode",
+    KEY_LENGTH = "key_length",
+    THEME = "theme",
+    HISTORY = "history",
 }
 
 export const ENCRYPTION_METHODS = [

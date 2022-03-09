@@ -10,19 +10,18 @@ export const getItem = (key: string | string[], callback: (items: { [key: string
     return chrome.storage.sync.get(key, callback)
 }
 
-export const getItemAtIndex = (key: string | string[], index: number, callback: (items: { [key: string]: any; }) => void) => {
+export const getItemAtIndex = (key: string, index: number, callback: (items: { [key: string]: any; }) => void) => {
     getItem(Storage.API_KEY, (data) => {
-        const result = data[Storage.API_KEY];
+        const result = data[key];
         if (result && result.length > index) {
             return result[index]
-
         }
     })
 }
 
 export const addItem = (key: string, value: any, callback?: () => void) => {
     getItem(Storage.API_KEY, (data) => {
-        let result = data[Storage.API_KEY];
+        let result = data[key];
         if(!result) {
             result = [];
         }
@@ -33,7 +32,7 @@ export const addItem = (key: string, value: any, callback?: () => void) => {
 
 export const removeItem = (key: string, value: any, index: number, callback?: () => void) => {
     getItem(Storage.API_KEY, (data) => {
-        let result = data[Storage.API_KEY];
+        let result = data[key];
         if(result && result.length > index) {
             result.splice(index, 1);
         }

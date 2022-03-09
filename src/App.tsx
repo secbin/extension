@@ -15,7 +15,7 @@ import History from "./routes/History";
 import HistoryIcon from '@mui/icons-material/History';
 import AcUnitIcon from '@mui/icons-material/AcUnit';
 import { ConfigContext } from './ConfigContext';
-import { defaultContext } from './constants'
+import { DEFAULT_CONTEXT } from './constants'
 import logoimg from '../assets/img/securebinlogo.svg'
 import {green, purple } from '@mui/material/colors';
 import Process from './routes/Process';
@@ -118,7 +118,7 @@ const theme = createMuiTheme({
 export const App = () => {
 
     const [appConfig, setAppConfig] = useState({})
-    const [securebin, dispatch] = useReducer(reducer, defaultContext);
+    const [securebin, dispatch] = useReducer(reducer, DEFAULT_CONTEXT);
     let {push, goBack} = useHistory();
     const classes = useStyles();
 

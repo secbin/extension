@@ -5,7 +5,7 @@ import { ChevronRight } from "@mui/icons-material";
 import { ConfigContext } from "../ConfigContext";
 import { makeStyles, createStyles } from '@mui/styles';
 import { setItem, getItem } from "../chrome/utils/storage";
-import { Storage, ENCRYPTION_METHODS, KEY_LENGTHS } from "../constants";
+import { Storage, ENCRYPTION_METHODS, KEY_LENGTHS, DEFAULT_CONTEXT } from "../constants";
 
 const useStyles = makeStyles(theme => ({
   card: {
@@ -31,7 +31,7 @@ export const Settings = () => {
   const classes = useStyles();
   const [APIKEY, setApiKey] = useState("");
   const [ENC_MODE, setEncMode] = useState("");
-  const [THEME, setTheme] = useState("");
+  const [THEME, setTheme] = useState(false);
   const [KEY_LENGTH, setKeyLength] = useState("");
 
   useEffect(() => {
@@ -42,65 +42,114 @@ export const Settings = () => {
 function getSettings():any {
   getItem(Storage.API_KEY, (data) => {
       setApiKey(data[Storage.API_KEY]);
+      console.log(APIKEY)
   })
 
   getItem(Storage.ENC_MODE, (data) => {
     setEncMode(data[Storage.ENC_MODE]);
+    console.log(ENC_MODE)
+
   })
 
   getItem(Storage.THEME, (data) => {
     setTheme(data[Storage.THEME]);
+    console.log(THEME)
+
   })
 
   getItem(Storage.KEY_LENGTH, (data) => {
     setKeyLength(data[Storage.KEY_LENGTH]);
+    console.log(KEY_LENGTH)
   })
+}
+
+const setKeyLeng = (e: any) => {
+  setItem(Storage.KEY_LENGTH, e.target.value)
+  setKeyLength(e.target.value);
+  console.log(KEY_LENGTH)
+
+  getItem(Storage.KEY_LENGTH, (data) => {
+    console.log(KEY_LENGTH)
+    console.log(data)
+  })
+}
+
+const setEncMod = (e: any) => {
+  setItem(Storage.ENC_MODE, e.target.value);
+  setEncMode(e.target.value);
+}
+
+const clearHistory = (e: any) => {
+  setItem(Storage.HISTORY, []);
+}
+
+const themeHandler = (e: any) => {
+  setItem(Storage.THEME, e.target.checked);
+  setTheme(e.target.checked);
+  console.log("EVENT ", e.target.checked);
+  console.log("STATE ", THEME);
+  //TODO change theme here
+}
+
+const resetSettings = (e: any) => {
+  const d = DEFAULT_CONTEXT;
+
+  setItem(Storage.THEME, d.theme);
+  setItem(Storage.API_KEY, d.api_key);
+  setItem(Storage.ENC_MODE, d.enc_mode);
+  setItem(Storage.KEY_LENGTH, d.key_length);
+
+  setEncMode(d.enc_mode);
+  setKeyLength(String(d.key_length));
+  setApiKey(d.api_key);
+  setTheme(d.theme);
+
 }
 
   return (
     <div>
       <Typography variant='h2' className={classes.pageHeading} >Settings</Typography>
       <List className={classes.list}>
-        <Typography variant={'h4'}>Dark Mode</Typography>
+        <Typography variant={'h4'}>Theme</Typography>
         <Card classes={{ root: classes.card }}>
           <ListItem>
             <ListItemText
               primary="Dark Mode" />
-            {/*<Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />*/}
-            <Checkbox defaultChecked onClick={() => setItem(Storage.THEME, true)} />
+            <Checkbox value={THEME ? 1 : 0} onChange={themeHandler} />
+          </ListItem>
+        </Card>
+
+        <Typography variant={'h4'}>Encryption</Typography>
+        <Card classes={{ root: classes.card }}>
+          <ListItem>
+            <ListItemText primary="Encryption Algorithm" />
+            <Select
+              value={ENC_MODE}
+              label={ENC_MODE}
+              onChange={setEncMod}
+            >
+              {ENCRYPTION_METHODS.map((item) => (
+                <MenuItem key={item.value}
+                value={item.value}>{item.prettyName}
+                </MenuItem>
+              ))}
+            </Select>
           </ListItem>
         </Card>
 
         <Card classes={{ root: classes.card }}>
           <ListItem>
-            <ListItemText primary="Encryption Algorithm" />
-            {/*<Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />*/}
-            <Select
-              labelId="demo-simple-select-label"
-              id="demo-simple-select"
-              value={ENC_MODE}
-              label={ENC_MODE}
-            >
-              {ENCRYPTION_METHODS.map((item) => (
-                <MenuItem key={item.value}
-                onClick={() => setItem(Storage.ENC_MODE, item.value)}
-                value={item.value}>{item.prettyName}
-                </MenuItem>
-              ))}
-            </Select>
+            <ListItemText primary="Key Length" />
 
             {/* // Note: a key size of 16 bytes will use AES-128, 24 => AES-192, 32 => AES-256 */}
             <Select
-              labelId="demo-simple-select-label"
-              id="demo-simple-select"
-              value={KEY_LENGTH}
-              label={KEY_LENGTH}
+                value={KEY_LENGTH}
+                onChange={setKeyLeng}
             >
               {KEY_LENGTHS.map((item) => (
-                <MenuItem key={item.value}
-                onClick={() => setItem(Storage.KEY_LENGTH, item.value)}
-                value={item.value}>{item.prettyName}
-                </MenuItem>
+                  <MenuItem key={item.value}
+                            value={item.value}>{item.prettyName}
+                  </MenuItem>
               ))}
             </Select>
           </ListItem>
@@ -110,8 +159,7 @@ function getSettings():any {
         <Card classes={{ root: classes.card }}>
           <ListItem>
             <ListItemText primary="PasteBin API Key" secondary={APIKEY} />
-            {/*<Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />*/}
-            <IconButton color="primary" sx={{ p: '10px' }} 
+            <IconButton color="primary" sx={{ p: '10px' }}
               aria-label="directions" 
              >
               <ChevronRight />
@@ -122,6 +170,24 @@ function getSettings():any {
             Set New Api Key
           </Button>
         </Card>
+
+          <Typography variant={'h4'}>Reset</Typography>
+          <Card classes={{ root: classes.card }}>
+            <ListItem>
+              <ListItemText
+                  primary="Clear History" />
+              <Button onClick={clearHistory}>Clear</Button>
+            </ListItem>
+          </Card>
+
+          <Card classes={{ root: classes.card }}>
+            <ListItem>
+              <ListItemText
+                  primary="Reset Settings" />
+              <Button onClick={resetSettings}>Reset</Button>
+            </ListItem>
+          </Card>
+
       </List>
     </div>
   )
