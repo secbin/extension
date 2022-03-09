@@ -1,63 +1,17 @@
 import React, { useContext, useEffect, useState } from "react";
-import { useHistory } from "react-router-dom";
-import { ChromeMessage, Sender } from "../types";
-import { getCurrentTabUId, getCurrentTabUrl } from "../chrome/utils";
 import { Button, Card, Checkbox, Divider, IconButton, List, ListItem, ListItemText,
-  MenuItem, Paper, Select, TextField, Typography } from "@mui/material";
-// import usePasteBinSearch from '../hooks/usePasteBinSearch'
-import usePasteBinSearchJS from '../hooks/usePasteBinSearchJS'
-import History from "./History";
-import CustomizedMenus from "./DropDownButton";
-import CustomizedInputBase from "./SmartTextBox";
+         MenuItem, Paper, Select, TextField, Typography } from "@mui/material";
 import { ChevronRight } from "@mui/icons-material";
 import { ConfigContext } from "../ConfigContext";
 import { makeStyles, createStyles } from '@mui/styles';
-import { setItem, getItem, Storage } from "../chrome/utils/storage";
-
-function ErrorPage() {
-
-  return (
-    <h2> Sorry, the Decryption you were looking for is not valid. </h2>
-  )
-}
-
-function CiphertextItem({ ciphertext }: any) {
-  return (ciphertext ? (
-    // <div>
-    // {Object.keys(ciphertext).map((keyName, i) => (
-    //
-    //   <p> {ciphertext[i].success}</p>
-    // ))};
-    // </div>
-    <p>Output goes Here</p>
-
-  ) : <ErrorPage />
-
-  )
-
-}
-function Ciphertext({ query }: any) {
-  const [ciphertext, setCiphertext] = usePasteBinSearchJS(query);
-
-  //  console.log(query);
-
-
-  return (
-    <div>
-      <CiphertextItem ciphertext={ciphertext} />
-    </div>
-
-  )
-}
+import { setItem, getItem } from "../chrome/utils/storage";
+import { Storage, ENCRYPTION_METHODS, KEY_LENGTHS } from "../constants";
 
 const useStyles = makeStyles(theme => ({
   card: {
     borderRadius: 6,
     border: '1px solid #E0E0E0',
     boxShadow: '0 0 7px 0 rgba(0,0,0,0.04)',
-    // backgroundColor: theme.palette.primary.light,
-    // color: theme.palette.primary.contrastText,
-    // boxShadow: "none",
     marginBottom: 14,
   },
   pageHeading: {
@@ -73,99 +27,18 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-
 export const Settings = () => {
   const classes = useStyles();
-  const [query, setQuery] = useState<string>('');
-  const [inputValue, setInputValue] = useState<string>('');
-  const [url, setUrl] = useState<string>('');
-  const [responseFromContent, setResponseFromContent] = useState<string>('');
-  const [ciphertext, setCiphertext] = useState([]);
   const [APIKEY, setApiKey] = useState("");
   const [ENC_MODE, setEncMode] = useState("");
   const [THEME, setTheme] = useState("");
   const [KEY_LENGTH, setKeyLength] = useState("");
 
-  // const {appConfig, setAppConfig} = useContext(ConfigContext)
-  //const [ciphertext, setCiphertext] = usePasteBinSearch(query);
-  let { push } = useHistory();
-
-  /**
-   * Get current URL
-   */
   useEffect(() => {
-
     getSettings();
-
-    getCurrentTabUrl((url) => {
-      setUrl(url || 'undefined');
-    })
   }, []);
 
-
-  const sendTestMessage = () => {
-    const message: ChromeMessage = {
-      from: Sender.React,
-      message: "Hello from React",
-    }
-
-    getCurrentTabUId((id) => {
-      id && chrome.tabs.sendMessage(
-        id,
-        message,
-        (responseFromContentScript) => {
-          setResponseFromContent(responseFromContentScript);
-        });
-    });
-  };
-
-  const sendRemoveMessage = () => {
-    const message: ChromeMessage = {
-      from: Sender.React,
-      message: "delete logo",
-    }
-
-    getCurrentTabUId((id) => {
-      id && chrome.tabs.sendMessage(
-        id,
-        message,
-        (response) => {
-          setResponseFromContent(response);
-        });
-    });
-  };
-
-  const encryptionMethods = [
-      {
-        prettyName: "AES-CBC",
-        value: "AES-CBC",
-      },
-      {
-        prettyName: "AES-CTR",
-        value: "AES-CTR",
-      },
-      {
-        prettyName: "AES-GCM",
-        value: "AES-GCM",
-      }
-  ];
-
   // Note: a key size of 16 bytes will use AES-128, 24 => AES-192, 32 => AES-256
-  const keyLengths = [
-    {
-      prettyName: "128",
-      value: 16,
-    },
-    {
-      prettyName: "192",
-      value: 24,
-    },
-    {
-      prettyName: "256",
-      value: 32,
-    }
-];
-
 function getSettings():any {
   getItem(Storage.API_KEY, (data) => {
       setApiKey(data[Storage.API_KEY]);
@@ -182,9 +55,7 @@ function getSettings():any {
   getItem(Storage.KEY_LENGTH, (data) => {
     setKeyLength(data[Storage.KEY_LENGTH]);
   })
-
 }
-
 
   return (
     <div>
@@ -210,14 +81,13 @@ function getSettings():any {
               value={ENC_MODE}
               label={ENC_MODE}
             >
-              {encryptionMethods.map((item) => (
+              {ENCRYPTION_METHODS.map((item) => (
                 <MenuItem key={item.value}
                 onClick={() => setItem(Storage.ENC_MODE, item.value)}
                 value={item.value}>{item.prettyName}
                 </MenuItem>
               ))}
             </Select>
-
 
             {/* // Note: a key size of 16 bytes will use AES-128, 24 => AES-192, 32 => AES-256 */}
             <Select
@@ -226,7 +96,7 @@ function getSettings():any {
               value={KEY_LENGTH}
               label={KEY_LENGTH}
             >
-              {keyLengths.map((item) => (
+              {KEY_LENGTHS.map((item) => (
                 <MenuItem key={item.value}
                 onClick={() => setItem(Storage.KEY_LENGTH, item.value)}
                 value={item.value}>{item.prettyName}

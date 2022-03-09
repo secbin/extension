@@ -23,7 +23,6 @@ import DirectionsIcon from '@mui/icons-material/Directions';
 import InputBase from '@mui/material/InputBase';
 import usePasteBinSearchJS from '../hooks/usePasteBinSearchJS'
 import usePasteBinPost from '../hooks/usePasteBinPost';
-//import usePasteBinPost from '../hooks/usePasteBinPost2';
 import { MAX_TEXT_LENGTH } from '../constants'
 import ErrorIcon from '@mui/icons-material/Error';
 import { Typography } from '@mui/material';
@@ -66,15 +65,6 @@ const useStyles = makeStyles(theme => ({
     large: {
         fontSize: '36px',
     },
-    medium: {
-        fontSize: 20,
-    },
-    small: {
-        fontSize: 14,
-    },
-    tiny: {
-        fontSize: 14,
-    }
 }));
 
 
@@ -212,12 +202,6 @@ export default function CustomizedMenus() {
 
   };
 
-  // @ts-ignore
-  // @ts-ignore
-  //   switch(length) {
-  //       case length < 100:
-  //           return action.payload;
-  //   }
 
 
   let hey = clsx(text.length < 30 && classes.large)

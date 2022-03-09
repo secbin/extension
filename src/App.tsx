@@ -15,7 +15,7 @@ import History from "./routes/History";
 import HistoryIcon from '@mui/icons-material/History';
 import AcUnitIcon from '@mui/icons-material/AcUnit';
 import { ConfigContext } from './ConfigContext';
-import { defaultSettings } from './constants'
+import { defaultContext } from './constants'
 import logoimg from '../assets/img/securebinlogo.svg'
 import {green, purple } from '@mui/material/colors';
 import Process from './routes/Process';
@@ -118,7 +118,7 @@ const theme = createMuiTheme({
 export const App = () => {
 
     const [appConfig, setAppConfig] = useState({})
-    const [securebin, dispatch] = useReducer(reducer, defaultSettings);
+    const [securebin, dispatch] = useReducer(reducer, defaultContext);
     let {push, goBack} = useHistory();
     const classes = useStyles();
 
@@ -140,9 +140,6 @@ export const App = () => {
                         {/*<IconButton edge="start" color="inherit" aria-label="menu" sx={{ mr: 2 }} onClick={() => { goBack()}}>*/}
                         {/*    <ChevronLeft />*/}
                         {/*</IconButton>*/}
-                        {/*<Typography variant="h6" color="inherit" component="div">*/}
-                        {/*    SecureBin*/}
-                        {/*</Typography>*/}
                         <IconButton className={classes.hoverStyle} aria-label="menu" sx={{ mr: 1 }} disableRipple onClick={() => { push('/processing')}}>
                             <AcUnitIcon />
                         </IconButton>

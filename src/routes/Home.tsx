@@ -2,9 +2,10 @@ import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { ChromeMessage, Sender } from "../types";
 import { getCurrentTabUId, getCurrentTabUrl } from "../chrome/utils";
-import { getItem, setItem, Storage} from "../chrome/utils/storage";
+import { getItem, setItem} from "../chrome/utils/storage";
 import { encrypt, decrypt } from "../chrome/utils/crypto";
 import { Button, TextField } from "@mui/material";
+import { Storage } from "../constants"
 
 import usePasteBinSearchJS from '../hooks/usePasteBinSearchJS'
 
