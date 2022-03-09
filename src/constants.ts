@@ -14,6 +14,13 @@ export enum Storage {
     HISTORY = "history",
 }
 
+export enum Action {
+    DECRYPT = "decrypt",
+    DECRYPT_PASTEBIN = "decrypt_pastebin",
+    ENCRYPT = "encrypt",
+    ENCRYPT_PASTEBIN = "encrypt_pastebin",
+}
+
 export const ENCRYPTION_METHODS = [
     {
         prettyName: "AES-CBC",

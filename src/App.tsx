@@ -120,7 +120,7 @@ const theme = createMuiTheme({
 export const App = () => {
 
     const [appConfig, setAppConfig] = useState({})
-    const [securebin, dispatch] = useReducer(reducer, DEFAULT_CONTEXT);
+    // const [securebin, dispatch] = useReducer(reducer, {});
     let {push, goBack} = useHistory();
     const classes = useStyles();
 
@@ -131,7 +131,7 @@ export const App = () => {
         // <div className="App">
         //     <header className="App-header">
         <ThemeProvider theme={theme}>
-         {/*<ConfigContext.Provider>*/}
+         {/*<ConfigContext.Provider value={{securebin, dispatch}}>*/}
             <>
                 <div>
                 <AppBar className={classes.root} position="fixed" enableColorOnDark>

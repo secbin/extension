@@ -77,12 +77,13 @@ export default function History() {
     //TODO Add moment JS to calculate time
     return (
         <>
+            {/*TODO Add moment to show times daily*/}
             <Typography variant='h2' className={classes.pageHeading}>History</Typography>
             <List className={classes.list} >
             {history?.map((item: any, index: number) => {
             return (
             <>
-            {<Typography variant={'h4'}>Today</Typography>}
+            {/*{<Typography variant={'h4'}>Today</Typography>}*/}
             <Card variant="outlined" classes={{root: classes.card}}>
                 <ListItem key={item?.url}>
                     <ListItemText primary={item?.url} secondary={JSON.parse(item.date).toLocaleString('en-US')} />
