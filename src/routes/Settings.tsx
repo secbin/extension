@@ -53,6 +53,7 @@ function getSettings():any {
 
   getItem(Storage.THEME, (data) => {
     setTheme(data[Storage.THEME]);
+    console.log("Getting theme", data[Storage.THEME])
     console.log(THEME)
 
   })
@@ -84,11 +85,9 @@ const clearHistory = (e: any) => {
 }
 
 const themeHandler = (e: any) => {
-  setItem(Storage.THEME, e.target.checked);
-  setTheme(e.target.checked);
-  console.log("EVENT ", e.target.checked);
-  console.log("STATE ", THEME);
-  //TODO change theme here
+  setItem(Storage.THEME, !THEME);
+  setTheme(!THEME);
+  //TODO do darkmode magic here
 }
 
 const resetSettings = (e: any) => {
@@ -115,7 +114,7 @@ const resetSettings = (e: any) => {
           <ListItem>
             <ListItemText
               primary="Dark Mode" />
-            <Checkbox value={THEME ? 1 : 0} onChange={themeHandler} />
+            <Checkbox checked={THEME} onChange={themeHandler} />
           </ListItem>
         </Card>
 
