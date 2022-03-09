@@ -4,6 +4,14 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ContentPasteIcon from '@mui/icons-material/ContentPaste';
 import { makeStyles, createStyles } from '@mui/styles';
 
+var text = ""
+var key = ""
+
+export function setResults(text: string, key:string){
+    text = text
+    key = key
+}
+
 const useStyles = makeStyles(theme => ({
     icon: {
         fontSize: 80,
@@ -37,14 +45,24 @@ const useStyles = makeStyles(theme => ({
 }));
 
 
-export default function Process(props: any) {
+export default function Result() {
     const classes = useStyles();
+    const [history, setHistory] = React.useState([]);
+
     return (
         <div className={classes.center}>
             <CheckCircleIcon className={classes.icon}/>
             <Typography variant={'h2'}>Created Ciphertext</Typography>
             <Card className={classes.copybox}>
-                <InputBase placeholder={"jaslkdj3ouroqejdnfskf"} value={'jaslkdykjhgjy97yhuhkhikuhkjhkjhkjj3ou'} />
+                <p>Key: </p>
+                <InputBase placeholder={key} value={key} />
+                <IconButton>
+                   <ContentPasteIcon color="primary"/>
+                </IconButton>
+            </Card>
+            <Card className={classes.copybox}>
+                <p>Cipher Text: </p>
+                <InputBase placeholder={text} value={text} />
                 <IconButton>
                    <ContentPasteIcon color="primary"/>
                 </IconButton>

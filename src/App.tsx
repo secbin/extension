@@ -20,7 +20,7 @@ import logoimg from '../assets/img/securebinlogo.svg'
 import logoimg_dark from '../assets/img/securebinlogo_dark.svg'
 
 import {green, purple } from '@mui/material/colors';
-import Process from './routes/Process';
+import Result from './routes/Result';
 function reducer(state: any, action: any) {
     switch(action.type) {
         case "add":
@@ -142,7 +142,7 @@ export const App = () => {
                         {/*<IconButton edge="start" color="inherit" aria-label="menu" sx={{ mr: 2 }} onClick={() => { goBack()}}>*/}
                         {/*    <ChevronLeft />*/}
                         {/*</IconButton>*/}
-                        <IconButton className={classes.hoverStyle} aria-label="menu" sx={{ mr: 1 }} disableRipple onClick={() => { push('/processing')}}>
+                        <IconButton className={classes.hoverStyle} aria-label="menu" sx={{ mr: 1 }} disableRipple onClick={() => { push('/result')}}>
                             <AcUnitIcon />
                         </IconButton>
                         <IconButton className={classes.hoverStyle} aria-label="menu" sx={{ mr: 1 }} disableRipple onClick={() => { push('/history')}}>
@@ -170,8 +170,8 @@ export const App = () => {
                 <Route path="/history">
                     <History/>
                 </Route>
-                <Route path="/processing">
-                    <Process/>
+                <Route path="/result">
+                    <Result/>
                 </Route>
                 <Route path="/">
                     <NewHome/>

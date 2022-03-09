@@ -29,6 +29,7 @@ import { Typography } from '@mui/material';
 import clsx from 'clsx';
 import { makeStyles, createStyles } from '@mui/styles';
 import { encrypt, decrypt } from "../chrome/utils/crypto";
+import {setResults} from './Result';
 
 
 const useStyles = makeStyles(theme => ({
@@ -152,6 +153,7 @@ export default function CustomizedMenus() {
         console.log(res.data);
         console.log(res.key);
         setPostLink(res.data);
+        // setResults(postLink, res.key)
     }else if (buttonText === "Encrypt Plaintext") {
       let res = await encrypt(text)
       console.log(res.data) //TODO - new window or somthing
