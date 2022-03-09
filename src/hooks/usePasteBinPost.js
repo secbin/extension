@@ -1,4 +1,6 @@
 import React, {useState, useEffect } from 'react'
+import { getItemAsync, getItem } from "../chrome/utils/storage";
+import { Storage} from "../constants";
 
 function usePasteBinPost(encryptQuery){
   // POST request using fetch with error handling
@@ -11,17 +13,19 @@ function usePasteBinPost(encryptQuery){
   var myHeaders = new Headers();
   myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
   myHeaders.append("Cookie", "_csrf-frontend=329554c223d6a49136d2267538fc128591f3ec2150a223caa1d6db2d96f0265aa%3A2%3A%7Bi%3A0%3Bs%3A14%3A%22_csrf-frontend%22%3Bi%3A1%3Bs%3A32%3A%22rO1MDUiUJzJoMpRxGyEtQ9KVFoodbesw%22%3B%7D; pastebin_posted=99663e9444444257d4931e06307949fe5a481efea6e1d02e1d14d0dd216f60dca%3A2%3A%7Bi%3A0%3Bs%3A15%3A%22pastebin_posted%22%3Bi%3A1%3Bs%3A8%3A%22JC4FD0vP%22%3B%7D");
-//
-  var urlencoded = new URLSearchParams();
-  urlencoded.append("api_dev_key", apiKey2);
-  urlencoded.append("api_paste_code", encryptQuery);
-  urlencoded.append("api_option", "paste");
-
 
 useEffect(() => {
  let ignore = false;
  const controller = new AbortController();
  async function fetchSearchResults() {
+  const apiKey = await getItemAsync(Storage.API_KEY)
+  console.log("API key from storage: ", apiKey)  
+  
+  var urlencoded = new URLSearchParams();
+  urlencoded.append("api_dev_key", apiKey2);
+  urlencoded.append("api_paste_code", encryptQuery);
+  urlencoded.append("api_option", "paste");
+  
   // let responseBody : string[] = [];
   let responseBody = {};
   //let responseBody = useState<string>('');

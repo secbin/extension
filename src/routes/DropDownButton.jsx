@@ -149,9 +149,10 @@ export default function CustomizedMenus() {
     // console.log(buttonText, " == ", "Create Pastebin")
     if(buttonText === "Encrypt to Pastebin") {
         console.log(text);
-        let res = encrypt(text)
-        //sets the pasteBinLink to output of usePasteBinPost
+        let res = await encrypt(text)
         console.log(res.data);
+        //sets the pasteBinLink to output of usePasteBinPost
+        await setPasteBinLink(res.data)
         setPostLink(res.data);
     }else if (buttonText === "Encrypt Plaintext") {
       let res = await encrypt(text)

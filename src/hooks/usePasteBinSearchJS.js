@@ -46,10 +46,6 @@ if(array[3]){
 
      }
 
-
-
-
-
      if (!ignore) {
        setLoading(false);
        setError(false);
