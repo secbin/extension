@@ -104,28 +104,6 @@ export const NewHome = () => {
                 <CustomizedInputBase/>
                 <CustomizedMenus />
                 <History />
-                {/*<button onClick={sendTestMessage}>SEND MESSAGE</button>*/}
-                {/*<button onClick={sendRemoveMessage}>Remove logo</button>*/}
-                {/*<form  onSubmit={(e) => {*/}
-                {/*  e.preventDefault();*/}
-                {/*    console.log(inputValue);*/}
-                {/*    setQuery(inputValue);*/}
-
-                {/*}}>*/}
-                {/*  <input value={inputValue} placeholder="Enter The Paste Bin Key" onChange={e => setInputValue(e.target.value)} />*/}
-                {/*  <button type="submit">Decrypt</button>*/}
-                {/*</form>*/}
-                {/*<p>Response from content:</p>*/}
-                {/*<p>*/}
-                {/*    {responseFromContent}*/}
-                {/*</p>*/}
-                {/*<div>*/}
-                {/*    <Ciphertext query={query}/>*/}
-                {/*</div>*/}
-                {/*<button onClick={() => {*/}
-                {/*    push('/about')*/}
-                {/*}}>About page*/}
-                {/*</button>*/}
             </header>
         </div>
     )

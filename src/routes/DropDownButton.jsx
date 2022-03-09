@@ -132,7 +132,6 @@ export default function CustomizedMenus() {
   const [newPlaintext, setNewPlaintext] = React.useState("");
   const [buttonEnabled, setButtonEnabled] = React.useState(false)
   const [menu, setMenu] = React.useState("Encrypt")
-
   const inputSize = text.length
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -149,9 +148,9 @@ export default function CustomizedMenus() {
     // console.log(buttonText, " == ", "Create Pastebin")
     if(buttonText === "Encrypt to Pastebin") {
         console.log(text);
-        let res = encrypt(text)
-        //sets the pasteBinLink to output of usePasteBinPost
+        let res = await encrypt(text)
         console.log(res.data);
+        console.log(res.key);
         setPostLink(res.data);
     }else if (buttonText === "Encrypt Plaintext") {
       let res = await encrypt(text)
@@ -164,11 +163,9 @@ export default function CustomizedMenus() {
       if(searchPasteBin){
         let key = prompt("Please enter your key"); //TODO - Decrypt will probably need two text boxes
         let res = decrypt(searchPasteBin, key)
-        console.log("SETTING NEW PLAINTEXT TO:",res.data);
-        setNewPlaintext(res.data);
+        console.log("SETTING NEW PLAINTEXT TO:",res);
+        setNewPlaintext(res);
       }
-
-
     } else if (buttonText === "Decrypt Ciphertext"){
       let key = prompt("Please enter your key"); //TODO - Decrypt will probably need two text boxes
       let res = decrypt(text, key)
