@@ -1,4 +1,5 @@
-import * as React from 'react';
+import React, { useEffect, useState, useContext } from "react";
+import { AppContext } from "../AppContext";
 import { styled, alpha } from '@mui/material/styles';
 import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
@@ -23,13 +24,16 @@ import DirectionsIcon from '@mui/icons-material/Directions';
 import InputBase from '@mui/material/InputBase';
 import usePasteBinSearchJS from '../hooks/usePasteBinSearchJS'
 import usePasteBinPost from '../hooks/usePasteBinPost';
-import { MAX_TEXT_LENGTH } from '../constants'
+import { MAX_TEXT_LENGTH, Action, Storage } from '../constants'
 import ErrorIcon from '@mui/icons-material/Error';
 import { Typography } from '@mui/material';
 import clsx from 'clsx';
 import { makeStyles, createStyles } from '@mui/styles';
 import { encrypt, decrypt } from "../chrome/utils/crypto";
-import {setResults} from './Result';
+import { useHistory } from "react-router-dom";
+import { setItem, getItem, addItem } from "../chrome/utils/storage";
+
+
 
 
 const useStyles = makeStyles(theme => ({
@@ -131,9 +135,12 @@ export default function CustomizedMenus() {
   const [pasteBinLink, setPasteBinLink] = usePasteBinPost(postLink);
   const [searchPasteBin, setSearchPasteBin] = usePasteBinSearchJS(link);
   const [newPlaintext, setNewPlaintext] = React.useState("");
-  const [buttonEnabled, setButtonEnabled] = React.useState(false)
-  const [menu, setMenu] = React.useState("Encrypt")
-  const inputSize = text.length
+  const [buttonEnabled, setButtonEnabled] = React.useState(false);
+  const [menu, setMenu] = React.useState("Encrypt");
+  const { state, dispatch } = useContext(AppContext);
+  let {push, goBack} = useHistory();
+
+    const inputSize = text.length
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
 
@@ -144,20 +151,69 @@ export default function CustomizedMenus() {
     setMenu(text)
   };
 
+
+
   const performAction = async (e) => {
     let buttonText = e.target.innerText || "";
     // console.log(buttonText, " == ", "Create Pastebin")
     if(buttonText === "Encrypt to Pastebin") {
         console.log(text);
         let res = await encrypt(text)
-        console.log(res.data);
+        console.log("DATA", res.data);
         console.log(res.key);
         setPostLink(res.data);
-        // setResults(postLink, res.key)
+        const history = {
+            id: Math.floor(Math.random()),
+            pastebinlink: res.data,
+            enc_mode: state.settings.enc_mode,
+            key_length: state.settings.key_length,
+            date: Date(),
+        }
+        // dispatch({
+        //     type: Action.CLEAR_HISTORY,
+        // });
+        dispatch({
+            type: Action.ENCRYPT_PASTEBIN,
+            payload: {
+                action: Action.ENCRYPT_PASTEBIN,
+                plaintext: text,
+                ciphertext: res.data,
+                key: res.key
+            },
+        })
+        addItem(Storage.HISTORY, history)
+        console.log("STATE", state)
+        push('/processing')
     }else if (buttonText === "Encrypt Plaintext") {
       let res = await encrypt(text)
-      console.log(res.data) //TODO - new window or somthing
-      console.log(res.key)
+      console.log("DATA", res.data) //TODO - new window or somthing
+      console.log("KEY", res.key)
+      const history = {
+          id: Math.floor(Math.random()),
+          pastebinlink: res.data,
+          enc_mode: state.settings.enc_mode,
+          key_length: state.settings.key_length,
+          date: Date(),
+      }
+        addItem(Storage.HISTORY, history)
+
+     dispatch({
+        type: Action.ADD_TO_HISTORY,
+        payload: history,
+     })
+
+     dispatch({
+        type: Action.ENCRYPT,
+        payload: {
+            action: Action.ENCRYPT,
+            plaintext: text,
+            ciphertext: text,
+            key: res.key
+         },
+     })
+
+      console.log("STATE", state)
+      push('/processing')
     } else if (buttonText === "Decrypt Pastebin") {
       // not working but it should be.
       setLink(text);

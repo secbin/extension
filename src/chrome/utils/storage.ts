@@ -6,12 +6,12 @@ export const setItem = (key: string, value: any, callback?: () => void) => {
     chrome.storage.sync.set({ [key]: value }, callback)
 }
 
-export const getItem = (key: string | string[], callback: (items: { [key: string]: any; }) => void) => {
+export const getItem = (key: string | string[] | null, callback: (items: { [key: string]: any; }) => void) => {
     return chrome.storage.sync.get(key, callback)
 }
 
 export const getItemAtIndex = (key: string, index: number, callback: (items: { [key: string]: any; }) => void) => {
-    getItem(Storage.API_KEY, (data) => {
+    getItem(key, (data) => {
         const result = data[key];
         if (result && result.length > index) {
             return result[index]
@@ -20,18 +20,21 @@ export const getItemAtIndex = (key: string, index: number, callback: (items: { [
 }
 
 export const addItem = (key: string, value: any, callback?: () => void) => {
-    getItem(Storage.API_KEY, (data) => {
+    getItem(key, (data) => {
+        console.log("DATA FROM ADD", data);
         let result = data[key];
         if(!result) {
             result = [];
         }
         result.push(value);
-        return chrome.storage.sync.set({ [key]: result }, callback)
+        console.log("ADDING ITEM", value)
+        console.log("RESULTING VALUE", result)
+        setItem(key, result)
     })
 }
 
 export const removeItem = (key: string, value: any, index: number, callback?: () => void) => {
-    getItem(Storage.API_KEY, (data) => {
+    getItem(key, (data) => {
         let result = data[key];
         if(result && result.length > index) {
             result.splice(index, 1);

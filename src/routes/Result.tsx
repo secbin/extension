@@ -3,6 +3,7 @@ import { Button, Card, Divider, IconButton, InputAdornment, InputBase, Paper, Te
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ContentPasteIcon from '@mui/icons-material/ContentPaste';
 import { makeStyles, createStyles } from '@mui/styles';
+import { AppContext } from "../AppContext";
 
 var text = ""
 var key = ""
@@ -29,11 +30,22 @@ const useStyles = makeStyles(theme => ({
     },
     copybox: {
         paddingLeft: 10,
-        margin: 15,
+        // margin: 15,
         borderRadius: 6,
         border: '1px solid #E0E0E0',
         boxShadow: '0 0 7px 0 rgba(0,0,0,0.04)',
         marginBottom: 14,
+        width: 400,
+    },
+    copyboxLarge: {
+        paddingLeft: 10,
+        // margin: 15,
+        borderRadius: 6,
+        border: '1px solid #E0E0E0',
+        boxShadow: '0 0 7px 0 rgba(0,0,0,0.04)',
+        marginBottom: 14,
+        width: 400,
+
     },
     heading: {
         width: '400px',
@@ -41,32 +53,46 @@ const useStyles = makeStyles(theme => ({
     blue: {
         color: 'cadetblue'
     },
+    left: {
+        textAlign: 'left',
+    }
 
 }));
 
 
-export default function Result() {
+export default function Process(props: any) {
+    const { state, dispatch } = React.useContext(AppContext);
     const classes = useStyles();
-    const [history, setHistory] = React.useState([]);
+    const key = state.draft.key;
+    const ctxt = state.draft.ciphertext;
 
     return (
         <div className={classes.center}>
             <CheckCircleIcon className={classes.icon}/>
             <Typography variant={'h2'}>Created Ciphertext</Typography>
+
+            <div className={classes.left}>
+            <Typography variant={'h4'}>Key</Typography>
             <Card className={classes.copybox}>
-                <p>Key: </p>
                 <InputBase placeholder={key} value={key} />
                 <IconButton>
                    <ContentPasteIcon color="primary"/>
                 </IconButton>
             </Card>
-            <Card className={classes.copybox}>
-                <p>Cipher Text: </p>
-                <InputBase placeholder={text} value={text} />
+
+            <Typography variant={'h4'}>Ciphertext</Typography>
+            <Card className={classes.copyboxLarge}>
+                <InputBase
+                    multiline
+                    placeholder={ctxt}
+                    value={ctxt}
+                    rows={5}
+                />
                 <IconButton>
-                   <ContentPasteIcon color="primary"/>
+                    <ContentPasteIcon color="primary"/>
                 </IconButton>
             </Card>
+            </div>
         </div>
     );
 }
