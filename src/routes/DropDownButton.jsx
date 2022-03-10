@@ -132,7 +132,10 @@ export default function CustomizedMenus() {
   const [newPlaintext, setNewPlaintext] = React.useState("");
   const [buttonEnabled, setButtonEnabled] = React.useState(false)
   const [menu, setMenu] = React.useState("Encrypt")
-  const inputSize = text.length
+    //PUSH STATE HERE using dispatch with action
+   const { state, dispatch } = useContext(AppContext);
+
+    const inputSize = text.length
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
 
