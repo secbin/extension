@@ -16,7 +16,7 @@ type ActionMap<M extends { [index: string]: any }> = {
 type HistoryPayload = {
     [Action.ADD_TO_HISTORY] : {
         id: number,
-        link: string,
+        pastebinlink: string,
         enc_mode: string,
         key_length: number,
         date: Date,
@@ -32,6 +32,14 @@ type DraftPayload = {
         action: Action.ENCRYPT,
         plaintext: string,
         ciphertext: string,
+        key: string,
+    };
+    [Action.ENCRYPT_PASTEBIN] : {
+        action: Action.ENCRYPT,
+        plaintext: string,
+        ciphertext: string,
+        key: string,
+        pastebinlink: string,
     };
 }
 
@@ -57,7 +65,7 @@ export const historyReducer = (state: HistoryType[], action: SettingsActions | D
                 ...state,
                 {
                     id: action.payload.id,
-                    link: action.payload.link,
+                    pastebinlink: action.payload.pastebinlink,
                     enc_mode: action.payload.enc_mode,
                     key_length: action.payload.key_length,
                     date: action.payload.date,
@@ -82,6 +90,16 @@ export const draftReducer = (state: DraftType, action: SettingsActions | DraftAc
                     action: action.payload.action,
                     plaintext: action.payload.plaintext,
                     ciphertext: action.payload.ciphertext,
+                    key: action.payload.key,
+            }
+        case Action.ENCRYPT_PASTEBIN:
+            return {
+                ...state,
+                action: action.payload.action,
+                plaintext: action.payload.plaintext,
+                ciphertext: action.payload.ciphertext,
+                key: action.payload.key,
+                pastebinlink: action.payload.pastebinlink,
             }
         default:
             return state;

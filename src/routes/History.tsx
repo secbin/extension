@@ -58,15 +58,11 @@ const historyItems = [
 
 export default function History() {
     useEffect(() => {
-        setItem(Storage.HISTORY, historyItems);
+        // setItem(Storage.HISTORY, historyItems);
 
         getItem(Storage.HISTORY, (data) => {
-            console.log(data[Storage.HISTORY]);
-            if(!data[Storage.HISTORY]) {
-                setHistory([]);
-            } else {
-                setHistory(data[Storage.HISTORY]);
-            }
+            console.log("HISTORY", data[Storage.HISTORY]);
+            setHistory(data[Storage.HISTORY]);
         })
 
     }, []);
@@ -85,8 +81,8 @@ export default function History() {
             <>
             {/*{<Typography variant={'h4'}>Today</Typography>}*/}
             <Card variant="outlined" classes={{root: classes.card}}>
-                <ListItem key={item?.url}>
-                    <ListItemText primary={item?.url} secondary={JSON.parse(item.date).toLocaleString('en-US')} />
+                <ListItem key={item?.pastebinlink}>
+                    <ListItemText primary={item?.pastebinlink} secondary={item.date} />
                     <IconButton color="primary" aria-label="Unlock CipherText">
                       <LockOpenIcon />
                     </IconButton>

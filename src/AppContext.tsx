@@ -16,12 +16,13 @@ export type DraftType = {
     plaintext: string,
     ciphertext: string,
     pastebinlink: string,
+    key: string,
     success: any
 }
 
 export type HistoryType = {
     id: number,
-    link: string,
+    pastebinlink: string,
     enc_mode: string,
     key_length: number,
     date: Date,
@@ -58,15 +59,21 @@ type InitialStateType = {
 }
 
 const initialState = {
-    history: getHistoryValuesFromStorage(),
+    history: [],
     draft: {
         action: Action.ENCRYPT,
         plaintext: "",
         ciphertext: "",
         pastebinlink: "",
+        key: "",
         success: "",
     } as DraftType,
-    settings: getSettingsValuesFromStorage(),
+    settings: {
+        api_key: "",
+        enc_mode: "",
+        key_length: 16,
+        theme: false,
+    },
 }
 
 const AppContext = createContext<{
