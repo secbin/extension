@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { Button, Card, Checkbox, Divider, IconButton, List, ListItem, ListItemText,
          MenuItem, Paper, Select, TextField, Typography } from "@mui/material";
 import { ChevronRight } from "@mui/icons-material";
-import { ConfigContext } from "../ConfigContext";
+// import { ConfigContext } from "../ConfigContext";
 import { makeStyles, createStyles } from '@mui/styles';
 import { setItem, getItem } from "../chrome/utils/storage";
 import { Storage, ENCRYPTION_METHODS, KEY_LENGTHS, DEFAULT_CONTEXT } from "../constants";

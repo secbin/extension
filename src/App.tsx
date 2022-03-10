@@ -14,7 +14,7 @@ import { ChevronLeft } from '@mui/icons-material';
 import History from "./routes/History";
 import HistoryIcon from '@mui/icons-material/History';
 import AcUnitIcon from '@mui/icons-material/AcUnit';
-import { ConfigContext } from './ConfigContext';
+import {AppProvider, AppContext } from './AppContext';
 import { DEFAULT_CONTEXT } from './constants'
 import logoimg from '../assets/img/securebinlogo.svg'
 import logoimg_dark from '../assets/img/securebinlogo_dark.svg'
@@ -120,7 +120,7 @@ const theme = createMuiTheme({
 export const App = () => {
 
     const [appConfig, setAppConfig] = useState({})
-    // const [securebin, dispatch] = useReducer(reducer, {});
+    const [securebin, dispatch] = useReducer(reducer, {});
     let {push, goBack} = useHistory();
     const classes = useStyles();
 
@@ -131,7 +131,7 @@ export const App = () => {
         // <div className="App">
         //     <header className="App-header">
         <ThemeProvider theme={theme}>
-         {/*<ConfigContext.Provider value={{securebin, dispatch}}>*/}
+         <AppProvider>
             <>
                 <div>
                 <AppBar className={classes.root} position="fixed" enableColorOnDark>
@@ -179,7 +179,7 @@ export const App = () => {
             </Switch>
             </div>
             </>
-        {/*</ConfigContext.Provider>*/}
+        </AppProvider>
         </ThemeProvider>
             )
 };

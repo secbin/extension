@@ -1,9 +1,11 @@
 import React, { useEffect, useState, useContext } from "react";
 import CustomizedMenus from "./DropDownButton";
-import { ConfigContext } from "../ConfigContext";
+import { AppContext } from "../AppContext";
+
 
 export const NewHome = () => {
-    // const {securebin, dispatch} = useContext(ConfigContext)
+    const { state, dispatch } = useContext(AppContext);
+
     return (
         <div className="App">
             <header className="App-header">
