@@ -19,6 +19,8 @@ type HistoryPayload = {
         pastebinlink: string,
         enc_mode: string,
         key_length: number,
+        key: string,
+        ciphertext: string,
         date: Date,
     };
     [Action.CLEAR_HISTORY] : undefined,
@@ -35,12 +37,15 @@ type DraftPayload = {
         key: string,
     };
     [Action.ENCRYPT_PASTEBIN] : {
-        action: Action.ENCRYPT,
+        action: Action.ENCRYPT_PASTEBIN,
         plaintext: string,
         ciphertext: string,
         key: string,
         pastebinlink: string,
     };
+    [Action.UPDATE_PLAINTEXT]: {
+        plaintext: string,
+    }
 }
 
 type SettingsPayload = {
@@ -66,6 +71,8 @@ export const historyReducer = (state: HistoryType[], action: SettingsActions | D
                 {
                     id: action.payload.id,
                     pastebinlink: action.payload.pastebinlink,
+                    ciphertext: action.payload.ciphertext,
+                    key: action.payload.key,
                     enc_mode: action.payload.enc_mode,
                     key_length: action.payload.key_length,
                     date: action.payload.date,
@@ -100,6 +107,11 @@ export const draftReducer = (state: DraftType, action: SettingsActions | DraftAc
                 ciphertext: action.payload.ciphertext,
                 key: action.payload.key,
                 pastebinlink: action.payload.pastebinlink,
+            }
+        case Action.UPDATE_PLAINTEXT:
+            return {
+                ...state,
+                plaintext: action.payload.plaintext,
             }
         default:
             return state;

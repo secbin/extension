@@ -110,6 +110,9 @@ const resetSettings = (e: any) => {
   setTheme(d.theme);
 
 }
+const signUp = () => {
+  window.open("https://pastebin.com/doc_api")
+}
 
   return (
     <div>
@@ -168,14 +171,22 @@ const resetSettings = (e: any) => {
         <Card classes={{ root: classes.card }}>
 
           <ListItem>
-            <ListItemText primary="PasteBin API Key" secondary={APIKEY} />
+
             <FormDialog/>
+              <ListItemText primary={`Key:${APIKEY}`} />
+
           </ListItem>
-          <TextField placeholder={APIKEY}> </TextField>
-          <Button onClick={() => setItem(Storage.API_KEY, "23ourwfodifkhjklfquhdkajdh")}>
-            Set New Api Key
-          </Button>
+
         </Card>
+
+  <Card classes={{ root: classes.card }}>
+        <ListItem>
+            <ListItemText
+              primary="Sign Up for PasteBin" />
+            <Button onClick={signUp}>Sign Up</Button>
+            </ListItem>
+    </Card>
+
 
           <Typography variant={'h4'}>Reset</Typography>
           <Card classes={{ root: classes.card }}>
