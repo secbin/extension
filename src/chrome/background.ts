@@ -1,7 +1,7 @@
 import { copyTextClipboard } from "../chrome/utils";
 import { encrypt, decrypt } from "../chrome/utils/crypto";
 import {postPastebin, getPastebin} from "../chrome/utils/pastebin";
-import { getItemAsync, addItem } from "../chrome/utils/storage";
+import { getItemAsync, addItem, setItem } from "../chrome/utils/storage";
 import { Storage } from '../constants'
 
 /** Fired when the extension is first installed,
@@ -11,20 +11,20 @@ chrome.runtime.onInstalled.addListener(async (details) => {
     console.log('onInstall, checking for settings, else set defaults', details);
     let mode = await getItemAsync(Storage.ENC_MODE) as string
     if (mode === undefined) {
-        console.log("Mode = ", mode);
-        addItem(Storage.ENC_MODE, "AES-CBC")
+        console.log("Mode = ", "AES-CBC");
+        setItem(Storage.ENC_MODE, "AES-CBC")
     }
 
     let len = await getItemAsync(Storage.KEY_LENGTH) as number
     if (len === undefined) {
         console.log("Key_Len = ", 128);
-        addItem(Storage.KEY_LENGTH, 16)
+        setItem(Storage.KEY_LENGTH, 16)
     }
 
     let theme = await getItemAsync(Storage.THEME) as number
     if (theme === undefined) {
         console.log("Theme = ", "Light");
-        addItem(Storage.THEME, false)
+        setItem(Storage.THEME, false)
     }
     //console.log(mode, len, theme);
 });
