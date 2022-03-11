@@ -6,6 +6,8 @@ export const DEFAULT_CONTEXT = {
     history: []
 }
 
+export const API_ERROR = "PasteBin Error"
+
 export enum Storage {
     API_KEY = "api_key",
     ENC_MODE = "enc_mode",

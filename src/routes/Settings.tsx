@@ -52,34 +52,32 @@ export const Settings = () => {
 function getSettings():any {
   getItem(Storage.API_KEY, (data) => {
       setApiKey(data[Storage.API_KEY]);
-      console.log(APIKEY)
+      //console.log(APIKEY)
   })
 
   getItem(Storage.ENC_MODE, (data) => {
     setEncMode(data[Storage.ENC_MODE]);
-    console.log(ENC_MODE)
+    //console.log(ENC_MODE)
   })
 
   getItem(Storage.THEME, (data) => {
     setTheme(data[Storage.THEME]);
-    console.log("Getting theme", data[Storage.THEME])
-    console.log(THEME)
+    //console.log("Getting theme", data[Storage.THEME])
   })
 
   getItem(Storage.KEY_LENGTH, (data) => {
     setKeyLength(data[Storage.KEY_LENGTH]);
-    console.log(KEY_LENGTH)
+    //console.log(KEY_LENGTH)
   })
 }
 
 const keyLengthHandler = (e: any) => {
   setItem(Storage.KEY_LENGTH, e.target.value)
   setKeyLength(e.target.value);
-  console.log(KEY_LENGTH)
+  //console.log(KEY_LENGTH)
 
   getItem(Storage.KEY_LENGTH, (data) => {
-    console.log(KEY_LENGTH)
-    console.log(data)
+    //console.log(KEY_LENGTH)
   })
 }
 
@@ -111,6 +109,9 @@ const resetSettings = (e: any) => {
   setApiKey(d.api_key);
   setTheme(d.theme);
 
+}
+const signUp = () => {
+  window.open("https://pastebin.com/doc_api")
 }
 
   return (
@@ -170,14 +171,22 @@ const resetSettings = (e: any) => {
         <Card classes={{ root: classes.card }}>
 
           <ListItem>
-            <ListItemText primary="PasteBin API Key" secondary={APIKEY} />
+
             <FormDialog/>
+              <ListItemText primary={`Key:${APIKEY}`} />
+
           </ListItem>
-          <TextField placeholder={APIKEY}> </TextField>
-          <Button onClick={() => setItem(Storage.API_KEY, "23ourwfodifkhjklfquhdkajdh")}>
-            Set New Api Key
-          </Button>
+
         </Card>
+
+  <Card classes={{ root: classes.card }}>
+        <ListItem>
+            <ListItemText
+              primary="Sign Up for PasteBin" />
+            <Button onClick={signUp}>Sign Up</Button>
+            </ListItem>
+    </Card>
+
 
           <Typography variant={'h4'}>Reset</Typography>
           <Card classes={{ root: classes.card }}>
