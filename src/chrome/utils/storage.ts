@@ -1,6 +1,3 @@
-// constant keys for accessing storage
-import { Storage } from '../../constants'
-
 
 export const setItem = (key: string, value: any, callback?: () => void) => {
     chrome.storage.sync.set({ [key]: value }, callback)
