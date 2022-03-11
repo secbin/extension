@@ -6,6 +6,7 @@ import { ChevronRight } from "@mui/icons-material";
 import { makeStyles, createStyles } from '@mui/styles';
 import { setItem, getItem } from "../chrome/utils/storage";
 import { Storage, ENCRYPTION_METHODS, KEY_LENGTHS, DEFAULT_CONTEXT } from "../constants";
+import FormDialog from "./Dialog"
 
 const useStyles = makeStyles(theme => ({
   card: {
@@ -167,13 +168,10 @@ const resetSettings = (e: any) => {
 
         <Typography variant={'h4'}>Pastebin API</Typography>
         <Card classes={{ root: classes.card }}>
+
           <ListItem>
             <ListItemText primary="PasteBin API Key" secondary={APIKEY} />
-            <IconButton color="primary" sx={{ p: '10px' }}
-              aria-label="directions" 
-             >
-              <ChevronRight />
-            </IconButton>
+            <FormDialog/>
           </ListItem>
           <TextField placeholder={APIKEY}> </TextField>
           <Button onClick={() => setItem(Storage.API_KEY, "23ourwfodifkhjklfquhdkajdh")}>
