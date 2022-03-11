@@ -56,6 +56,7 @@ export default function Process(props: any) {
     const { state, dispatch } = React.useContext(AppContext);
     const classes = useStyles();
     const key = state.draft.key;
+    const link = state.draft.pastebinlink;
     const ctxt = state.draft.ciphertext;
 
     return (
@@ -67,6 +68,14 @@ export default function Process(props: any) {
             <Typography variant={'h4'}>Key</Typography>
             <Card className={classes.copybox}>
                 <InputBase placeholder={key} value={key} />
+                <IconButton>
+                   <ContentPasteIcon color="primary"/>
+                </IconButton>
+            </Card>
+
+            <Typography variant={'h4'}>Link</Typography>
+            <Card className={classes.copybox}>
+                <InputBase placeholder={link} value={link} />
                 <IconButton>
                    <ContentPasteIcon color="primary"/>
                 </IconButton>
