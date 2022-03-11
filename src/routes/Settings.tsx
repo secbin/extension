@@ -112,6 +112,9 @@ const resetSettings = (e: any) => {
   setTheme(d.theme);
 
 }
+const signUp = () => {
+  window.open("https://pastebin.com/signup")
+}
 
   return (
     <div>
@@ -173,8 +176,19 @@ const resetSettings = (e: any) => {
 
             <FormDialog/>
               <ListItemText primary={`Key:${APIKEY}`} />
+
           </ListItem>
+
         </Card>
+
+  <Card classes={{ root: classes.card }}>
+        <ListItem>
+            <ListItemText
+              primary="Sign Up for PasteBin" />
+            <Button onClick={signUp}>Sign Up</Button>
+            </ListItem>
+    </Card>
+
 
           <Typography variant={'h4'}>Reset</Typography>
           <Card classes={{ root: classes.card }}>
