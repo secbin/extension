@@ -14,6 +14,7 @@ export type SettingsType = {
 export type DraftType = {
     action: Action.DECRYPT | Action.DECRYPT_PASTEBIN | Action.ENCRYPT | Action.ENCRYPT_PASTEBIN,
     plaintext: string,
+    buttonEnabled: boolean,
     ciphertext: string,
     pastebinlink: string,
     key: string,
@@ -65,6 +66,7 @@ const initialState = {
     draft: {
         action: Action.ENCRYPT,
         plaintext: "",
+        buttonEnabled: false,
         ciphertext: "",
         pastebinlink: "",
         key: "",
