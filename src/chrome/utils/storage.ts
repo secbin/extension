@@ -21,14 +21,14 @@ export const getItemAtIndex = (key: string, index: number, callback: (items: { [
 
 export const addItem = (key: string, value: any, callback?: () => void) => {
     getItem(key, (data) => {
-        console.log("DATA FROM ADD", data);
+        //console.log("DATA FROM ADD", data);
         let result = data[key];
         if(!result) {
             result = [];
         }
         result.push(value);
-        console.log("ADDING ITEM", value)
-        console.log("RESULTING VALUE", result)
+        //console.log("ADDING ITEM", value)
+        //console.log("RESULTING VALUE", result)
         setItem(key, result)
     })
 }
@@ -53,7 +53,7 @@ export const getItemAsync = async (key: string) => {
       chrome.storage.sync.get([key], function (result) {
         if (result[key] === undefined) {
           console.log(`${key} not found`)
-          reject();
+          resolve(undefined)
         } else {
           resolve(result[key]);
         }

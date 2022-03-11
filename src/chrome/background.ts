@@ -1,28 +1,40 @@
 import { copyTextClipboard } from "../chrome/utils";
 import { encrypt, decrypt } from "../chrome/utils/crypto";
 import {postPastebin, getPastebin} from "../chrome/utils/pastebin";
-import { getItemAsync, addItem } from "../chrome/utils/storage";
+import { getItemAsync, addItem, setItem } from "../chrome/utils/storage";
 import { Storage } from '../constants'
-import { useHistory } from "react-router-dom";
-import React, {useContext } from "react";
-import { AppContext } from "../AppContext";
 
 /** Fired when the extension is first installed,
  *  when the extension is updated to a new version,
  *  and when Chrome is updated to a new version. */
-chrome.runtime.onInstalled.addListener((details) => {
-    console.log('[background.js] onInstalled', details);
-    //alert('[background.js] onInstalled');
+chrome.runtime.onInstalled.addListener(async (details) => {
+    console.log('onInstall, checking for settings, else set defaults', details);
+    let mode = await getItemAsync(Storage.ENC_MODE) as string
+    if (mode === undefined) {
+        console.log("Mode = ", "AES-CBC");
+        setItem(Storage.ENC_MODE, "AES-CBC")
+    }
+
+    let len = await getItemAsync(Storage.KEY_LENGTH) as number
+    if (len === undefined) {
+        console.log("Key_Len = ", 128);
+        setItem(Storage.KEY_LENGTH, 16)
+    }
+
+    let theme = await getItemAsync(Storage.THEME) as number
+    if (theme === undefined) {
+        console.log("Theme = ", "Light");
+        setItem(Storage.THEME, false)
+    }
+    //console.log(mode, len, theme);
 });
 
 chrome.runtime.onConnect.addListener((port) => {
-    console.log('[background.js] onConnect', port)
-   // alert('[background.js] onInstalled');
+    //console.log('[background.js] onConnect', port)
 });
 
 chrome.runtime.onStartup.addListener(() => {
-    console.log('[background.js] onStartup')
-   // alert('[background.js] onInstalled');
+   // console.log('[background.js] onStartup')
 });
 
 /**
@@ -35,8 +47,7 @@ chrome.runtime.onStartup.addListener(() => {
  *  unloaded the onSuspendCanceled event will
  *  be sent and the page won't be unloaded. */
 chrome.runtime.onSuspend.addListener(() => {
-    console.log('[background.js] onSuspend')
-   // alert('[background.js] onSuspend');
+   // console.log('[background.js] onSuspend')
 });
 
 
@@ -50,16 +61,10 @@ chrome.runtime.onSuspend.addListener(() => {
 //     }
 //   });
 
-// Design choice: any encrption will return the cipher text and the key.
-// if we replace clipboad with ciphertext/url, how should we return key?
-        // 1. return key as alert();
-        // 2. display key and ciphertext in popup window.
-
-
 var pasteBinMenuItem = {
     "id": "pasteBin",
-    "title": "Share via PasteBin", //name of menu
-    "contexts": ['selection'] // what type of content menu appears on
+    "title": "Share via PasteBin",
+    "contexts": ['selection']
 }
 
 var clipboardMenuItem = {
@@ -79,8 +84,6 @@ chrome.contextMenus.create(clipboardMenuItem);
 chrome.contextMenus.create(decryptMenuItem);
 
 chrome.contextMenus.onClicked.addListener( async (clickData) => {
-    //let {push, goBack} = useHistory();
-    //const { state, dispatch } = useContext(AppContext);
     let text = clickData.selectionText
     if(text === undefined){
         alert("Please select some text")
@@ -93,7 +96,7 @@ chrome.contextMenus.onClicked.addListener( async (clickData) => {
         let link = await postPastebin(res.data)
         const history = {
             id: Math.floor(Math.random()),
-            pastebinlink: link, //Undefined, promise error
+            pastebinlink: link,
             enc_text: res.data,
             enc_mode: "state.settings.enc_mode",
             key_length: "state.settings.key_length",
@@ -122,7 +125,6 @@ chrome.contextMenus.onClicked.addListener( async (clickData) => {
         console.log("ENC text", history)
         addItem(Storage.HISTORY, history)
 
-        // Not able to use react or state variables in background.js
         alert("Key: " + res.key + "\nCiphertext:" + res.data);
         copyTextClipboard("Key: " + res.key + "\nCiphertext:" + res.data);
     }

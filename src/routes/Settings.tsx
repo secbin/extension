@@ -52,34 +52,32 @@ export const Settings = () => {
 function getSettings():any {
   getItem(Storage.API_KEY, (data) => {
       setApiKey(data[Storage.API_KEY]);
-      console.log(APIKEY)
+      //console.log(APIKEY)
   })
 
   getItem(Storage.ENC_MODE, (data) => {
     setEncMode(data[Storage.ENC_MODE]);
-    console.log(ENC_MODE)
+    //console.log(ENC_MODE)
   })
 
   getItem(Storage.THEME, (data) => {
     setTheme(data[Storage.THEME]);
-    console.log("Getting theme", data[Storage.THEME])
-    console.log(THEME)
+    //console.log("Getting theme", data[Storage.THEME])
   })
 
   getItem(Storage.KEY_LENGTH, (data) => {
     setKeyLength(data[Storage.KEY_LENGTH]);
-    console.log(KEY_LENGTH)
+    //console.log(KEY_LENGTH)
   })
 }
 
 const keyLengthHandler = (e: any) => {
   setItem(Storage.KEY_LENGTH, e.target.value)
   setKeyLength(e.target.value);
-  console.log(KEY_LENGTH)
+  //console.log(KEY_LENGTH)
 
   getItem(Storage.KEY_LENGTH, (data) => {
-    console.log(KEY_LENGTH)
-    console.log(data)
+    //console.log(KEY_LENGTH)
   })
 }
 
