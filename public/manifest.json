@@ -1,33 +1,21 @@
 {
-  "name": "Securebin",
+  "name": "secureBin",
   "description" : "Securely encrypt your text on Pastebin.com",
-  "version": "1.0",
-  "manifest_version": 2,
-  "browser_action": {
+  "version": "1.0.0.1",
+  "manifest_version": 3,
+  "action": {
     "default_popup": "index.html",
     "default_title": "Open the popup"
   },
   "icons": {
-    "16": "logo192.png",
-    "48": "logo192.png",
-    "128": "logo192.png"
+    "16": "logo48.png",
+    "48": "logo48.png",
+    "128": "logo128.png"
   },
   "background": {
-    "scripts": [
-      "./static/js/background.js"
-    ],
-    "persistent": false
+    "service_worker": "./static/js/background.js"
   },
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "js": ["./static/js/content.js"],
-      "all_frames": false,
-      "run_at": "document_end"
-    }
-  ],
   "permissions": [
-    "activeTab",
     "storage",
     "contextMenus",
     "clipboardWrite"

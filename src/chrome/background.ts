@@ -102,7 +102,7 @@ chrome.contextMenus.onClicked.addListener( async (clickData) => {
         addItem(Storage.HISTORY, history)
 
         alert("Key: " + res.key + "\nLink:" + link);
-        copyTextClipboard(link);
+        copyTextClipboard("Key: " + res.key + "\nLink:" + link);
     }
     else if(clickData.menuItemId === "clipboardMenuItem"){
         let res = await encrypt(text)
@@ -124,7 +124,7 @@ chrome.contextMenus.onClicked.addListener( async (clickData) => {
 
         // Not able to use react or state variables in background.js
         alert("Key: " + res.key + "\nCiphertext:" + res.data);
-        copyTextClipboard(res.data);
+        copyTextClipboard("Key: " + res.key + "\nCiphertext:" + res.data);
     }
     else if (clickData.menuItemId === "decryptText"){
         let key = prompt("Please enter your key");
