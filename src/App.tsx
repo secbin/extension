@@ -12,7 +12,8 @@ import { makeStyles, createStyles } from '@mui/styles';
 import { ChevronLeft } from '@mui/icons-material';
 import History from "./routes/History";
 import HistoryIcon from '@mui/icons-material/History';
-import AcUnitIcon from '@mui/icons-material/AcUnit';
+// import AcUnitIcon from '@mui/icons-material/AcUnit';
+import ContentPasteIcon from '@mui/icons-material/ContentPaste';
 import {AppProvider, AppContext } from './AppContext';
 import { DEFAULT_CONTEXT } from './constants'
 import logoimg from '../assets/img/securebinlogo.svg'
@@ -142,7 +143,7 @@ export const App = () => {
                         {/*    <ChevronLeft />*/}
                         {/*</IconButton>*/}
                         <IconButton className={classes.hoverStyle} aria-label="menu" sx={{ mr: 1 }} disableRipple onClick={() => { push('/result')}}>
-                            <AcUnitIcon />
+                            <ContentPasteIcon />
                         </IconButton>
                         <IconButton className={classes.hoverStyle} aria-label="menu" sx={{ mr: 1 }} disableRipple onClick={() => { push('/history')}}>
                             <HistoryIcon />
