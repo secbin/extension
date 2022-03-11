@@ -1,22 +1,28 @@
 import { copyTextClipboard } from "../chrome/utils";
 import { encrypt, decrypt } from "../chrome/utils/crypto";
+import {postPastebin, getPastebin} from "../chrome/utils/pastebin";
+import { getItemAsync, addItem } from "../chrome/utils/storage";
+import { Storage } from '../constants'
+import { useHistory } from "react-router-dom";
+import React, {useContext } from "react";
+import { AppContext } from "../AppContext";
 
 /** Fired when the extension is first installed,
  *  when the extension is updated to a new version,
  *  and when Chrome is updated to a new version. */
 chrome.runtime.onInstalled.addListener((details) => {
     console.log('[background.js] onInstalled', details);
-    alert('[background.js] onInstalled');
+    //alert('[background.js] onInstalled');
 });
 
 chrome.runtime.onConnect.addListener((port) => {
     console.log('[background.js] onConnect', port)
-    alert('[background.js] onInstalled');
+   // alert('[background.js] onInstalled');
 });
 
 chrome.runtime.onStartup.addListener(() => {
     console.log('[background.js] onStartup')
-    alert('[background.js] onInstalled');
+   // alert('[background.js] onInstalled');
 });
 
 /**
@@ -73,6 +79,8 @@ chrome.contextMenus.create(clipboardMenuItem);
 chrome.contextMenus.create(decryptMenuItem);
 
 chrome.contextMenus.onClicked.addListener( async (clickData) => {
+    //let {push, goBack} = useHistory();
+    //const { state, dispatch } = useContext(AppContext);
     let text = clickData.selectionText
     if(text === undefined){
         alert("Please select some text")
@@ -80,21 +88,60 @@ chrome.contextMenus.onClicked.addListener( async (clickData) => {
     }
 
     if(clickData.menuItemId === "pasteBin"){
-        alert("TODO not implemented")
+        let res = await encrypt(text)
+        console.log("ENC text", res)
+        let link = await postPastebin(res.data)
+        const history = {
+            id: Math.floor(Math.random()),
+            pastebinlink: link, //Undefined, promise error
+            enc_text: res.data,
+            enc_mode: "state.settings.enc_mode",
+            key_length: "state.settings.key_length",
+            date: Date(),
+        }
+        addItem(Storage.HISTORY, history)
+
+        alert("Key: " + res.key + "\nLink:" + link);
+        copyTextClipboard(link);
     }
     else if(clickData.menuItemId === "clipboardMenuItem"){
-        let res = encrypt(text);
-        console.log(res)
-        copyTextClipboard((await res).data);
+        let res = await encrypt(text)
+        let mode = await getItemAsync(Storage.ENC_MODE) as string
+        let len = await getItemAsync(Storage.KEY_LENGTH) as number
+        console.log("ENC text", res.data)
+
+        const history = {
+            id: Math.floor(Math.random()),
+            pastebinlink: "",
+            enc_text: res.data,
+            enc_mode: mode,
+            key_length: len,
+            date: Date(),
+        }
+
+        console.log("ENC text", history)
+        addItem(Storage.HISTORY, history)
+
+        // Not able to use react or state variables in background.js
+        alert("Key: " + res.key + "\nCiphertext:" + res.data);
+        copyTextClipboard(res.data);
     }
     else if (clickData.menuItemId === "decryptText"){
         let key = prompt("Please enter your key");
         if(key === null){
             return
-        }else if(!text.includes("C_TXT")){
-            alert("Invalid ciphertext")
+        }else if(text.includes("C_TXT")){
+            let res = decrypt(text, key);
+            alert("Decrypted text: \n" + res);
+            console.log(res);
+        }else if(text.includes("pastebin")){
+            let link = text
+            text = await getPastebin(link)
+            let res = decrypt(text, key);
+            alert("Decrypted text: \n" + res);
+            console.log(res);
+        }else{
+            console.log("Invalid Text");
         }
-        let res = decrypt(text, key);
-        console.log(res);
     }
 })

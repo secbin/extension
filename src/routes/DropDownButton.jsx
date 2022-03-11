@@ -31,7 +31,8 @@ import clsx from 'clsx';
 import { makeStyles, createStyles } from '@mui/styles';
 import { encrypt, decrypt } from "../chrome/utils/crypto";
 import { useHistory } from "react-router-dom";
-import { setItem, getItem, addItem } from "../chrome/utils/storage";
+import {addItem } from "../chrome/utils/storage";
+import {postPastebin, getPastebin} from "../chrome/utils/pastebin";
 
 
 
@@ -133,7 +134,7 @@ export default function CustomizedMenus() {
   const [link, setLink] = React.useState("");
   const [postLink, setPostLink] = React.useState("");
   const [pasteBinLink, setPasteBinLink] = usePasteBinPost(postLink);
-  const [searchPasteBin, setSearchPasteBin] = usePasteBinSearchJS(link);
+  const [pasteBinText, setPasteBinText] = usePasteBinSearchJS(link);
   const [newPlaintext, setNewPlaintext] = React.useState("");
   const [buttonEnabled, setButtonEnabled] = React.useState(false);
   const [menu, setMenu] = React.useState("Encrypt");
@@ -155,24 +156,20 @@ export default function CustomizedMenus() {
 
   const performAction = async (e) => {
     let buttonText = e.target.innerText || "";
-    // console.log(buttonText, " == ", "Create Pastebin")
     if(buttonText === "Encrypt to Pastebin") {
-        console.log(text);
         let res = await encrypt(text)
-        console.log("DATA", res.data);
-        console.log(res.key);
-        setPostLink(res.data);
-
+        console.log("ENC text", res)
+        let newNewlink = await postPastebin(res.data)
         const history = {
             id: Math.floor(Math.random()),
-            pastebinlink: res.data,
+            pastebinlink: newNewlink,
+            enc_text: res.data,
             enc_mode: state.settings.enc_mode,
             key_length: state.settings.key_length,
             date: Date(),
         }
-        // dispatch({
-        //     type: Action.CLEAR_HISTORY,
-        // });
+        addItem(Storage.HISTORY, history)
+
         dispatch({
             type: Action.ENCRYPT_PASTEBIN,
             payload: {
@@ -182,26 +179,21 @@ export default function CustomizedMenus() {
                 key: res.key
             },
         })
-        addItem(Storage.HISTORY, history)
         console.log("STATE", state)
-        push('/processing')
+        push('/result')
+
     }else if (buttonText === "Encrypt Plaintext") {
       let res = await encrypt(text)
-      console.log("DATA", res.data) //TODO - new window or somthing
-      console.log("KEY", res.key)
+      console.log("ENC text", res)
       const history = {
           id: Math.floor(Math.random()),
-          pastebinlink: res.data,
+          pastebinlink: "",
+          enc_text: res.data,
           enc_mode: state.settings.enc_mode,
           key_length: state.settings.key_length,
           date: Date(),
       }
-        addItem(Storage.HISTORY, history)
-
-     dispatch({
-        type: Action.ADD_TO_HISTORY,
-        payload: history,
-     })
+      addItem(Storage.HISTORY, history)
 
      dispatch({
         type: Action.ENCRYPT,
@@ -212,23 +204,23 @@ export default function CustomizedMenus() {
             key: res.key
          },
      })
-
       console.log("STATE", state)
-      push('/processing')
+      push('/result')
+
     } else if (buttonText === "Decrypt Pastebin") {
-      // not working but it should be.
-      setLink(text);
-      console.log(searchPasteBin);
-      if(searchPasteBin){
-        let key = prompt("Please enter your key"); //TODO - Decrypt will probably need two text boxes
-        let res = decrypt(searchPasteBin, key)
-        console.log("SETTING NEW PLAINTEXT TO:",res);
-        setNewPlaintext(res);
+      let pasteText = await getPastebin(text)
+      console.log(pasteText);
+      if(pasteText){
+        let key = prompt("Please enter your key"); //TODO - Maybe add text box instead 
+        let res = decrypt(pasteText, key)
+        console.log("SETTING NEW PLAINTEXT TO:", res);
+        setNewPlaintext(res); // Not sure where this goes to
       }
     } else if (buttonText === "Decrypt Ciphertext"){
-      let key = prompt("Please enter your key"); //TODO - Decrypt will probably need two text boxes
+      let key = prompt("Please enter your key");
       let res = decrypt(text, key)
-      console.log(res)
+      console.log("SETTING NEW PLAINTEXT TO:", res);
+      setNewPlaintext(res);
     }
 }
 
@@ -335,7 +327,7 @@ export default function CustomizedMenus() {
 
       </div>
       {pasteBinLink.includes("API") ? <p> Bad Url, or out of pastes.</p> : <p>{pasteBinLink}</p>}
-      {searchPasteBin ? <p>{searchPasteBin}</p> : <p> Sorry Invalid Link</p> }
+      {pasteBinText ? <p>{pasteBinText}</p> : <p> Sorry Invalid Link</p> }
       {newPlaintext ? <p>{newPlaintext}</p> : <p></p> }
 
     </div>

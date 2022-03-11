@@ -57,14 +57,12 @@ function getSettings():any {
   getItem(Storage.ENC_MODE, (data) => {
     setEncMode(data[Storage.ENC_MODE]);
     console.log(ENC_MODE)
-
   })
 
   getItem(Storage.THEME, (data) => {
     setTheme(data[Storage.THEME]);
     console.log("Getting theme", data[Storage.THEME])
     console.log(THEME)
-
   })
 
   getItem(Storage.KEY_LENGTH, (data) => {
