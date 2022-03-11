@@ -1,7 +1,6 @@
 import React, {useReducer, useState } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { About } from "./routes/About";
-import { Home } from "./routes/Home";
 import { NewHome } from "./routes/NewHome";
 import SettingsIcon from '@mui/icons-material/Settings';
 import { Settings } from './routes/Settings'
