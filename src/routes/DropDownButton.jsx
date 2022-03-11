@@ -31,7 +31,8 @@ import clsx from 'clsx';
 import { makeStyles, createStyles } from '@mui/styles';
 import { encrypt, decrypt } from "../chrome/utils/crypto";
 import { useHistory } from "react-router-dom";
-import { setItem, getItem, addItem } from "../chrome/utils/storage";
+import {addItem } from "../chrome/utils/storage";
+import {postPastebin, getPastebin} from "../chrome/utils/pastebin";
 
 
 
@@ -158,10 +159,11 @@ export default function CustomizedMenus() {
     if(buttonText === "Encrypt to Pastebin") {
         let res = await encrypt(text)
         console.log("ENC text", res)
-        setPostLink(res.data); // Use to replace text with link, but not errors as we push('/result')
+        let newNewlink = await postPastebin(res)
+        //setPostLink(res.data); // Use to replace text with link, but not errors as we push('/result')
         const history = {
             id: Math.floor(Math.random()),
-            pastebinlink: postLink, //Undefined, promise error
+            pastebinlink: newNewlink, //Undefined, promise error
             enc_text: res.data,
             enc_mode: state.settings.enc_mode,
             key_length: state.settings.key_length,
@@ -208,11 +210,12 @@ export default function CustomizedMenus() {
 
     } else if (buttonText === "Decrypt Pastebin") {
       // not working but it should be.
-      setLink(text);// ^ Not working becuase searchPasteBin is empty when decrypt is called
-      console.log(pasteBinText);
-      if(pasteBinText){
+      //setLink(text);// ^ Not working becuase searchPasteBin is empty when decrypt is called
+      let pasteText = await getPastebin(text)
+      console.log(pasteText);
+      if(pasteText){
         let key = prompt("Please enter your key"); //TODO - Maybe add text box instead 
-        let res = decrypt(pasteBinText, key)
+        let res = decrypt(pasteText, key)
         console.log("SETTING NEW PLAINTEXT TO:", res);
         setNewPlaintext(res); // Not sure where this goes to
       }

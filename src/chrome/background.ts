@@ -1,5 +1,6 @@
 import { copyTextClipboard } from "../chrome/utils";
 import { encrypt, decrypt } from "../chrome/utils/crypto";
+import {postPastebin, getPastebin} from "../chrome/utils/pastebin";
 import { getItemAsync, addItem } from "../chrome/utils/storage";
 import { Storage } from '../constants'
 import { useHistory } from "react-router-dom";
@@ -87,13 +88,12 @@ chrome.contextMenus.onClicked.addListener( async (clickData) => {
     }
 
     if(clickData.menuItemId === "pasteBin"){
-        alert("TODO not implemented")
         let res = await encrypt(text)
         console.log("ENC text", res)
-        //setPostLink(res.data); // Use to replace text with link, but not errors as we push('/result')
+        let link = await postPastebin(res.data)
         const history = {
             id: Math.floor(Math.random()),
-            pastebinlink: "postLink", //Undefined, promise error
+            pastebinlink: link, //Undefined, promise error
             enc_text: res.data,
             enc_mode: "state.settings.enc_mode",
             key_length: "state.settings.key_length",
@@ -101,17 +101,8 @@ chrome.contextMenus.onClicked.addListener( async (clickData) => {
         }
         addItem(Storage.HISTORY, history)
 
-        // dispatch({
-        //     type: Action.ENCRYPT_PASTEBIN,
-        //     payload: {
-        //         action: Action.ENCRYPT_PASTEBIN,
-        //         plaintext: text,
-        //         ciphertext: res.data,
-        //         key: res.key
-        //     },
-        // })
-        // console.log("STATE", state)
-        // push('/result')
+        alert("Key: " + res.key + "\nLink:" + link);
+        copyTextClipboard(link);
     }
     else if(clickData.menuItemId === "clipboardMenuItem"){
         let res = await encrypt(text)
@@ -139,11 +130,18 @@ chrome.contextMenus.onClicked.addListener( async (clickData) => {
         let key = prompt("Please enter your key");
         if(key === null){
             return
-        }else if(!text.includes("C_TXT")){
-            alert("Invalid ciphertext")
+        }else if(text.includes("C_TXT")){
+            let res = decrypt(text, key);
+            alert("Decrypted text: \n" + res);
+            console.log(res);
+        }else if(text.includes("pastebin")){
+            let link = text
+            text = await getPastebin(link)
+            let res = decrypt(text, key);
+            alert("Decrypted text: \n" + res);
+            console.log(res);
+        }else{
+            console.log("Invalid Text");
         }
-        let res = decrypt(text, key);
-        alert("Decrypted text: \n" + res);
-        console.log(res);
     }
 })
