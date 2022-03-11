@@ -5,14 +5,6 @@ import ContentPasteIcon from '@mui/icons-material/ContentPaste';
 import { makeStyles, createStyles } from '@mui/styles';
 import { AppContext } from "../AppContext";
 
-var text = ""
-var key = ""
-
-export function setResults(text: string, key:string){
-    text = text
-    key = key
-}
-
 const useStyles = makeStyles(theme => ({
     icon: {
         fontSize: 80,
