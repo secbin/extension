@@ -7,8 +7,8 @@ function usePasteBinPost(encryptQuery){
     const [result, setResult] = useState([]);
     const [ loading, setLoading ] = useState(false);
     const [ error, setError ] = useState(false);
-  const apiKey = "klVQoqGaWEZGAuv9qALhwCN94jyuBQ7w";
-  const apiKey2 ="bYYcefkxnd18LJMggTKIH2Vg8m8QP-N0"
+  //const apiKey = "klVQoqGaWEZGAuv9qALhwCN94jyuBQ7w";
+  //const apiKey2 ="bYYcefkxnd18LJMggTKIH2Vg8m8QP-N0"
 // if (encryptQuery){
   var myHeaders = new Headers();
   myHeaders.append("Content-Type", "application/x-www-form-urlencoded");
@@ -19,13 +19,13 @@ useEffect(() => {
  const controller = new AbortController();
  async function fetchSearchResults() {
   const apiKey = await getItemAsync(Storage.API_KEY)
-  console.log("API key from storage: ", apiKey)  
-  
+  console.log("API key from storage: ", apiKey)
+
   var urlencoded = new URLSearchParams();
-  urlencoded.append("api_dev_key", apiKey2);
+  urlencoded.append("api_dev_key", apiKey);
   urlencoded.append("api_paste_code", encryptQuery);
   urlencoded.append("api_option", "paste");
-  
+
   // let responseBody : string[] = [];
   let responseBody = {};
   //let responseBody = useState<string>('');
