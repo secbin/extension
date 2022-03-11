@@ -25,6 +25,8 @@ export type HistoryType = {
     pastebinlink: string,
     enc_mode: string,
     key_length: number,
+    key: string,
+    ciphertext: string,
     date: Date,
 }
 

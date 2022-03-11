@@ -82,7 +82,7 @@ export default function History() {
             {/*{<Typography variant={'h4'}>Today</Typography>}*/}
             <Card variant="outlined" classes={{root: classes.card}}>
                 <ListItem key={item?.pastebinlink}>
-                    <ListItemText primary={item?.pastebinlink} secondary={item.date} />
+                    <ListItemText primary={item?.pastebinlink ? item.pastebinlink : "Encrypted Plaintext"} secondary={item.date} />
                     <IconButton color="primary" aria-label="Unlock CipherText">
                       <LockOpenIcon />
                     </IconButton>

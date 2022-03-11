@@ -26,6 +26,7 @@ export enum Action {
     RESET_SETTINGS =            "clear_settings",
     UPDATE_SETTINGS =           "update_settings",
     TOGGLE_DARK_MODE =          "toggle_dark_mode",
+    UPDATE_PLAINTEXT =          "update_plaintext"
 }
 
 export const ENCRYPTION_METHODS = [

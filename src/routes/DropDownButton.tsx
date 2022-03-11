@@ -34,9 +34,6 @@ import { useHistory } from "react-router-dom";
 import {addItem } from "../chrome/utils/storage";
 import {postPastebin, getPastebin} from "../chrome/utils/pastebin";
 
-
-
-
 const useStyles = makeStyles(theme => ({
     counterContainer: {
         // alignContent: 'center',
@@ -114,13 +111,13 @@ const StyledMenu = styled((props) => (
   },
 }));
 
-export function TextCounter(props) {
+export function TextCounter(props: any) {
     const classes = useStyles();
     let safe = props.textLength < MAX_TEXT_LENGTH
     return (
         <div className={classes.counterContainer}>
         {!safe && <ErrorIcon className={clsx(classes.red, classes.counter)} sx={{mr: 0.5, mb: -0.25}}/>}
-        <Typography className={clsx(safe ? classes.grey : classes.red, classes.counter)} variant={'p'}>{props.textLength}/{MAX_TEXT_LENGTH}</Typography>
+        <Typography className={clsx(safe ? classes.grey : classes.red, classes.counter)} variant={'body1'} >{props.textLength}/{MAX_TEXT_LENGTH}</Typography>
         </div>
     );
 }
@@ -132,29 +129,31 @@ export default function CustomizedMenus() {
   const open = Boolean(anchorEl);
   const [text, setText] = React.useState("");
   const [link, setLink] = React.useState("");
-  const [postLink, setPostLink] = React.useState("");
+  const [postLink, setPostLink] = React.useState<string>("");
   const [pasteBinLink, setPasteBinLink] = usePasteBinPost(postLink);
   const [pasteBinText, setPasteBinText] = usePasteBinSearchJS(link);
   const [newPlaintext, setNewPlaintext] = React.useState("");
   const [buttonEnabled, setButtonEnabled] = React.useState(false);
-  const [menu, setMenu] = React.useState("Encrypt");
   const { state, dispatch } = useContext(AppContext);
+
+
+    const [menu, setMenu] = React.useState("Encrypt");
   let {push, goBack} = useHistory();
 
     const inputSize = text.length
-  const handleClick = (event) => {
+  const handleClick = (event: any) => {
     setAnchorEl(event.currentTarget);
 
 
   };
-  const handleClose = (text) => {
+  const handleClose = (text: string) => {
     setAnchorEl(null);
     setMenu(text)
   };
 
 
 
-  const performAction = async (e) => {
+  const performAction = async (e: any) => {
     let buttonText = e.target.innerText || "";
     if(buttonText === "Encrypt to Pastebin") {
         let res = await encrypt(text)
@@ -163,6 +162,7 @@ export default function CustomizedMenus() {
         const history = {
             id: Math.floor(Math.random()),
             pastebinlink: newNewlink,
+            key: res.key,
             enc_text: res.data,
             enc_mode: state.settings.enc_mode,
             key_length: state.settings.key_length,
@@ -190,20 +190,21 @@ export default function CustomizedMenus() {
           id: Math.floor(Math.random()),
           pastebinlink: "Encrypted Text",
           enc_text: res.data,
+          key: res.key,
           enc_mode: state.settings.enc_mode,
           key_length: state.settings.key_length,
           date: Date(),
       }
       addItem(Storage.HISTORY, history)
 
-     dispatch({
+     // @ts-ignore
+        dispatch({
         type: Action.ENCRYPT,
         payload: {
             action: Action.ENCRYPT,
             plaintext: text,
             ciphertext: res.data,
             key: res.key,
-            pastebinlink: "Encrypted Text",
          },
      })
       console.log("STATE", state)
@@ -213,20 +214,20 @@ export default function CustomizedMenus() {
       let pasteText = await getPastebin(text)
       console.log(pasteText);
       if(pasteText){
-        let key = prompt("Please enter your key"); //TODO - Maybe add text box instead 
+        let key = prompt("Please enter your key") || ""; //TODO - Maybe add text box instead
         let res = decrypt(pasteText, key)
         console.log("SETTING NEW PLAINTEXT TO:", res);
         setNewPlaintext(res); // Not sure where this goes to
       }
     } else if (buttonText === "Decrypt Ciphertext"){
       let key = prompt("Please enter your key");
-      let res = decrypt(text, key)
+      let res = decrypt(text, key ? key : "")
       console.log("SETTING NEW PLAINTEXT TO:", res);
       setNewPlaintext(res);
     }
 }
 
-  const checkTypeOfText = (e) => {
+  const checkTypeOfText = (e: any) => {
     setText(e.target.value);
     let buttonText = e.target.value || "";
     if(e.target.value.length > MAX_TEXT_LENGTH) {
@@ -255,7 +256,12 @@ export default function CustomizedMenus() {
 
 
   let hey = clsx(text.length < 30 && classes.large)
-  return (
+  // @ts-ignore
+    // @ts-ignore
+    // @ts-ignore
+    // @ts-ignore
+    // @ts-ignore
+    return (
       <>
           <div>
           <InputBase
@@ -275,20 +281,20 @@ export default function CustomizedMenus() {
       <Card
           className={classes.hoverStyle}
           style={{minWidth: 100, textAlign: 'center', backgroundColor: '#1D6BC6', color: 'white', margin: 15, borderRadius: 50, marginLeft: 'auto'}}>
-      <ListItemButton sx={{ ml: 1, flex: 1, height: 40, textAlign: 'center', fontWeight: 800 }}
-        onClick={performAction}
-        id="demo-customized-button"
-        aria-controls={open ? 'demo-customized-menu' : undefined}
-        aria-haspopup="true"
-        disabled={!buttonEnabled}
-        aria-expanded={open ? 'true' : undefined}
-        variant="contained"
-        disableElevation
+          <ListItemButton sx={{ ml: 1, flex: 1, height: 40, textAlign: 'center', fontWeight: 800 }}
+            onClick={performAction}
+            id="demo-customized-button"
+            aria-controls={open ? 'demo-customized-menu' : undefined}
+            aria-haspopup="true"
+            disabled={!buttonEnabled}
+            aria-expanded={open ? 'true' : undefined}
+            // variant="contained"
+            // disableElevation
 
-      >
+          >
           <ListItemText>{menu}</ListItemText>
           {/*<Divider sx={{ height: 28, m: 0.5, color: 'white', borderColor: 'white' }} orientation="vertical" />*/}
-          <IconButton color="primary" sx={{ p: '10px' }} sx={{ color: 'white'}} onClick={handleClick}
+          <IconButton color="primary" sx={{ p: '10px', color: 'white' }} onClick={handleClick}
                       aria-label="encryption/decryption options">
               <KeyboardArrowDownIcon />
           </IconButton>
@@ -297,12 +303,13 @@ export default function CustomizedMenus() {
       </Card>
       <StyledMenu
         // id="demo-customized-menu"
-        MenuListProps={{
-          'aria-labelledby': 'demo-customized-button',
-        }}
+        // MenuListProps={{
+        //   'aria-labelledby': 'demo-customized-button',
+        // }}
+        /* @ts-ignore */
         anchorEl={anchorEl}
         open={open}
-        onClose={e => handleClose(menu)}
+        onClose={(e: any) => handleClose(menu)}
       >
           <MenuItem sx={{ fontWeight: 700, color: 'grey' }} disabled dense disableRipple>
               Select Action
@@ -328,6 +335,7 @@ export default function CustomizedMenus() {
       </StyledMenu>
 
       </div>
+      {        /* @ts-ignore */}
       {pasteBinLink.includes("API") ? <p> Bad Url, or out of pastes.</p> : <p>{pasteBinLink}</p>}
       {pasteBinText ? <p>{pasteBinText}</p> : <p> Sorry Invalid Link</p> }
       {newPlaintext ? <p>{newPlaintext}</p> : <p></p> }
