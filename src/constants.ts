@@ -15,10 +15,11 @@ export enum Storage {
 }
 
 export enum Action {
-    DECRYPT =                   "decrypt",
-    DECRYPT_PASTEBIN =          "decrypt_pastebin",
-    ENCRYPT =                   "encrypt",
-    ENCRYPT_PASTEBIN =          "encrypt_pastebin",
+    DECRYPT =                   "Decrypt Plaintext",
+    DECRYPT_PASTEBIN =          "Decrypt Pastebin",
+    ENCRYPT =                   "Encrypt Plaintext",
+    ENCRYPT_PASTEBIN =          "Encrypt to Pastebin",
+    UPDATE_ENC_MENU =           "update_enc_options",
     CLEAR_DRAFT =               "clear_draft",
     ADD_TO_HISTORY =            "add_to_history",
     CLEAR_HISTORY =             "clear_history",

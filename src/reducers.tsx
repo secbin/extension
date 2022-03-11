@@ -45,6 +45,12 @@ type DraftPayload = {
     };
     [Action.UPDATE_PLAINTEXT]: {
         plaintext: string,
+        buttonEnabled: boolean,
+        action: Action.DECRYPT | Action.DECRYPT_PASTEBIN | Action.ENCRYPT | Action.ENCRYPT_PASTEBIN,
+    },
+    [Action.UPDATE_ENC_MENU]: {
+        buttonEnabled: boolean,
+        action: Action.DECRYPT | Action.DECRYPT_PASTEBIN | Action.ENCRYPT | Action.ENCRYPT_PASTEBIN,
     }
 }
 
@@ -112,6 +118,14 @@ export const draftReducer = (state: DraftType, action: SettingsActions | DraftAc
             return {
                 ...state,
                 plaintext: action.payload.plaintext,
+                action: action.payload.action,
+                buttonEnabled: action.payload.buttonEnabled,
+            }
+        case Action.UPDATE_ENC_MENU:
+            return {
+                ...state,
+                action: action.payload.action,
+                buttonEnabled: action.payload.buttonEnabled,
             }
         default:
             return state;
