@@ -52,7 +52,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 
-export default function Process(props: any) {
+export default function Result(props: any) {
     const { state, dispatch } = React.useContext(AppContext);
     const classes = useStyles();
     const key = state.draft.key;

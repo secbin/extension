@@ -1,6 +1,8 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Button, Card, Checkbox, Divider, IconButton, List, ListItem, ListItemText,
-         MenuItem, Paper, Select, TextField, Typography } from "@mui/material";
+import {
+  Button, Card, Checkbox, Divider, IconButton, List, ListItem, ListItemText,
+  MenuItem, Paper, Select, TextField, Typography
+} from "@mui/material";
 import { ChevronRight } from "@mui/icons-material";
 // import { ConfigContext } from "../ConfigContext";
 import { makeStyles, createStyles } from '@mui/styles';
@@ -49,70 +51,70 @@ export const Settings = () => {
   }, []);
 
   // Note: a key size of 16 bytes will use AES-128, 24 => AES-192, 32 => AES-256
-function getSettings():any {
-  getItem(Storage.API_KEY, (data) => {
+  function getSettings(): any {
+    getItem(Storage.API_KEY, (data) => {
       setApiKey(data[Storage.API_KEY]);
       //console.log(APIKEY)
-  })
+    })
 
-  getItem(Storage.ENC_MODE, (data) => {
-    setEncMode(data[Storage.ENC_MODE]);
-    //console.log(ENC_MODE)
-  })
+    getItem(Storage.ENC_MODE, (data) => {
+      setEncMode(data[Storage.ENC_MODE]);
+      //console.log(ENC_MODE)
+    })
 
-  getItem(Storage.THEME, (data) => {
-    setTheme(data[Storage.THEME]);
-    //console.log("Getting theme", data[Storage.THEME])
-  })
+    getItem(Storage.THEME, (data) => {
+      setTheme(data[Storage.THEME]);
+      //console.log("Getting theme", data[Storage.THEME])
+    })
 
-  getItem(Storage.KEY_LENGTH, (data) => {
-    setKeyLength(data[Storage.KEY_LENGTH]);
+    getItem(Storage.KEY_LENGTH, (data) => {
+      setKeyLength(data[Storage.KEY_LENGTH]);
+      //console.log(KEY_LENGTH)
+    })
+  }
+
+  const keyLengthHandler = (e: any) => {
+    setItem(Storage.KEY_LENGTH, e.target.value)
+    setKeyLength(e.target.value);
     //console.log(KEY_LENGTH)
-  })
-}
 
-const keyLengthHandler = (e: any) => {
-  setItem(Storage.KEY_LENGTH, e.target.value)
-  setKeyLength(e.target.value);
-  //console.log(KEY_LENGTH)
+    getItem(Storage.KEY_LENGTH, (data) => {
+      //console.log(KEY_LENGTH)
+    })
+  }
 
-  getItem(Storage.KEY_LENGTH, (data) => {
-    //console.log(KEY_LENGTH)
-  })
-}
+  const encModeHandler = (e: any) => {
+    setItem(Storage.ENC_MODE, e.target.value);
+    setEncMode(e.target.value);
+  }
 
-const encModeHandler = (e: any) => {
-  setItem(Storage.ENC_MODE, e.target.value);
-  setEncMode(e.target.value);
-}
+  const clearHistory = (e: any) => {
+    setItem(Storage.HISTORY, []);
+  }
 
-const clearHistory = (e: any) => {
-  setItem(Storage.HISTORY, []);
-}
+  const themeHandler = (e: any) => {
+    setItem(Storage.THEME, !THEME);
+    setTheme(!THEME);
+    //TODO do darkmode magic here
+  }
 
-const themeHandler = (e: any) => {
-  setItem(Storage.THEME, !THEME);
-  setTheme(!THEME);
-  //TODO do darkmode magic here
-}
+  const resetSettings = (e: any) => {
+    const d = DEFAULT_CONTEXT;
 
-const resetSettings = (e: any) => {
-  const d = DEFAULT_CONTEXT;
+    setItem(Storage.THEME, d.theme);
+    setItem(Storage.API_KEY, d.api_key);
+    setItem(Storage.ENC_MODE, d.enc_mode);
+    setItem(Storage.KEY_LENGTH, d.key_length);
 
-  setItem(Storage.THEME, d.theme);
-  setItem(Storage.API_KEY, d.api_key);
-  setItem(Storage.ENC_MODE, d.enc_mode);
-  setItem(Storage.KEY_LENGTH, d.key_length);
+    setEncMode(d.enc_mode);
+    setKeyLength(String(d.key_length));
+    setApiKey(d.api_key);
+    setTheme(d.theme);
 
-  setEncMode(d.enc_mode);
-  setKeyLength(String(d.key_length));
-  setApiKey(d.api_key);
-  setTheme(d.theme);
-
-}
-const signUp = () => {
-  window.open("https://pastebin.com/doc_api")
-}
+  }
+  const signUp = () => {
+    window.open("https://pastebin.com/doc_api")
+  }
 
   return (
     <div>
@@ -138,9 +140,9 @@ const signUp = () => {
               onChange={encModeHandler}
             >
               {ENCRYPTION_METHODS.map((item) => (
-                <MenuItem classes={{root: classes.menuItem}}
-                          key={item.value}
-                          value={item.value}>{item.prettyName}
+                <MenuItem classes={{ root: classes.menuItem }}
+                  key={item.value}
+                  value={item.value}>{item.prettyName}
                 </MenuItem>
               ))}
             </Select>
@@ -153,15 +155,15 @@ const signUp = () => {
 
             {/* // Note: a key size of 16 bytes will use AES-128, 24 => AES-192, 32 => AES-256 */}
             <Select
-                className={classes.select}
-                value={KEY_LENGTH}
-                onChange={keyLengthHandler}
+              className={classes.select}
+              value={KEY_LENGTH}
+              onChange={keyLengthHandler}
             >
               {KEY_LENGTHS.map((item) => (
-                  <MenuItem className={classes.menuItem}
-                            key={item.value}
-                            value={item.value}>{item.prettyName}
-                  </MenuItem>
+                <MenuItem className={classes.menuItem}
+                  key={item.value}
+                  value={item.value}>{item.prettyName}
+                </MenuItem>
               ))}
             </Select>
           </ListItem>
@@ -169,41 +171,29 @@ const signUp = () => {
 
         <Typography variant={'h4'}>Pastebin API</Typography>
         <Card classes={{ root: classes.card }}>
-
           <ListItem>
-
-            <FormDialog/>
-              <ListItemText primary={`Key:${APIKEY}`} />
-
+            <ListItemText primary={`Key:${APIKEY}`} />
+            <FormDialog />
           </ListItem>
-
         </Card>
 
-  <Card classes={{ root: classes.card }}>
-        <ListItem>
+
+        <Typography variant={'h4'}>Reset</Typography>
+        <Card classes={{ root: classes.card }}>
+          <ListItem>
             <ListItemText
-              primary="Sign Up for PasteBin" />
-            <Button onClick={signUp}>Sign Up</Button>
-            </ListItem>
-    </Card>
+              primary="Clear History" />
+            <Button onClick={clearHistory}>Clear</Button>
+          </ListItem>
+        </Card>
 
-
-          <Typography variant={'h4'}>Reset</Typography>
-          <Card classes={{ root: classes.card }}>
-            <ListItem>
-              <ListItemText
-                  primary="Clear History" />
-              <Button onClick={clearHistory}>Clear</Button>
-            </ListItem>
-          </Card>
-
-          <Card classes={{ root: classes.card }}>
-            <ListItem>
-              <ListItemText
-                  primary="Reset Settings" />
-              <Button onClick={resetSettings}>Reset</Button>
-            </ListItem>
-          </Card>
+        <Card classes={{ root: classes.card }}>
+          <ListItem>
+            <ListItemText
+              primary="Reset Settings" />
+            <Button onClick={resetSettings}>Reset</Button>
+          </ListItem>
+        </Card>
 
       </List>
     </div>

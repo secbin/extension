@@ -1,13 +1,11 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, {useEffect } from "react";
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
-import {Button, Card, Divider, IconButton, Paper, Typography } from '@mui/material';
-import { ChevronRight } from '@mui/icons-material';
-import { makeStyles, createStyles } from '@mui/styles';
+import {Card, IconButton, Typography } from '@mui/material';
+import { makeStyles } from '@mui/styles';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
-import { getCurrentTabUrl } from '../chrome/utils';
-import { getItem, setItem } from '../chrome/utils/storage';
+import { getItem } from '../chrome/utils/storage';
 import { Storage } from '../constants'
 
 const useStyles = makeStyles(theme => ({
@@ -29,32 +27,6 @@ const useStyles = makeStyles(theme => ({
         padding: 20,
     }
 }));
-
-const historyItems = [
-    {
-        url: "pastebin.com/123123123",
-        date: JSON.stringify(new Date()),
-        passkey: "magic"
-    },
-    {
-        url: "pastebin.com/5454323",
-        date: JSON.stringify(new Date()),
-        passkey: "magic"
-
-    },
-    {
-        url: "pastebin.com/345223123",
-        date: JSON.stringify(new Date()),
-        passkey: "magic"
-
-    },
-    {
-        url: "pastebin.com/6543123",
-        date: JSON.stringify(new Date()),
-        passkey: "magic"
-    },
-]
-
 
 export default function History() {
     useEffect(() => {

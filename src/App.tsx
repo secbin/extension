@@ -1,7 +1,7 @@
 import React, {useReducer, useState } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { About } from "./routes/About";
-import { NewHome } from "./routes/NewHome";
+import { Home } from "./routes/Home";
 import SettingsIcon from '@mui/icons-material/Settings';
 import { Settings } from './routes/Settings'
 import { useHistory } from "react-router-dom";
@@ -161,8 +161,8 @@ export const App = () => {
                 <Route path="/about">
                     <About/>
                 </Route>
-                <Route path="/newhome">
-                    <NewHome/>
+                <Route path="/home">
+                    <Home/>
                 </Route>
                 <Route path="/settings">
                     <Settings/>
@@ -174,7 +174,7 @@ export const App = () => {
                     <Result/>
                 </Route>
                 <Route path="/">
-                    <NewHome/>
+                    <Home/>
                 </Route>
             </Switch>
             </div>
