@@ -14,9 +14,11 @@ export async function postPastebin(encryptQuery: string) {
     const apiKey3 = await getItemAsync(Storage.API_KEY);
     console.log("API ", apiKey3);
     var content = new URLSearchParams();
-    content.append("api_dev_key", apiKey);
+    content.append("api_dev_key", apiKey2);
     content.append("api_paste_code", encryptQuery);
     content.append("api_option", "paste");
+    console.log("encryptQuery ", encryptQuery);
+    console.log("Content ", content);
 
     const response = await fetch(`https://pastebin.com/api/api_post.php`, {
         method: "POST",

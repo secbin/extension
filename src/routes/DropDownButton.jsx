@@ -176,7 +176,8 @@ export default function CustomizedMenus() {
                 action: Action.ENCRYPT_PASTEBIN,
                 plaintext: text,
                 ciphertext: res.data,
-                key: res.key
+                key: res.key,
+                pastebinlink: newNewlink,
             },
         })
         console.log("STATE", state)
@@ -200,8 +201,9 @@ export default function CustomizedMenus() {
         payload: {
             action: Action.ENCRYPT,
             plaintext: text,
-            ciphertext: text,
-            key: res.key
+            ciphertext: res.data,
+            key: res.key,
+            pastebinlink: "",
          },
      })
       console.log("STATE", state)
