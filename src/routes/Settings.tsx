@@ -113,7 +113,7 @@ const resetSettings = (e: any) => {
 
 }
 const signUp = () => {
-  window.open("https://pastebin.com/signup")
+  window.open("https://pastebin.com/login")
 }
 
   return (
