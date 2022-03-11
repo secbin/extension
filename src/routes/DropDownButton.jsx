@@ -159,11 +159,10 @@ export default function CustomizedMenus() {
     if(buttonText === "Encrypt to Pastebin") {
         let res = await encrypt(text)
         console.log("ENC text", res)
-        let newNewlink = await postPastebin(res)
-        //setPostLink(res.data); // Use to replace text with link, but not errors as we push('/result')
+        let newNewlink = await postPastebin(res.data)
         const history = {
             id: Math.floor(Math.random()),
-            pastebinlink: newNewlink, //Undefined, promise error
+            pastebinlink: newNewlink,
             enc_text: res.data,
             enc_mode: state.settings.enc_mode,
             key_length: state.settings.key_length,
@@ -209,8 +208,6 @@ export default function CustomizedMenus() {
       push('/result')
 
     } else if (buttonText === "Decrypt Pastebin") {
-      // not working but it should be.
-      //setLink(text);// ^ Not working becuase searchPasteBin is empty when decrypt is called
       let pasteText = await getPastebin(text)
       console.log(pasteText);
       if(pasteText){
