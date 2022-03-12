@@ -32,9 +32,9 @@ export async function postPastebin(encryptQuery: string) {
     });
 
     if (!response.ok) {
-        console.log(Error(response.statusText));
-        console.log(response);
-        return API_ERROR;
+        const error = await response.text();
+        console.log(error);
+        return API_ERROR + error;
     }
 
     const link = await response.text();
@@ -54,9 +54,9 @@ export async function getPastebin(link: string) {
     const response = await fetch(`https://pastebin.com/raw/` + link);
 
     if (!response.ok) {
-        console.log(Error(response.statusText));
-        console.log(response);
-        return API_ERROR;
+        const error = await response.text();
+        console.log(error);
+        return API_ERROR + error;
     }
 
     const text = await response.text();
