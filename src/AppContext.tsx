@@ -1,6 +1,6 @@
 import React, { createContext, Dispatch, useReducer } from 'react'
 import { Action } from './constants'
-import { setItem, getItem } from "./chrome/utils/storage";
+import { setSyncItem, getSyncItem, getLocalItem } from "./chrome/utils/storage";
 import { Storage } from "./constants"
 import { HistoryActions, historyReducer, draftReducer, settingsReducer, DraftActions, SettingsActions } from './reducers';
 
@@ -32,7 +32,7 @@ export type HistoryType = {
 }
 
 function getSettingsValuesFromStorage() {
-    getItem(null, (data) => {
+    getSyncItem(null, (data) => {
         return {
         api_key: data[Storage.API_KEY],
         enc_mode: data[Storage.ENC_MODE],
@@ -49,7 +49,7 @@ function getSettingsValuesFromStorage() {
 }
 
 function getHistoryValuesFromStorage() {
-    getItem(Storage.HISTORY, (data) => {
+    getLocalItem(Storage.HISTORY, (data) => {
         return data[Storage.HISTORY] as HistoryType[]
     })
     return [] as HistoryType[]

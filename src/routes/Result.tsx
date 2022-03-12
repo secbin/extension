@@ -5,7 +5,7 @@ import ContentPasteIcon from '@mui/icons-material/ContentPaste';
 import ErrorIcon from '@mui/icons-material/Error';
 import { makeStyles, createStyles } from '@mui/styles';
 import { AppContext, HistoryType } from "../AppContext";
-import { getItem } from '../chrome/utils/storage';
+import { getLocalItem, getSyncItem } from '../chrome/utils/storage';
 import { Storage } from '../constants'
 import clsx from "clsx";
 import { copyTextClipboard } from "../chrome/utils"
@@ -80,7 +80,7 @@ export type LHistoryType = {
 export default function Result(props: any) {
 
     useEffect(() => {
-        getItem(Storage.HISTORY, (data) => {
+        getLocalItem(Storage.HISTORY, (data) => {
             console.log("HISTORY from there", data[Storage.HISTORY]);
             setHistory(data[Storage.HISTORY]);
         })

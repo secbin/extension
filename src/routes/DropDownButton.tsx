@@ -12,14 +12,14 @@ import Card from '@mui/material/Card';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import InputBase from '@mui/material/InputBase';
-import { MAX_TEXT_LENGTH, Action, Storage } from '../constants'
+import {MAX_PASTEBIN_TEXT_LENGTH, MAX_ENC_TEXT_LENGTH, Action, Storage } from '../constants'
 import ErrorIcon from '@mui/icons-material/Error';
 import { Typography } from '@mui/material';
 import clsx from 'clsx';
 import { makeStyles, createStyles } from '@mui/styles';
 import { encrypt, decrypt } from "../chrome/utils/crypto";
 import { useHistory } from "react-router-dom";
-import { addItem } from "../chrome/utils/storage";
+import { addLocalItem } from "../chrome/utils/storage";
 import { postPastebin, getPastebin } from "../chrome/utils/pastebin";
 
 const useStyles = makeStyles(theme => ({
@@ -99,12 +99,17 @@ const StyledMenu = styled((props) => (
 }));
 
 export function TextCounter(props: any) {
+  let MAX = MAX_ENC_TEXT_LENGTH;
+  if(props.menu === Action.ENCRYPT_PASTEBIN){ // button is pastebine enc
+    MAX = MAX_PASTEBIN_TEXT_LENGTH;
+  }
   const classes = useStyles();
-  let safe = props.textLength < MAX_TEXT_LENGTH
+  let safe = props.textLength < MAX
+
   return (
     <div className={classes.counterContainer}>
       {!safe && <ErrorIcon className={clsx(classes.red, classes.counter)} sx={{ mr: 0.5, mb: -0.25 }} />}
-      <Typography className={clsx(safe ? classes.grey : classes.red, classes.counter)} variant={'body1'} >{props.textLength}/{MAX_TEXT_LENGTH}</Typography>
+      <Typography className={clsx(safe ? classes.grey : classes.red, classes.counter)} variant={'body1'} >{props.textLength}/{MAX}</Typography>
     </div>
   );
 }
@@ -149,7 +154,7 @@ export default function CustomizedMenus() {
         key_length: state.settings.key_length,
         date: Date(),
       }
-      addItem(Storage.HISTORY, history)
+      addLocalItem(Storage.HISTORY, history)
 
       dispatch({
         type: Action.ENCRYPT_PASTEBIN,
@@ -175,7 +180,7 @@ export default function CustomizedMenus() {
         key_length: state.settings.key_length,
         date: Date(),
       }
-      addItem(Storage.HISTORY, history)
+      addLocalItem(Storage.HISTORY, history)
 
       // @ts-ignore
       dispatch({
@@ -209,20 +214,19 @@ export default function CustomizedMenus() {
     let textbox = e.target.value || "";
     let buttonEnabled = false;
     let buttonText = Action.ENCRYPT;
-    if (e.target.value.length > MAX_TEXT_LENGTH) {
-      buttonEnabled = false
-    }
-    else if (textbox.includes("pastebin.com")) {
+    if (textbox.includes("pastebin.com") && e.target.value.length <= MAX_ENC_TEXT_LENGTH) {
       // console.log("PASTE BIN LINK FOUND")
       buttonText = Action.DECRYPT_PASTEBIN
       buttonEnabled = true
-    } else if (textbox.includes("C_TXT")) {
+    } else if (textbox.includes("C_TXT") && e.target.value.length <= MAX_ENC_TEXT_LENGTH) {
       // console.log("ENCRYPTED TEXT FOUND")
       buttonText = Action.DECRYPT
       buttonEnabled = true
-    } else if (textbox) {
+    } else if (textbox && e.target.value.length <= MAX_PASTEBIN_TEXT_LENGTH) {
       // console.log("PLAINTEXT FOUND")
       buttonText = Action.ENCRYPT_PASTEBIN
+      buttonEnabled = true
+    } else if (buttonText === Action.ENCRYPT && e.target.value.length <= MAX_ENC_TEXT_LENGTH) {
       buttonEnabled = true
     } else {
       buttonEnabled = false
@@ -230,8 +234,6 @@ export default function CustomizedMenus() {
     // setMenu(buttonText)
     // setButtonEnabled(buttonEnabled)
     dispatch({ type: Action.UPDATE_PLAINTEXT, payload: { plaintext: textbox, action: buttonText, buttonEnabled: buttonEnabled } });
-
-
   };
 
 
@@ -259,7 +261,7 @@ export default function CustomizedMenus() {
 
         <Divider />
         <div className={classes.bottomSection}>
-          <TextCounter textLength={text.length} />
+          <TextCounter textLength={text.length} menu={menu} />
           <Card
             className={classes.hoverStyle}
             style={{ minWidth: 100, textAlign: 'center', backgroundColor: '#1D6BC6', color: 'white', margin: 15, borderRadius: 50, marginLeft: 'auto' }}>

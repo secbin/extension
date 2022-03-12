@@ -6,7 +6,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import {setItem, getItem} from "../chrome/utils/storage";
+import {setSyncItem, getSyncItem} from "../chrome/utils/storage";
 import { Storage } from "../constants";
 import {Card, Divider, InputBase, Typography } from '@mui/material';
 import { makeStyles, createStyles } from '@mui/styles';
@@ -41,9 +41,9 @@ export default function FormDialog(props: any) {
     const handleClose = () => {
 
         console.log("Setting the API KEY:",apiKey);
-        setItem(Storage.API_KEY,apiKey);
+        setSyncItem(Storage.API_KEY,apiKey);
         setOpen(false);
-        getItem(Storage.API_KEY, (data) => {
+        getSyncItem(Storage.API_KEY, (data) => {
             //console.log(KEY_LENGTH)
           })
     };

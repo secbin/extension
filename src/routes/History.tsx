@@ -5,7 +5,7 @@ import ListItemText from '@mui/material/ListItemText';
 import {Card, IconButton, Typography } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
-import { getItem } from '../chrome/utils/storage';
+import { getLocalItem, getSyncItem } from '../chrome/utils/storage';
 import { Storage } from '../constants'
 
 const useStyles = makeStyles(theme => ({
@@ -30,9 +30,8 @@ const useStyles = makeStyles(theme => ({
 
 export default function History() {
     useEffect(() => {
-        // setItem(Storage.HISTORY, historyItems);
 
-        getItem(Storage.HISTORY, (data) => {
+        getLocalItem(Storage.HISTORY, (data) => {
             console.log("HISTORY", data[Storage.HISTORY]);
             setHistory(data[Storage.HISTORY]);
         })

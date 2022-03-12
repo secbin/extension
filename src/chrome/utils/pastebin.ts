@@ -1,4 +1,4 @@
-import { getItemAsync } from "./storage";
+import { getSyncItemAsync } from "./storage";
 import { Storage, API_ERROR } from "../../constants";
 
 
@@ -10,7 +10,7 @@ export async function postPastebin(encryptQuery: string) {
         "_csrf-frontend=329554c223d6a49136d2267538fc128591f3ec2150a223caa1d6db2d96f0265aa%3A2%3A%7Bi%3A0%3Bs%3A14%3A%22_csrf-frontend%22%3Bi%3A1%3Bs%3A32%3A%22rO1MDUiUJzJoMpRxGyEtQ9KVFoodbesw%22%3B%7D; pastebin_posted=99663e9444444257d4931e06307949fe5a481efea6e1d02e1d14d0dd216f60dca%3A2%3A%7Bi%3A0%3Bs%3A15%3A%22pastebin_posted%22%3Bi%3A1%3Bs%3A8%3A%22JC4FD0vP%22%3B%7D"
     );
 
-    const apiKey = await getItemAsync(Storage.API_KEY) as string;
+    const apiKey = await getSyncItemAsync(Storage.API_KEY) as string;
     console.log("API ", apiKey);
     if (apiKey === undefined) {
         alert("Please set your Pastbin API key");
@@ -51,7 +51,7 @@ export async function getPastebin(link: string) {
         link = array[0];
     }
 
-    const response = await fetch(`https://pastebin.com/raw/` + link);
+    const response = await fetch(`https://cors.securebin.workers.dev/?https://pastebin.com/raw/` + link);
 
     if (!response.ok) {
         const error = await response.text();
