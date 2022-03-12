@@ -8,8 +8,30 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import {setItem, getItem} from "../chrome/utils/storage";
 import { Storage } from "../constants";
+import {Card, Divider, InputBase, Typography } from '@mui/material';
+import { makeStyles, createStyles } from '@mui/styles';
+
+
+const useStyles = makeStyles(theme => ({
+    copybox: {
+        paddingLeft: 10,
+        paddingRight: 10,
+        // margin: 15,
+        borderRadius: 6,
+        border: '1px solid #E0E0E0',
+        boxShadow: '0 0 7px 0 rgba(0,0,0,0.04)',
+        marginTop: 20,
+        marginBottom: 14,
+    },
+    margin: {
+        marginTop: 10,
+    }
+
+
+}));
 
 export default function FormDialog(props: any) {
+    const classes = useStyles();
     const [open, setOpen] = React.useState(false);
     const [apiKey, setApiKey] = React.useState("");
     const handleClickOpen = () => {
@@ -26,34 +48,47 @@ export default function FormDialog(props: any) {
           })
     };
 
+    const handleCancel = () => {
+        setOpen(false);
+    };
+
     return (
         <div>
-            <Button variant="outlined" onClick={handleClickOpen}>
+            <Button onClick={handleClickOpen}>
                 Set Api Key
             </Button>
             <Dialog open={open} onClose={handleClose} >
-                <DialogTitle>Set PasteBin Api Key</DialogTitle>
+                <DialogTitle>
+                    <Typography variant={'h3'}>Set Pastebin Api Key</Typography>
+                </DialogTitle>
+                <Divider/>
                 <DialogContent>
                     <DialogContentText>
+                        <Typography variant={'body2'}>
                         In order to be able to use the PasteBin Api, you will need to
-                        create an account with PasteBin in order to get an Api key. Once
-                        you have made an account enter in the key here and you are all good to go!
-                        You can signup for an API key <a href="https://pastebin.com/doc_api" onClick={()=> window.open("https://pastebin.com/doc_api")}>here</a>
+                        create an account with PasteBin in order to get an Api key.
+                        </Typography>
+                        <Typography variant={'body2'} className={classes.margin}>
+                        Once you have made an account enter in the key here and you are all good to go!
+                        </Typography>
                     </DialogContentText>
-                    <TextField
+                    <Card className={classes.copybox}>
+                    <InputBase
                         autoFocus
-                        margin="dense"
-                        id="name"
-                        label="Set API Key"
-                        type="email"
+                        placeholder={"API Key"}
                         fullWidth
-                        variant="standard"
                         onChange={(event) => {setApiKey(event.target.value)}}
                     />
+                    </Card>
+                    <DialogContentText>
+                        <Typography variant={'body2'} className={classes.margin}>
+                            You can signup for an API key <a href="https://pastebin.com/doc_api" onClick={()=> window.open("https://pastebin.com/doc_api")}>here</a>
+                        </Typography>
+                    </DialogContentText>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleClose}>Cancel</Button>
-                    <Button onClick={handleClose}>Set Api Key</Button>
+                    <Button onClick={handleCancel}>Cancel</Button>
+                    <Button onClick={handleClose}>Set</Button>
                 </DialogActions>
             </Dialog>
         </div>
