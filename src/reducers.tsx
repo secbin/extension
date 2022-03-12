@@ -1,5 +1,5 @@
 import {DraftType, HistoryType, SettingsType } from "./AppContext";
-import { setItem, getItem } from "./chrome/utils/storage";
+import { setSyncItem, getSyncItem } from "./chrome/utils/storage";
 import { Storage, Action, DEFAULT_CONTEXT } from "./constants"
 
 type ActionMap<M extends { [index: string]: any }> = {

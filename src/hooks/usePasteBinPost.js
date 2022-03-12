@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { getItemAsync, getItem } from "../chrome/utils/storage";
+import { getSyncItemAsync, getSyncItem } from "../chrome/utils/storage";
 import { Storage } from "../constants";
 
 function usePasteBinPost(encryptQuery) {
@@ -15,7 +15,7 @@ function usePasteBinPost(encryptQuery) {
         let ignore = false;
         const controller = new AbortController();
         async function fetchSearchResults() {
-            const apiKey = await getItemAsync(Storage.API_KEY)
+            const apiKey = await getSyncItemAsync(Storage.API_KEY)
             console.log("API key from storage: ", apiKey)
 
             var urlencoded = new URLSearchParams();

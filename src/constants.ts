@@ -62,4 +62,8 @@ export const KEY_LENGTHS = [
     }
 ];
 
-export const MAX_TEXT_LENGTH = 512
+// Limiting factors:
+// Pastebine 10MB but auto removes text pastes greater then 1000 characters/bytes
+// cipher text is ~1.5 times larger than plaintext so limit is half of max
+export const MAX_PASTEBIN_TEXT_LENGTH = 512
+export const MAX_ENC_TEXT_LENGTH = 4096

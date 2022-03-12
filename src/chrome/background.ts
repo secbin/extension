@@ -1,7 +1,7 @@
 import { copyTextClipboard } from "../chrome/utils";
 import { encrypt, decrypt } from "../chrome/utils/crypto";
 import {postPastebin, getPastebin} from "../chrome/utils/pastebin";
-import { getItemAsync, addItem, setItem } from "../chrome/utils/storage";
+import { getSyncItemAsync, addLocalItem, setSyncItem } from "../chrome/utils/storage";
 import { Storage } from '../constants'
 
 /** Fired when the extension is first installed,
@@ -9,22 +9,22 @@ import { Storage } from '../constants'
  *  and when Chrome is updated to a new version. */
 chrome.runtime.onInstalled.addListener(async (details) => {
     console.log('onInstall, checking for settings, else set defaults', details);
-    let mode = await getItemAsync(Storage.ENC_MODE) as string
+    let mode = await getSyncItemAsync(Storage.ENC_MODE) as string
     if (mode === undefined) {
         console.log("Mode = ", "AES-CBC");
-        setItem(Storage.ENC_MODE, "AES-CBC")
+        setSyncItem(Storage.ENC_MODE, "AES-CBC")
     }
 
-    let len = await getItemAsync(Storage.KEY_LENGTH) as number
+    let len = await getSyncItemAsync(Storage.KEY_LENGTH) as number
     if (len === undefined) {
         console.log("Key_Len = ", 128);
-        setItem(Storage.KEY_LENGTH, 16)
+        setSyncItem(Storage.KEY_LENGTH, 16)
     }
 
-    let theme = await getItemAsync(Storage.THEME) as number
+    let theme = await getSyncItemAsync(Storage.THEME) as number
     if (theme === undefined) {
         console.log("Theme = ", "Light");
-        setItem(Storage.THEME, false)
+        setSyncItem(Storage.THEME, false)
     }
     //console.log(mode, len, theme);
 });
@@ -102,15 +102,15 @@ chrome.contextMenus.onClicked.addListener( async (clickData) => {
             key_length: "state.settings.key_length",
             date: Date(),
         }
-        addItem(Storage.HISTORY, history)
+        addLocalItem(Storage.HISTORY, history)
 
         alert("Key: " + res.key + "\nLink:" + link);
         copyTextClipboard("Key: " + res.key + "\nLink:" + link);
     }
     else if(clickData.menuItemId === "clipboardMenuItem"){
         let res = await encrypt(text)
-        let mode = await getItemAsync(Storage.ENC_MODE) as string
-        let len = await getItemAsync(Storage.KEY_LENGTH) as number
+        let mode = await getSyncItemAsync(Storage.ENC_MODE) as string
+        let len = await getSyncItemAsync(Storage.KEY_LENGTH) as number
         console.log("ENC text", res.data)
 
         const history = {
@@ -123,7 +123,7 @@ chrome.contextMenus.onClicked.addListener( async (clickData) => {
         }
 
         console.log("ENC text", history)
-        addItem(Storage.HISTORY, history)
+        addLocalItem(Storage.HISTORY, history)
 
         alert("Key: " + res.key + "\nCiphertext:" + res.data);
         copyTextClipboard("Key: " + res.key + "\nCiphertext:" + res.data);

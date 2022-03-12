@@ -1,10 +1,10 @@
 import forge from 'node-forge';
-import { getItemAsync } from "./storage";
+import { getSyncItemAsync } from "./storage";
 import { Storage } from "../../constants"
 
 export async function encrypt(data: string){
-    let mode = await getItemAsync(Storage.ENC_MODE) as string
-    let len = await getItemAsync(Storage.KEY_LENGTH) as number
+    let mode = await getSyncItemAsync(Storage.ENC_MODE) as string
+    let len = await getSyncItemAsync(Storage.KEY_LENGTH) as number
 
     // encrypt data
     const encRes = encryptText(data, mode, len)

@@ -6,7 +6,7 @@ import {
 import { ChevronRight } from "@mui/icons-material";
 // import { ConfigContext } from "../ConfigContext";
 import { makeStyles, createStyles } from '@mui/styles';
-import { setItem, getItem } from "../chrome/utils/storage";
+import { setSyncItem, getSyncItem, setLocalItem } from "../chrome/utils/storage";
 import { Storage, ENCRYPTION_METHODS, KEY_LENGTHS, DEFAULT_CONTEXT } from "../constants";
 import FormDialog from "./Dialog"
 
@@ -52,48 +52,48 @@ export const Settings = () => {
 
   // Note: a key size of 16 bytes will use AES-128, 24 => AES-192, 32 => AES-256
   function getSettings(): any {
-    getItem(Storage.API_KEY, (data) => {
+    getSyncItem(Storage.API_KEY, (data) => {
       setApiKey(data[Storage.API_KEY]);
       //console.log(APIKEY)
     })
 
-    getItem(Storage.ENC_MODE, (data) => {
+    getSyncItem(Storage.ENC_MODE, (data) => {
       setEncMode(data[Storage.ENC_MODE]);
       //console.log(ENC_MODE)
     })
 
-    getItem(Storage.THEME, (data) => {
+    getSyncItem(Storage.THEME, (data) => {
       setTheme(data[Storage.THEME]);
       //console.log("Getting theme", data[Storage.THEME])
     })
 
-    getItem(Storage.KEY_LENGTH, (data) => {
+    getSyncItem(Storage.KEY_LENGTH, (data) => {
       setKeyLength(data[Storage.KEY_LENGTH]);
       //console.log(KEY_LENGTH)
     })
   }
 
   const keyLengthHandler = (e: any) => {
-    setItem(Storage.KEY_LENGTH, e.target.value)
+    setSyncItem(Storage.KEY_LENGTH, e.target.value)
     setKeyLength(e.target.value);
     //console.log(KEY_LENGTH)
 
-    getItem(Storage.KEY_LENGTH, (data) => {
+    getSyncItem(Storage.KEY_LENGTH, (data) => {
       //console.log(KEY_LENGTH)
     })
   }
 
   const encModeHandler = (e: any) => {
-    setItem(Storage.ENC_MODE, e.target.value);
+    setSyncItem(Storage.ENC_MODE, e.target.value);
     setEncMode(e.target.value);
   }
 
   const clearHistory = (e: any) => {
-    setItem(Storage.HISTORY, []);
+    setLocalItem(Storage.HISTORY, []);
   }
 
   const themeHandler = (e: any) => {
-    setItem(Storage.THEME, !THEME);
+    setSyncItem(Storage.THEME, !THEME);
     setTheme(!THEME);
     //TODO do darkmode magic here
   }
@@ -101,10 +101,10 @@ export const Settings = () => {
   const resetSettings = (e: any) => {
     const d = DEFAULT_CONTEXT;
 
-    setItem(Storage.THEME, d.theme);
-    setItem(Storage.API_KEY, d.api_key);
-    setItem(Storage.ENC_MODE, d.enc_mode);
-    setItem(Storage.KEY_LENGTH, d.key_length);
+    setSyncItem(Storage.THEME, d.theme);
+    setSyncItem(Storage.API_KEY, d.api_key);
+    setSyncItem(Storage.ENC_MODE, d.enc_mode);
+    setSyncItem(Storage.KEY_LENGTH, d.key_length);
 
     setEncMode(d.enc_mode);
     setKeyLength(String(d.key_length));
