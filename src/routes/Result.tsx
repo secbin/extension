@@ -8,6 +8,7 @@ import { AppContext, HistoryType } from "../AppContext";
 import { getItem } from '../chrome/utils/storage';
 import { Storage } from '../constants'
 import clsx from "clsx";
+import { copyTextClipboard } from "../chrome/utils"
 
 const useStyles = makeStyles(theme => ({
     icon: {
@@ -37,7 +38,7 @@ const useStyles = makeStyles(theme => ({
         border: '1px solid #E0E0E0',
         boxShadow: '0 0 7px 0 rgba(0,0,0,0.04)',
         marginBottom: 14,
-        width: 400,
+        width: 390,
     },
     copyboxLarge: {
         paddingLeft: 10,
@@ -46,7 +47,7 @@ const useStyles = makeStyles(theme => ({
         border: '1px solid #E0E0E0',
         boxShadow: '0 0 7px 0 rgba(0,0,0,0.04)',
         marginBottom: 14,
-        width: 400,
+        width: 390,
 
     },
     heading: {
@@ -57,6 +58,11 @@ const useStyles = makeStyles(theme => ({
     },
     left: {
         textAlign: 'left',
+        marginLeft: 10,
+        marginRight: 10,
+    },
+    textArea: {
+        width: 350,
     }
 
 }));
@@ -113,17 +119,26 @@ export default function Result(props: any) {
                     <>
                         <Typography variant={'h4'}>Link</Typography>
                         <Card className={classes.copybox}>
-                            <InputBase placeholder={lastItem?.pastebinlink} value={lastItem?.pastebinlink} />
-                            <IconButton>
-                                <ContentPasteIcon color="primary"/>
+                            <InputBase
+                                className={classes.textArea}
+                                placeholder={lastItem?.pastebinlink}
+                                value={lastItem?.pastebinlink}
+                            />
+                            <IconButton onClick={() => copyTextClipboard(lastItem?.pastebinlink)} >
+                                <ContentPasteIcon color="primary"
+                                />
                             </IconButton>
                         </Card>
                     </>)}
 
                 <Typography variant={'h4'}>Key</Typography>
                 <Card className={classes.copybox}>
-                    <InputBase placeholder={lastItem.key} value={lastItem.key} />
-                    <IconButton>
+                    <InputBase
+                        className={classes.textArea}
+                        placeholder={lastItem.key}
+                        value={lastItem.key}
+                    />
+                    <IconButton onClick={() => copyTextClipboard(lastItem?.key)} >
                        <ContentPasteIcon color="primary"/>
                     </IconButton>
                 </Card>
@@ -131,12 +146,13 @@ export default function Result(props: any) {
                 <Typography variant={'h4'}>Ciphertext</Typography>
                 <Card className={classes.copyboxLarge}>
                     <InputBase
+                        className={classes.textArea}
                         multiline
                         placeholder={lastItem.enc_text}
                         value={lastItem.enc_text}
                         rows={5}
                     />
-                    <IconButton>
+                    <IconButton onClick={() => copyTextClipboard(lastItem?.enc_text)} >
                         <ContentPasteIcon color="primary"/>
                     </IconButton>
                 </Card>

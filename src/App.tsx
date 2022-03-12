@@ -67,6 +67,7 @@ declare module '@mui/material/styles' {
 
 const theme = createMuiTheme({
         palette: {
+            mode: 'light',
         // type: 'light',
         primary: {
             main: '#3f51b5',
