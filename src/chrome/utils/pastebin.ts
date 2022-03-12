@@ -24,7 +24,7 @@ export async function postPastebin(encryptQuery: string) {
     console.log("encryptQuery ", encryptQuery);
     console.log("Content ", content);
 
-    const response = await fetch(`https://pastebin.com/api/api_post.php`, {
+    const response = await fetch(`https://cors.securebin.workers.dev/?https://pastebin.com/api/api_post.php`, {
         method: "POST",
         headers: myHeaders,
         body: content,

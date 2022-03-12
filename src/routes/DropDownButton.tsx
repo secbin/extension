@@ -169,7 +169,6 @@ export default function CustomizedMenus() {
       console.log("ENC text", res)
       const history = {
         id: Math.floor(Math.random()),
-        pastebinlink: "Encrypted Text",
         enc_text: res.data,
         key: res.key,
         enc_mode: state.settings.enc_mode,

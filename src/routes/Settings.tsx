@@ -172,7 +172,7 @@ export const Settings = () => {
         <Typography variant={'h4'}>Pastebin API</Typography>
         <Card classes={{ root: classes.card }}>
           <ListItem>
-            <ListItemText primary={`Key:${APIKEY}`} />
+            <ListItemText primary="API Key" secondary={APIKEY ? APIKEY : "Not Set"} />
             <FormDialog />
           </ListItem>
         </Card>
