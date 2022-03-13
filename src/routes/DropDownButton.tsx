@@ -146,6 +146,7 @@ export default function CustomizedMenus() {
       console.log("ENC text", res)
       let newNewlink = await postPastebin(res.data)
       const history = {
+        action: Action.ENCRYPT_PASTEBIN,
         id: Math.floor(Math.random()),
         pastebinlink: newNewlink,
         key: res.key,
@@ -173,6 +174,7 @@ export default function CustomizedMenus() {
       let res = await encrypt(text)
       console.log("ENC text", res)
       const history = {
+        action: Action.ENCRYPT,
         id: Math.floor(Math.random()),
         enc_text: res.data,
         key: res.key,

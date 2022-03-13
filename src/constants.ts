@@ -24,6 +24,7 @@ export enum Action {
     UPDATE_ENC_MENU =           "update_enc_options",
     CLEAR_DRAFT =               "clear_draft",
     ADD_TO_HISTORY =            "add_to_history",
+    PREVIEW_HISTORY_ITEM =      "preview_history",
     CLEAR_HISTORY =             "clear_history",
     REMOVE_ITEM_FROM_HISTORY =  "remove_item_from_history",
     RESET_SETTINGS =            "clear_settings",

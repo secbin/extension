@@ -9,6 +9,8 @@ import { getLocalItem, getSyncItem } from '../chrome/utils/storage';
 import { Storage } from '../constants'
 import clsx from "clsx";
 import { copyTextClipboard } from "../chrome/utils"
+import { useHistory } from "react-router-dom";
+import {ChevronLeft } from "@mui/icons-material";
 
 const useStyles = makeStyles(theme => ({
     icon: {
@@ -63,6 +65,9 @@ const useStyles = makeStyles(theme => ({
     },
     textArea: {
         width: 350,
+    },
+    marginTop: {
+        marginTop: 10,
     }
 
 }));
@@ -79,6 +84,7 @@ export type LHistoryType = {
 
 export default function Result(props: any) {
 
+
     useEffect(() => {
         getLocalItem(Storage.HISTORY, (data) => {
             console.log("HISTORY from there", data[Storage.HISTORY]);
@@ -86,6 +92,7 @@ export default function Result(props: any) {
         })
     }, []);
 
+    let {push, goBack} = useHistory();
     const { state, dispatch } = React.useContext(AppContext);
     const classes = useStyles();
     // const key = state.draft.key ;
@@ -160,6 +167,7 @@ export default function Result(props: any) {
                     </IconButton>
                 </Card>
                 </div>
+                    <Button className={classes.marginTop} startIcon={<ChevronLeft />} onClick={() => { goBack()}}>Back</Button>
                 </>
             )}
         </div>
