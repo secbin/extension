@@ -88,9 +88,9 @@ export default function Result(props: any) {
 
     const { state, dispatch } = React.useContext(AppContext);
     const classes = useStyles();
-    const key = state.draft.key;
-    const link = state.draft.pastebinlink;
-    const ctxt = state.draft.ciphertext;
+    // const key = state.draft.key ;
+    // const link = state.draft.pastebinlink;
+    // const ctxt = state.draft.ciphertext;
     const [history, setHistory] = React.useState<LHistoryType[]>([]);
     const lastItem = history[history.length - 1]
 
@@ -101,7 +101,7 @@ export default function Result(props: any) {
         <div className={classes.center}>
             {lastItem && (
                 <>
-                    {lastItem.pastebinlink.includes("Error") ? (
+                    {lastItem?.pastebinlink && lastItem?.pastebinlink.includes("Error") ? (
                 <>
                 <ErrorIcon className={clsx(classes.icon, classes.red)} />
                 <Typography variant={'h2'}>Error posting to Pastebin</Typography>
@@ -109,7 +109,10 @@ export default function Result(props: any) {
                 ) : (
                 <>
                 <CheckCircleIcon className={clsx(classes.icon, classes.green)}/>
-                <Typography variant={'h2'}>Posted to Pastebin</Typography>
+                    {lastItem?.pastebinlink && lastItem?.pastebinlink.length ?
+                <Typography variant={'h2'}>Posted to Pastebin</Typography> :
+                <Typography variant={'h2'}>Encrypted Ciphertext</Typography>
+                }
                 </>
                 )}
 

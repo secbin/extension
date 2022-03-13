@@ -152,7 +152,7 @@ export default function CustomizedMenus() {
         enc_text: res.data,
         enc_mode: state.settings.enc_mode,
         key_length: state.settings.key_length,
-        date: Date(),
+        date: new Date().getTime(),
       }
       addLocalItem(Storage.HISTORY, history)
 
@@ -178,7 +178,7 @@ export default function CustomizedMenus() {
         key: res.key,
         enc_mode: state.settings.enc_mode,
         key_length: state.settings.key_length,
-        date: Date(),
+        date: new Date().getTime(),
       }
       addLocalItem(Storage.HISTORY, history)
 

@@ -1,4 +1,4 @@
-import React, {useReducer, useState } from 'react';
+import React, { useEffect, useContext, useReducer, useState } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { About } from "./routes/About";
 import { Home } from "./routes/Home";
@@ -7,20 +7,21 @@ import { Settings } from './routes/Settings'
 import { useHistory } from "react-router-dom";
 import usePasteBinSearch from './hooks/usePasteBinSearchJS';
 import './App.css';
-import {AppBar, createMuiTheme, createTheme, Divider, IconButton, ThemeProvider, Toolbar, Typography, useTheme } from '@mui/material';
+import { AppBar, createMuiTheme, createTheme, Divider, IconButton, ThemeProvider, Toolbar, Typography, useTheme } from '@mui/material';
 import { makeStyles, createStyles } from '@mui/styles';
 import { ChevronLeft } from '@mui/icons-material';
 import History from "./routes/History";
 import HistoryIcon from '@mui/icons-material/History';
-// import AcUnitIcon from '@mui/icons-material/AcUnit';
 import ContentPasteIcon from '@mui/icons-material/ContentPaste';
-import {AppProvider, AppContext } from './AppContext';
+import { AppProvider, AppContext } from './AppContext';
 import { DEFAULT_CONTEXT } from './constants'
 import logoimg from '../assets/img/securebinlogo.svg'
 import logoimg_dark from '../assets/img/securebinlogo_dark.svg'
-
-import {green, purple } from '@mui/material/colors';
+import { Storage } from './constants'
+import { green, purple } from '@mui/material/colors';
 import Result from './routes/Result';
+import { getLocalItem } from './chrome/utils/storage';
+
 function reducer(state: any, action: any) {
     switch(action.type) {
         case "add":
@@ -32,7 +33,6 @@ const useStyles = makeStyles(theme => ({
     root: {
         boxShadow: "none",
         backgroundColor: "#fff",
-        // marginBottom: 64,
     },
     content: {
         marginTop: 64,
@@ -68,7 +68,6 @@ declare module '@mui/material/styles' {
 const theme = createMuiTheme({
         palette: {
             mode: 'light',
-        // type: 'light',
         primary: {
             main: '#3f51b5',
         },
@@ -121,9 +120,18 @@ const theme = createMuiTheme({
 export const App = () => {
 
     const [appConfig, setAppConfig] = useState({})
-    const [securebin, dispatch] = useReducer(reducer, {});
+    const { state, dispatch } = React.useContext(AppContext);
     let {push, goBack} = useHistory();
     const classes = useStyles();
+    const [history, setHistory] = useState([]);
+
+    useEffect(() => {
+        getLocalItem(Storage.HISTORY, (data) => {
+            console.log("HISTORY from there", data[Storage.HISTORY]);
+            setHistory(data[Storage.HISTORY]);
+        })
+    }, []);
+
 
 
     // const theme = useTheme();
@@ -143,13 +151,13 @@ export const App = () => {
                         {/*<IconButton edge="start" color="inherit" aria-label="menu" sx={{ mr: 2 }} onClick={() => { goBack()}}>*/}
                         {/*    <ChevronLeft />*/}
                         {/*</IconButton>*/}
-                        <IconButton className={classes.hoverStyle} aria-label="menu" sx={{ mr: 1 }} disableRipple onClick={() => { push('/result')}}>
-                            <ContentPasteIcon />
-                        </IconButton>
-                        <IconButton className={classes.hoverStyle} aria-label="menu" sx={{ mr: 1 }} disableRipple onClick={() => { push('/history')}}>
+                        {history && history.length && <IconButton className={classes.hoverStyle} aria-label="Latest paste" sx={{ mr: 1 }} disableRipple onClick={() => { push('/result')}}>
+                        <ContentPasteIcon />
+                        </IconButton>}
+                        <IconButton className={classes.hoverStyle} aria-label="History" sx={{ mr: 1 }} disableRipple onClick={() => { push('/history')}}>
                             <HistoryIcon />
                         </IconButton>
-                        <IconButton className={classes.hoverStyle} aria-label="menu" disableRipple onClick={() => { push('/settings')}}>
+                        <IconButton className={classes.hoverStyle} aria-label="Settings" disableRipple onClick={() => { push('/settings')}}>
                             <SettingsIcon />
                         </IconButton>
                         </div>
