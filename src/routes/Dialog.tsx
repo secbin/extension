@@ -43,7 +43,7 @@ export default function FormDialog(props: any) {
         console.log("Setting the API KEY:",apiKey);
         setSyncItem(Storage.API_KEY,apiKey);
         setOpen(false);
-        getSyncItem(Storage.API_KEY, (data) => {
+        getSyncItem(Storage.API_KEY, (data: any) => {
             //console.log(KEY_LENGTH)
           })
     };
@@ -75,6 +75,7 @@ export default function FormDialog(props: any) {
                     <Card className={classes.copybox}>
                     <InputBase
                         autoFocus
+                        defaultValue={props.APIKEY}
                         placeholder={"API Key"}
                         fullWidth
                         onChange={(event) => {setApiKey(event.target.value)}}

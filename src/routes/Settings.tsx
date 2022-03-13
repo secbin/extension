@@ -173,7 +173,7 @@ export const Settings = () => {
         <Card classes={{ root: classes.card }}>
           <ListItem>
             <ListItemText primary="API Key" secondary={APIKEY ? APIKEY : "Not Set"} />
-            <FormDialog />
+            <FormDialog APIKEY={APIKEY}/>
           </ListItem>
         </Card>
 
