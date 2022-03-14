@@ -1,8 +1,15 @@
+export const DEFAULT_SETTINGS = {
+    theme: false,
+    enc_mode: "AES-CBC",
+    key_length: 16,
+}
+
 export const DEFAULT_CONTEXT = {
     theme: false,
     api_key: "",
     enc_mode: "AES-CBC",
     key_length: 16,
+    settings: DEFAULT_SETTINGS,
     history: []
 }
 
@@ -14,6 +21,7 @@ export enum Storage {
     KEY_LENGTH = "key_length",
     THEME = "theme",
     HISTORY = "history",
+    SETTINGS = "settings"
 }
 
 export enum Action {

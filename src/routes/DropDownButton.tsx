@@ -12,14 +12,14 @@ import Card from '@mui/material/Card';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import InputBase from '@mui/material/InputBase';
-import {MAX_PASTEBIN_TEXT_LENGTH, MAX_ENC_TEXT_LENGTH, Action, Storage } from '../constants'
+import { MAX_PASTEBIN_TEXT_LENGTH, MAX_ENC_TEXT_LENGTH, Action, Storage } from '../constants'
 import ErrorIcon from '@mui/icons-material/Error';
 import { Typography } from '@mui/material';
 import clsx from 'clsx';
 import { makeStyles, createStyles } from '@mui/styles';
 import { encrypt, decrypt } from "../chrome/utils/crypto";
 import { useHistory } from "react-router-dom";
-import { addLocalItem } from "../chrome/utils/storage";
+import { addLocalItem, getSyncItemAsync } from "../chrome/utils/storage";
 import { postPastebin, getPastebin } from "../chrome/utils/pastebin";
 
 const useStyles = makeStyles(theme => ({
@@ -100,7 +100,7 @@ const StyledMenu = styled((props) => (
 
 export function TextCounter(props: any) {
   let MAX = MAX_ENC_TEXT_LENGTH;
-  if(props.menu === Action.ENCRYPT_PASTEBIN){ // button is pastebine enc
+  if (props.menu === Action.ENCRYPT_PASTEBIN) { // button is pastebine enc
     MAX = MAX_PASTEBIN_TEXT_LENGTH;
   }
   const classes = useStyles();
@@ -123,17 +123,15 @@ export default function CustomizedMenus() {
   const buttonEnabled = state.draft.buttonEnabled;
   const menu = state.draft.action;
   const text = state.draft.plaintext;
-  console.log("STATE", state);
+  //console.log("STATE", state);
   let { push, goBack } = useHistory();
 
   const handleClick = (event: any) => {
     setAnchorEl(event.currentTarget);
-
-
   };
+
   const handleClose = (text: Action.ENCRYPT | Action.DECRYPT | Action.DECRYPT_PASTEBIN | Action.ENCRYPT_PASTEBIN) => {
     setAnchorEl(null);
-    // setMenu(text)
     dispatch({ type: Action.UPDATE_ENC_MENU, payload: { action: text, buttonEnabled: buttonEnabled } })
   };
 
@@ -141,7 +139,7 @@ export default function CustomizedMenus() {
 
   const performAction = async (e: any) => {
     let buttonText = e.target.innerText || "";
-    if (buttonText === "Encrypt to Pastebin") {
+    if (buttonText === Action.ENCRYPT_PASTEBIN) {
       let res = await encrypt(text)
       console.log("ENC text", res)
       let newNewlink = await postPastebin(res.data)
@@ -151,8 +149,8 @@ export default function CustomizedMenus() {
         pastebinlink: newNewlink,
         key: res.key,
         enc_text: res.data,
-        enc_mode: state.settings.enc_mode,
-        key_length: state.settings.key_length,
+        enc_mode: res.mode,
+        key_length: res.key_len,
         date: new Date().getTime(),
       }
       addLocalItem(Storage.HISTORY, history)
@@ -170,16 +168,16 @@ export default function CustomizedMenus() {
       console.log("STATE", state)
       push('/result')
 
-    } else if (buttonText === "Encrypt Plaintext") {
+    } else if (buttonText === Action.ENCRYPT) {
       let res = await encrypt(text)
       console.log("ENC text", res)
       const history = {
         action: Action.ENCRYPT,
         id: Math.floor(Math.random()),
-        enc_text: res.data,
         key: res.key,
-        enc_mode: state.settings.enc_mode,
-        key_length: state.settings.key_length,
+        enc_text: res.data,
+        enc_mode: res.mode,
+        key_length: res.key_len,
         date: new Date().getTime(),
       }
       addLocalItem(Storage.HISTORY, history)
@@ -197,18 +195,27 @@ export default function CustomizedMenus() {
       console.log("STATE", state)
       push('/result')
 
-    } else if (buttonText === "Decrypt Pastebin") {
+    } else if (buttonText === Action.DECRYPT_PASTEBIN) {
       let pasteText = await getPastebin(text)
       console.log(pasteText);
       if (pasteText) {
         let key = prompt("Please enter your key") || ""; //TODO - Maybe add text box instead
         let res = decrypt(pasteText, key)
         console.log("SETTING NEW PLAINTEXT TO:", res);
+        dispatch({
+          type: Action.UPDATE_PLAINTEXT,
+          payload: { plaintext: res, action: buttonText, buttonEnabled: buttonEnabled }
+        });
       }
-    } else if (buttonText === "Decrypt Ciphertext") {
+    } else if (buttonText === Action.DECRYPT) {
       let key = prompt("Please enter your key");
       let res = decrypt(text, key ? key : "")
       console.log("SETTING NEW PLAINTEXT TO:", res);
+      dispatch({
+        type: Action.UPDATE_PLAINTEXT,
+        payload: { plaintext: res, action: buttonText, buttonEnabled: buttonEnabled }
+      });
+      // TODO need way to update page, similar to useState
     }
   }
 
@@ -298,20 +305,20 @@ export default function CustomizedMenus() {
             <Divider />
             <MenuItem onClick={e => handleClose(Action.ENCRYPT)} dense disableRipple>
               <LockIcon />
-              Encrypt Plaintext
+              {Action.ENCRYPT}
             </MenuItem>
             <MenuItem onClick={e => handleClose(Action.ENCRYPT_PASTEBIN)} dense disableRipple>
               <LockIcon />
-              Encrypt to Pastebin
+              {Action.ENCRYPT_PASTEBIN}
             </MenuItem>
             <Divider sx={{ my: 0.5 }} />
             <MenuItem onClick={e => handleClose(Action.DECRYPT_PASTEBIN)} dense disableRipple>
               <LockOpenIcon />
-              Decrypt Plaintext
+              {Action.DECRYPT}
             </MenuItem>
             <MenuItem onClick={e => handleClose(Action.DECRYPT_PASTEBIN)} dense disableRipple>
               <LockOpenIcon />
-              Decrypt Pastebin
+              {Action.DECRYPT_PASTEBIN}
             </MenuItem>
           </StyledMenu>
 

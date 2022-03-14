@@ -8,22 +8,22 @@ export const getSyncItem = (key: string | string[] | null, callback: (items: { [
     return chrome.storage.sync.get(key, callback)
 }
 
-export const deleteSyncItem  = (key: string | string[], callback?: () => void) => {
+export const deleteSyncItem = (key: string | string[], callback?: () => void) => {
     return chrome.storage.sync.remove(key, callback)
 }
 
 export const getSyncItemAsync = async (key: string) => {
     return new Promise((resolve, reject) => {
-      chrome.storage.sync.get([key], function (result) {
-        if (result[key] === undefined) {
-          console.log(`${key} not found`)
-          resolve(undefined)
-        } else {
-          resolve(result[key]);
-        }
-      });
+        chrome.storage.sync.get([key], function (result) {
+            if (result[key] === undefined) {
+                console.log(`${key} not found in storage`)
+                resolve(undefined)
+            } else {
+                resolve(result[key]);
+            }
+        });
     });
-  };
+};
 
 
 /////////////////////////  LOCAL STORAGE //////////////////////////////
@@ -36,7 +36,7 @@ export const getLocalItem = (key: string | string[] | null, callback: (items: { 
     return chrome.storage.local.get(key, callback)
 }
 
-export const deleteLocalItem   = (key: string | string[], callback?: () => void) => {
+export const deleteLocalItem = (key: string | string[], callback?: () => void) => {
     return chrome.storage.local.remove(key, callback)
 }
 
@@ -44,7 +44,7 @@ export const addLocalItem = (key: string, value: any, callback?: () => void) => 
     getLocalItem(key, (data) => {
         //console.log("DATA FROM ADD", data);
         let result = data[key];
-        if(!result) {
+        if (!result) {
             result = [];
         }
         result.push(value);
@@ -66,7 +66,7 @@ export const getItemAtIndex = (key: string, index: number, callback: (items: { [
 export const removeItem = (key: string, value: any, index: number, callback?: () => void) => {
     getLocalItem(key, (data) => {
         let result = data[key];
-        if(result && result.length > index) {
+        if (result && result.length > index) {
             result.splice(index, 1);
         }
         return chrome.storage.local.set({ [key]: result }, callback)
