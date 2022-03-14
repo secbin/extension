@@ -141,7 +141,7 @@ export default function CustomizedMenus() {
 
   const performAction = async (e: any) => {
     let buttonText = e.target.innerText || "";
-    if (buttonText === "Encrypt to Pastebin") {
+    if (buttonText === Action.ENCRYPT_PASTEBIN) {
       let res = await encrypt(text)
       console.log("ENC text", res)
       let newNewlink = await postPastebin(res.data)
@@ -170,7 +170,7 @@ export default function CustomizedMenus() {
       console.log("STATE", state)
       push('/result')
 
-    } else if (buttonText === "Encrypt Plaintext") {
+    } else if (buttonText === Action.ENCRYPT) {
       let res = await encrypt(text)
       console.log("ENC text", res)
       const history = {
@@ -197,7 +197,7 @@ export default function CustomizedMenus() {
       console.log("STATE", state)
       push('/result')
 
-    } else if (buttonText === "Decrypt Pastebin") {
+    } else if (buttonText === Action.DECRYPT_PASTEBIN) {
       let pasteText = await getPastebin(text)
       console.log(pasteText);
       if (pasteText) {
@@ -205,7 +205,7 @@ export default function CustomizedMenus() {
         let res = decrypt(pasteText, key)
         console.log("SETTING NEW PLAINTEXT TO:", res);
       }
-    } else if (buttonText === "Decrypt Ciphertext") {
+    } else if (buttonText === Action.DECRYPT) {
       let key = prompt("Please enter your key");
       let res = decrypt(text, key ? key : "")
       console.log("SETTING NEW PLAINTEXT TO:", res);
@@ -298,20 +298,20 @@ export default function CustomizedMenus() {
             <Divider />
             <MenuItem onClick={e => handleClose(Action.ENCRYPT)} dense disableRipple>
               <LockIcon />
-              Encrypt Plaintext
+              {Action.ENCRYPT}
             </MenuItem>
             <MenuItem onClick={e => handleClose(Action.ENCRYPT_PASTEBIN)} dense disableRipple>
               <LockIcon />
-              Encrypt to Pastebin
+              {Action.ENCRYPT_PASTEBIN}
             </MenuItem>
             <Divider sx={{ my: 0.5 }} />
             <MenuItem onClick={e => handleClose(Action.DECRYPT_PASTEBIN)} dense disableRipple>
               <LockOpenIcon />
-              Decrypt Plaintext
+              {Action.DECRYPT}
             </MenuItem>
             <MenuItem onClick={e => handleClose(Action.DECRYPT_PASTEBIN)} dense disableRipple>
               <LockOpenIcon />
-              Decrypt Pastebin
+              {Action.DECRYPT_PASTEBIN}
             </MenuItem>
           </StyledMenu>
 
