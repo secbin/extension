@@ -14,7 +14,7 @@ import ListItemText from '@mui/material/ListItemText';
 import InputBase from '@mui/material/InputBase';
 import { MAX_PASTEBIN_TEXT_LENGTH, MAX_ENC_TEXT_LENGTH, Action, Storage } from '../constants'
 import ErrorIcon from '@mui/icons-material/Error';
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Typography } from '@mui/material';
 import clsx from 'clsx';
 import { makeStyles, createStyles } from '@mui/styles';
 import { encrypt, decrypt } from "../chrome/utils/crypto";
@@ -24,6 +24,7 @@ import { postPastebin, getPastebin } from "../chrome/utils/pastebin";
 
 let buttonText = "";
 let decKey = ""
+let password = ""
 
 const useStyles = makeStyles(theme => ({
   counterContainer: {
@@ -133,7 +134,8 @@ export default function CustomizedMenus() {
   const buttonEnabled = state.draft.buttonEnabled;
   const menu = state.draft.action;
   const text = state.draft.plaintext;
-  const [openForm, setOpenForm] = React.useState(false);
+  const [openDecForm, setOpenDecForm] = React.useState(false);
+  const [openEncForm, setOpenEncForm] = React.useState(false);
   //console.log("STATE", state);
   let { push, goBack } = useHistory();
 
@@ -150,16 +152,16 @@ export default function CustomizedMenus() {
     buttonText = e.target.innerText || "";
     console.log("ACTION", e.target.innerText, buttonText);
     if (buttonText === Action.DECRYPT_PASTEBIN || buttonText === Action.DECRYPT) {
-      setOpenForm(true);
-    } else {
-      performAction();
+      setOpenDecForm(true);
+    } else if (buttonText === Action.ENCRYPT_PASTEBIN || buttonText === Action.ENCRYPT) {
+      setOpenEncForm(true);
     }
   }
 
   const performAction = async () => {
     //let buttonText = e.target.innerText || "";
     if (buttonText === Action.ENCRYPT_PASTEBIN) {
-      let res = await encrypt(text)
+      let res = await encrypt(text, password)
       console.log("ENC text", res)
       let newNewlink = await postPastebin(res.data)
       const history = {
@@ -188,7 +190,7 @@ export default function CustomizedMenus() {
       push('/result')
 
     } else if (buttonText === Action.ENCRYPT) {
-      let res = await encrypt(text)
+      let res = await encrypt(text, password)
       console.log("ENC text", res)
       const history = {
         action: Action.ENCRYPT,
@@ -268,19 +270,19 @@ export default function CustomizedMenus() {
   function DecryptFormDialog() {
     const [key, setKey] = React.useState("");
     const handleClose = () => {
-      setOpenForm(false);
+      setOpenDecForm(false);
       decKey = key;
       console.log("Setting the decKey:", decKey);
       performAction();
     };
 
     const handleCancel = () => {
-      setOpenForm(false);
+      setOpenDecForm(false);
     };
 
     return (
       <div>
-        <Dialog open={openForm} onClose={handleClose} >
+        <Dialog open={openDecForm} onClose={handleClose} >
           <DialogTitle>
             <Typography variant={'h3'}>Enter your Decryption Key:</Typography>
           </DialogTitle>
@@ -297,6 +299,55 @@ export default function CustomizedMenus() {
           </DialogContent>
           <DialogActions>
             <Button onClick={handleCancel}>Cancel</Button>
+            <Button onClick={handleClose}>Enter</Button>
+          </DialogActions>
+        </Dialog>
+      </div>
+    );
+  }
+
+  function EncryptFormDialog() {
+    const [key, setKey] = React.useState("");
+    const handleClose = () => {
+      setOpenEncForm(false);
+      password = key;
+      console.log("Setting the password:", password);
+      performAction();
+    };
+
+    const handleRandom = () => {
+      performAction();
+    };
+
+    const handleCancel = () => {
+      setOpenEncForm(false);
+    };
+
+    return (
+      <div>
+        <Dialog open={openEncForm} onClose={handleClose} >
+          <DialogTitle>
+            <Typography variant={'h3'}>Enter a Password:</Typography>
+          </DialogTitle>
+          <Divider />
+          <DialogContent>
+            <DialogContentText>
+              <Typography variant={'body2'}>
+                Enter a password or select random to generate a random key.
+              </Typography>
+            </DialogContentText>
+            <Card className={classes.copybox}>
+              <InputBase
+                autoFocus
+                placeholder={"Password"}
+                fullWidth
+                onChange={(event) => { setKey(event.target.value) }}
+              />
+            </Card>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCancel}>Cancel</Button>
+            <Button onClick={handleRandom}>Random</Button>
             <Button onClick={handleClose}>Enter</Button>
           </DialogActions>
         </Dialog>
@@ -381,6 +432,7 @@ export default function CustomizedMenus() {
             </MenuItem>
           </StyledMenu>
           <DecryptFormDialog />
+          <EncryptFormDialog />
         </div>
       </div>
     </>
