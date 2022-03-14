@@ -14,13 +14,16 @@ import ListItemText from '@mui/material/ListItemText';
 import InputBase from '@mui/material/InputBase';
 import { MAX_PASTEBIN_TEXT_LENGTH, MAX_ENC_TEXT_LENGTH, Action, Storage } from '../constants'
 import ErrorIcon from '@mui/icons-material/Error';
-import { Typography } from '@mui/material';
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Typography } from '@mui/material';
 import clsx from 'clsx';
 import { makeStyles, createStyles } from '@mui/styles';
 import { encrypt, decrypt } from "../chrome/utils/crypto";
 import { useHistory } from "react-router-dom";
 import { addLocalItem, getSyncItemAsync } from "../chrome/utils/storage";
 import { postPastebin, getPastebin } from "../chrome/utils/pastebin";
+
+let buttonText = "";
+let decKey = ""
 
 const useStyles = makeStyles(theme => ({
   counterContainer: {
@@ -54,6 +57,14 @@ const useStyles = makeStyles(theme => ({
   },
   large: {
     fontSize: '36px',
+  }, copybox: {
+    paddingLeft: 10,
+    paddingRight: 10,
+    borderRadius: 6,
+    border: '1px solid #E0E0E0',
+    boxShadow: '0 0 7px 0 rgba(0,0,0,0.04)',
+    marginTop: 20,
+    marginBottom: 14,
   },
 }));
 
@@ -114,7 +125,6 @@ export function TextCounter(props: any) {
   );
 }
 
-
 export default function CustomizedMenus() {
   const classes = useStyles();
   const { state, dispatch } = useContext(AppContext);
@@ -123,6 +133,7 @@ export default function CustomizedMenus() {
   const buttonEnabled = state.draft.buttonEnabled;
   const menu = state.draft.action;
   const text = state.draft.plaintext;
+  const [openForm, setOpenForm] = React.useState(false);
   //console.log("STATE", state);
   let { push, goBack } = useHistory();
 
@@ -135,10 +146,18 @@ export default function CustomizedMenus() {
     dispatch({ type: Action.UPDATE_ENC_MENU, payload: { action: text, buttonEnabled: buttonEnabled } })
   };
 
+  const actionWrapper = async (e: any) => {
+    buttonText = e.target.innerText || "";
+    console.log("ACTION", e.target.innerText, buttonText);
+    if (buttonText === Action.DECRYPT_PASTEBIN || buttonText === Action.DECRYPT) {
+      setOpenForm(true);
+    } else {
+      performAction();
+    }
+  }
 
-
-  const performAction = async (e: any) => {
-    let buttonText = e.target.innerText || "";
+  const performAction = async () => {
+    //let buttonText = e.target.innerText || "";
     if (buttonText === Action.ENCRYPT_PASTEBIN) {
       let res = await encrypt(text)
       console.log("ENC text", res)
@@ -196,26 +215,27 @@ export default function CustomizedMenus() {
       push('/result')
 
     } else if (buttonText === Action.DECRYPT_PASTEBIN) {
-      let pasteText = await getPastebin(text)
-      console.log(pasteText);
-      if (pasteText) {
-        let key = prompt("Please enter your key") || ""; //TODO - Maybe add text box instead
-        let res = decrypt(pasteText, key)
+      if (decKey !== "") {
+        let pasteText = await getPastebin(text)
+        if (pasteText) {
+          let res = decrypt(pasteText, decKey)
+          console.log("SETTING NEW PLAINTEXT TO:", res);
+          dispatch({
+            type: Action.UPDATE_PLAINTEXT,
+            payload: { plaintext: res, action: buttonText, buttonEnabled: buttonEnabled }
+          });
+        }
+      }
+    } else if (buttonText === Action.DECRYPT) {
+      if (decKey !== "") {
+        console.log("Key:", decKey);
+        let res = decrypt(text, decKey)
         console.log("SETTING NEW PLAINTEXT TO:", res);
         dispatch({
           type: Action.UPDATE_PLAINTEXT,
           payload: { plaintext: res, action: buttonText, buttonEnabled: buttonEnabled }
         });
       }
-    } else if (buttonText === Action.DECRYPT) {
-      let key = prompt("Please enter your key");
-      let res = decrypt(text, key ? key : "")
-      console.log("SETTING NEW PLAINTEXT TO:", res);
-      dispatch({
-        type: Action.UPDATE_PLAINTEXT,
-        payload: { plaintext: res, action: buttonText, buttonEnabled: buttonEnabled }
-      });
-      // TODO need way to update page, similar to useState
     }
   }
 
@@ -244,6 +264,45 @@ export default function CustomizedMenus() {
     // setButtonEnabled(buttonEnabled)
     dispatch({ type: Action.UPDATE_PLAINTEXT, payload: { plaintext: textbox, action: buttonText, buttonEnabled: buttonEnabled } });
   };
+
+  function DecryptFormDialog() {
+    const [key, setKey] = React.useState("");
+    const handleClose = () => {
+      setOpenForm(false);
+      decKey = key;
+      console.log("Setting the decKey:", decKey);
+      performAction();
+    };
+
+    const handleCancel = () => {
+      setOpenForm(false);
+    };
+
+    return (
+      <div>
+        <Dialog open={openForm} onClose={handleClose} >
+          <DialogTitle>
+            <Typography variant={'h3'}>Enter your Decryption Key:</Typography>
+          </DialogTitle>
+          <Divider />
+          <DialogContent>
+            <Card className={classes.copybox}>
+              <InputBase
+                autoFocus
+                placeholder={"Dec Key"}
+                fullWidth
+                onChange={(event) => { setKey(event.target.value) }}
+              />
+            </Card>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCancel}>Cancel</Button>
+            <Button onClick={handleClose}>Enter</Button>
+          </DialogActions>
+        </Dialog>
+      </div>
+    );
+  }
 
 
 
@@ -275,7 +334,7 @@ export default function CustomizedMenus() {
             className={classes.hoverStyle}
             style={{ minWidth: 100, textAlign: 'center', backgroundColor: '#1D6BC6', color: 'white', margin: 15, borderRadius: 50, marginLeft: 'auto' }}>
             <ListItemButton sx={{ ml: 1, flex: 1, height: 40, textAlign: 'center', fontWeight: 800 }}
-              onClick={performAction}
+              onClick={actionWrapper}
               id="demo-customized-button"
               aria-controls={open ? 'demo-customized-menu' : undefined}
               aria-haspopup="true"
@@ -321,7 +380,7 @@ export default function CustomizedMenus() {
               {Action.DECRYPT_PASTEBIN}
             </MenuItem>
           </StyledMenu>
-
+          <DecryptFormDialog />
         </div>
       </div>
     </>
