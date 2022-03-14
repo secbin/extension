@@ -11,7 +11,7 @@ export async function encrypt(data: string){
     // encode data to string
     const cTXT = JSON.stringify(encRes.CipherData);
     
-    return {data: cTXT, key: encRes.Key}
+    return {data: cTXT, key: encRes.Key, mode:mode, key_len: len}
 }
 
 // Encrpts a string using the AES algorithm. Optional parameter: Password, AES Mode

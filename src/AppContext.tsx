@@ -43,7 +43,7 @@ function getSettingsValuesFromStorage() {
     return {
         api_key: "",
         enc_mode: "",
-        key_length: 16,
+        key_length: -1,
         theme: false,
     } as SettingsType
 }
@@ -75,7 +75,7 @@ const initialState = {
     settings: {
         api_key: "",
         enc_mode: "",
-        key_length: 16,
+        key_length: -1,
         theme: false,
     },
 }
