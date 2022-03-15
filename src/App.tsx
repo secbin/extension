@@ -1,6 +1,5 @@
 import React, { useEffect, useContext, useReducer, useState } from 'react';
 import { Route, Switch } from 'react-router-dom';
-import { About } from "./routes/About";
 import { Home } from "./routes/Home";
 import SettingsIcon from '@mui/icons-material/Settings';
 import { Settings } from './routes/Settings'
@@ -15,8 +14,6 @@ import HistoryIcon from '@mui/icons-material/History';
 import ContentPasteIcon from '@mui/icons-material/ContentPaste';
 import { AppProvider, AppContext } from './AppContext';
 import { DEFAULT_CONTEXT } from './constants'
-import logoimg from '../assets/img/securebinlogo.svg'
-import logoimg_dark from '../assets/img/securebinlogo_dark.svg'
 import { Storage } from './constants'
 import { green, purple } from '@mui/material/colors';
 import Result from './routes/Result';
@@ -127,7 +124,7 @@ export const App = () => {
 
     useEffect(() => {
         getLocalItem(Storage.HISTORY, (data) => {
-            console.log("HISTORY from there", data[Storage.HISTORY]);
+            //console.log("HISTORY from there", data[Storage.HISTORY]);
             setHistory(data[Storage.HISTORY]);
         })
     }, []);
@@ -167,9 +164,6 @@ export const App = () => {
             </div>
             <div className={classes.content}>
             <Switch >
-                <Route path="/about">
-                    <About/>
-                </Route>
                 <Route path="/home">
                     <Home/>
                 </Route>

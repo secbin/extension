@@ -94,16 +94,16 @@ export default function Result(props: any) {
 
     useEffect(() => {
         getLocalItem(Storage.HISTORY, (data) => {
-            console.log("HISTORY from there", data[Storage.HISTORY]);
+            //console.log("HISTORY from there", data[Storage.HISTORY]);
             setHistory(data[Storage.HISTORY]);
             setResult(state.history.pop() || data[Storage.HISTORY].pop());
         })
-        console.log("HISTORY state", history)
+        //console.log("HISTORY state", history)
         // console.log("LAST ITEM", lastItem)
-        console.log("HISTORY CONTEXT", historyContext);
-        console.log("LAST ITEM ITEM", history[history.length - 1]);
+      //  console.log("HISTORY CONTEXT", historyContext);
+        //console.log("LAST ITEM ITEM", history[history.length - 1]);
 
-        console.log("SET RESULT", result);
+      //  console.log("SET RESULT", result);
         return function cleanup () {
             dispatch({type: Action.CLEAR_HISTORY});
         }
@@ -113,17 +113,8 @@ export default function Result(props: any) {
     const { state, dispatch } = React.useContext(AppContext);
     const classes = useStyles();
     const historyContext = state.history;
-    // const key = state.draft.key ;
-    // const link = state.draft.pastebinlink;
-    // const ctxt = state.draft.ciphertext;
     const [history, setHistory] = React.useState<LHistoryType[]>([]);
     const [result, setResult] = React.useState<any>();
-
-    // const lastItem = historyContext ? historyContext[history.length - 1] : history[history.length - 1];
-
-
-
-
 
     return (
         <div className={classes.center}>
@@ -202,4 +193,3 @@ export default function Result(props: any) {
         </div>
     );
 }
-

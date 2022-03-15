@@ -48,7 +48,7 @@ function usePasteBinPost(encryptQuery) {
             if (!ignore) {
                 setLoading(false);
                 setError(false);
-                console.log(responseBody);
+                //console.log(responseBody);
                 setResult(responseBody || []);
             }
         }
