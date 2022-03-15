@@ -1,0 +1,98 @@
+Arguments: 
+  /opt/homebrew/Cellar/node/17.2.0/bin/node /opt/homebrew/Cellar/yarn/1.22.17_2/libexec/bin/yarn.js start
+
+PATH: 
+  /opt/homebrew/bin:/opt/homebrew/sbin:/Users/bindeman/bin:/Users/bindeman/.cargo/bin:/Users/bindeman/.cabal/bin:/Users/bindeman/.ghcup/bin:/Library/Frameworks/Python.framework/Versions/3.7/bin:/Library/Frameworks/Python.framework/Versions/3.7/bin:/Users/bindeman/Downloads/google-cloud-sdk/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Library/Apple/usr/bin:/Users/bindeman/iCloud Drive (Archive)/Dev/securebin/securebin/node_modules/.bin
+
+Yarn version: 
+  1.22.17
+
+Node version: 
+  17.2.0
+
+Platform: 
+  darwin arm64
+
+Trace: 
+  SyntaxError: /Users/bindeman/iCloud Drive (Archive)/Dev/securebin/securebin/package.json: Unexpected token < in JSON at position 87
+      at JSON.parse (<anonymous>)
+      at /opt/homebrew/Cellar/yarn/1.22.17_2/libexec/lib/cli.js:1625:59
+      at Generator.next (<anonymous>)
+      at step (/opt/homebrew/Cellar/yarn/1.22.17_2/libexec/lib/cli.js:310:30)
+      at /opt/homebrew/Cellar/yarn/1.22.17_2/libexec/lib/cli.js:321:13
+
+npm manifest: 
+  {
+    "name": "chrome-react-extension-example",
+    "version": "0.1.0",
+    "private": true,
+  <<<<<<< HEAD
+    "proxy": "https://cors-anywhere.herokuapp.com/",
+  =======
+    "proxy": "http://0.0.0.0:8080",
+  >>>>>>> 96ae4ac3b2b604aada9948387908739d4cd2c0ec
+    "dependencies": {
+      "@craco/craco": "^5.8.0",
+      "@emotion/react": "^11.7.1",
+      "@emotion/styled": "^11.6.0",
+      "@mui/icons-material": "^5.4.2",
+      "@mui/material": "^5.4.2",
+      "@testing-library/jest-dom": "^5.11.4",
+      "@testing-library/react": "^11.1.0",
+      "@testing-library/user-event": "^12.1.10",
+      "@types/jest": "^26.0.15",
+      "@types/node": "^12.0.0",
+      "@types/react": "^16.9.53",
+      "@types/react-dom": "^16.9.8",
+  <<<<<<< HEAD
+      "cors-anywhere": "^0.4.4",
+      "node-forge": "^1.2.1",
+      "clsx": "^1.1.1",
+      "pastebin-js": "^1.0.6",
+  =======
+      "clsx": "^1.1.1",
+      "pastebin-js": "^1.0.6",
+      "pastebin-ts": "^1.2.0",
+  >>>>>>> 96ae4ac3b2b604aada9948387908739d4cd2c0ec
+      "react": "^17.0.1",
+      "react-dom": "^17.0.1",
+      "react-router-dom": "^5.2.0",
+      "react-scripts": "^5.0.0",
+      "typescript": "4.0.5",
+      "web-vitals": "^0.2.4"
+    },
+    "scripts": {
+      "start": "react-scripts start",
+      "build": "INLINE_RUNTIME_CHUNK=false craco build",
+      "test": "react-scripts test",
+      "eject": "react-scripts eject"
+    },
+    "eslintConfig": {
+      "extends": [
+        "react-app"
+      ]
+    },
+    "browserslist": {
+      "production": [
+        ">0.2%",
+        "not dead",
+        "not op_mini all"
+      ],
+      "development": [
+        "last 1 chrome version",
+        "last 1 firefox version",
+        "last 1 safari version"
+      ]
+    },
+    "devDependencies": {
+      "@types/chrome": "^0.0.126",
+      "@types/node-forge": "^1.0.0",
+      "@types/react-router-dom": "^5.1.6"
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile

@@ -69,8 +69,12 @@ const useStyles = makeStyles(theme => ({
     textArea: {
         width: 350,
     },
-    marginTop: {
+    bottomButton: {
         marginTop: 10,
+        marginBottom: 15,
+    },
+    buttonMarginBottom: {
+        marginBottom: 20,
     }
 
 }));
@@ -175,7 +179,7 @@ export default function Result(props: any) {
                     </IconButton>
                 </Card>
                 </div>
-                    <Button className={classes.marginTop} startIcon={<ChevronLeft />} onClick={() => { goBack()}}>Back</Button>
+                    <Button className={classes.bottomButton} startIcon={<ChevronLeft />} onClick={() => { goBack()}}>Back</Button>
                 </>
             ) : (
                 <>

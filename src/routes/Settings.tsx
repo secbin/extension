@@ -117,7 +117,7 @@ export const Settings = () => {
 
   return (
     <div>
-      <Typography variant='h2' className={classes.pageHeading} >Settings</Typography>
+      <Typography variant='h2' className={classes.pageHeading}>Settings</Typography>
       <List className={classes.list}>
         <Typography variant={'h4'}>Theme</Typography>
         <Card classes={{ root: classes.card }}>

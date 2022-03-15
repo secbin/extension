@@ -87,10 +87,11 @@ export default function History() {
     const classes = useStyles();
     let lastLastDate = 0;
     //TODO Add moment JS to calculate time
+
     return (
         <>
-            {/*TODO Add moment to show times daily*/}
-            {!history.length ? (
+            {/* @ts-ignore */}
+            {!history && !history?.length ? (
                 <div className={classes.center}>
                     <HistoryIcon className={clsx(classes.icon, classes.grey)} />
                     <Typography variant={'h2'}>No History</Typography>
@@ -113,7 +114,7 @@ export default function History() {
             {/*{<Typography variant={'h4'}>Today</Typography>}*/}
             <Card variant="outlined" classes={{root: classes.card}}>
                 <ListItem key={item?.pastebinlink}>
-                    <ListItemText primary={item?.pastebinlink ? item.pastebinlink : "Encrypted Plaintext"} secondary={printDateInCorrectFormat(item.date)} />
+                    <ListItemText primary={item?.pastebinlink ? item.pastebinlink : `${item.key_length * 8} ${item.enc_mode} Encrypted Plaintext`} secondary={printDateInCorrectFormat(item.date)} />
                     <IconButton color="primary" aria-label="Unlock CipherText" onClick={(e) => handleHistory(item)}>
                       <InfoOutlinedIcon />
                     </IconButton>

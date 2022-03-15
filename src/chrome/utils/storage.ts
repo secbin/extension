@@ -32,6 +32,18 @@ export const setLocalItem = (key: string, value: any, callback?: () => void) => 
     chrome.storage.local.set({ [key]: value }, callback)
 }
 
+export const setLocalItemAsync = async (key: string, value: any) => {
+    return new Promise((resolve, reject) => {
+      try {
+        chrome.storage.local.set({[key]: value}, function() {
+          resolve(true);
+        });
+      } catch (ex) {
+        reject(ex);
+      }
+    });
+  };
+
 export const getLocalItem = (key: string | string[] | null, callback: (items: { [key: string]: any; }) => void) => {
     return chrome.storage.local.get(key, callback)
 }

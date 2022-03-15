@@ -176,19 +176,30 @@ export default function CustomizedMenus() {
         key_length: res.key_len,
         date: new Date().getTime(),
       }
-      addLocalItem(Storage.HISTORY, history)
 
-      dispatch({
-        type: Action.ENCRYPT_PASTEBIN,
-        payload: {
-          action: Action.ENCRYPT_PASTEBIN,
-          plaintext: textBox,
-          enc_text: res.data,
-          key: res.key,
+      dispatch({type: Action.ADD_TO_HISTORY, payload: {
+          id: Math.floor(Math.random()),
           pastebinlink: newNewlink,
-        },
+          enc_mode: res.mode,
+          key_length: res.key_len,
+          key: res.key,
+          enc_text: res.data,
+          date: new Date(),
+        }
       })
-      //console.log("STATE", state)
+      addLocalItem(Storage.HISTORY, history);
+      // dispatch({
+      //   type: Action.ENCRYPT_PASTEBIN,
+      //   payload: {
+      //     action: Action.ENCRYPT_PASTEBIN,
+      //     plaintext: textBox,
+      //     enc_text: res.data,
+      //     key: res.key,
+      //     pastebinlink: newNewlink,
+      //   },
+      // })
+      console.log("STATE", state)
+
       push('/result')
 
     } else if (buttonText === Action.ENCRYPT) {
@@ -203,19 +214,31 @@ export default function CustomizedMenus() {
         key_length: res.key_len,
         date: new Date().getTime(),
       }
+
+      dispatch({type: Action.ADD_TO_HISTORY, payload: {
+          id: Math.floor(Math.random()),
+          pastebinlink: "",
+          enc_mode: res.mode,
+          key_length: res.key_len,
+          key: res.key,
+          enc_text: res.data,
+          date: new Date(),
+        }
+      })
       addLocalItem(Storage.HISTORY, history)
 
       // @ts-ignore
-      dispatch({
-        type: Action.ENCRYPT,
-        payload: {
-          action: Action.ENCRYPT,
-          plaintext: textBox,
-          enc_text: res.data,
-          key: res.key,
-        },
-      })
-      //console.log("STATE", state)
+      // dispatch({
+      //   type: Action.ENCRYPT,
+      //   payload: {
+      //     action: Action.ENCRYPT,
+      //     plaintext: textBox,
+      //     enc_text: res.data,
+      //     key: res.key,
+      //   },
+      // })
+      console.log("STATE", state)
+
       push('/result')
 
     } else if (buttonText === Action.DECRYPT_PASTEBIN) {
