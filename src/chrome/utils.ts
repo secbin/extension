@@ -1,3 +1,5 @@
+import moment from "moment";
+
 export const getCurrentTabUrl = (callback: (url: string | undefined) => void): void => {
     const queryInfo = {active: true, lastFocusedWindow: true};
 
@@ -12,6 +14,16 @@ export const getCurrentTabUId = (callback: (url: number | undefined) => void): v
     chrome.tabs && chrome.tabs.query(queryInfo, tabs => {
         callback(tabs[0].id);
     });
+}
+
+export const printDateInCorrectFormat = (dateOfEvent: number) => {
+    const now = new Date().getTime();
+    let eventDate = new Date(dateOfEvent).getTime();
+    if(Math.abs(now - eventDate ) < 170000000) {
+        return moment(dateOfEvent).fromNow();
+    } else {
+        return moment(dateOfEvent).format('MMMM D, YYYY');
+    }
 }
 
 export function copyTextClipboard(text: string | undefined) {

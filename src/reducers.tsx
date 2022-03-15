@@ -20,7 +20,7 @@ type HistoryPayload = {
         enc_mode: string,
         key_length: number,
         key: string,
-        ciphertext: string,
+        enc_text: string,
         date: Date,
     };
     [Action.CLEAR_HISTORY] : undefined,
@@ -33,13 +33,13 @@ type DraftPayload = {
     [Action.ENCRYPT] : {
         action: Action.ENCRYPT,
         plaintext: string,
-        ciphertext: string,
+        enc_text: string,
         key: string,
     };
     [Action.ENCRYPT_PASTEBIN] : {
         action: Action.ENCRYPT_PASTEBIN,
         plaintext: string,
-        ciphertext: string,
+        enc_text: string,
         key: string,
         pastebinlink: string,
     };
@@ -77,7 +77,7 @@ export const historyReducer = (state: HistoryType[], action: SettingsActions | D
                 {
                     id: action.payload.id,
                     pastebinlink: action.payload.pastebinlink,
-                    ciphertext: action.payload.ciphertext,
+                    enc_text: action.payload.enc_text,
                     key: action.payload.key,
                     enc_mode: action.payload.enc_mode,
                     key_length: action.payload.key_length,
@@ -102,7 +102,7 @@ export const draftReducer = (state: DraftType, action: SettingsActions | DraftAc
                     ...state,
                     action: action.payload.action,
                     plaintext: action.payload.plaintext,
-                    ciphertext: action.payload.ciphertext,
+                enc_text: action.payload.enc_text,
                     key: action.payload.key,
             }
         case Action.ENCRYPT_PASTEBIN:
@@ -110,7 +110,7 @@ export const draftReducer = (state: DraftType, action: SettingsActions | DraftAc
                 ...state,
                 action: action.payload.action,
                 plaintext: action.payload.plaintext,
-                ciphertext: action.payload.ciphertext,
+                enc_text: action.payload.enc_text,
                 key: action.payload.key,
                 pastebinlink: action.payload.pastebinlink,
             }

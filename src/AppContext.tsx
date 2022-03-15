@@ -15,7 +15,7 @@ export type DraftType = {
     action: Action.DECRYPT | Action.DECRYPT_PASTEBIN | Action.ENCRYPT | Action.ENCRYPT_PASTEBIN,
     plaintext: string,
     buttonEnabled: boolean,
-    ciphertext: string,
+    enc_text: string,
     pastebinlink: string,
     key: string,
     success: any
@@ -27,7 +27,7 @@ export type HistoryType = {
     enc_mode: string,
     key_length: number,
     key: string,
-    ciphertext: string,
+    enc_text: string,
     date: Date,
 }
 
@@ -67,7 +67,7 @@ const initialState = {
         action: Action.ENCRYPT,
         plaintext: "",
         buttonEnabled: false,
-        ciphertext: "",
+        enc_text: "",
         pastebinlink: "",
         key: "",
         success: "",

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, {useContext, useEffect } from "react";
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
@@ -6,8 +6,12 @@ import {Card, IconButton, Typography } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import { getLocalItem, getSyncItem } from '../chrome/utils/storage';
-import { Storage } from '../constants'
+import {Action, Storage } from '../constants'
 import moment from "moment";
+import {AppContext, HistoryType } from "../AppContext";
+import { useHistory } from "react-router-dom";
+import { printDateInCorrectFormat } from "../chrome/utils";
+
 
 const useStyles = makeStyles(theme => ({
     card: {
@@ -29,17 +33,21 @@ const useStyles = makeStyles(theme => ({
     }
 }));
 
-const now = new Date().getTime();
-const printDateInCorrectFormat = (dateOfEvent: number) => {
-    let eventDate = new Date(dateOfEvent).getTime();
-    if(Math.abs(now - eventDate ) < 170000000) {
-        return moment(dateOfEvent).fromNow();
-    } else {
-        return moment(dateOfEvent).format('MMMM D, YYYY');
-    }
-}
+// const history = {
+//     action: Action.ENCRYPT_PASTEBIN,
+//     id: Math.floor(Math.random()),
+//     pastebinlink: newNewlink,
+//     key: res.key,
+//     enc_text: res.data,
+//     enc_mode: res.mode,
+//     key_length: res.key_len,
+//     date: new Date().getTime(),
+// }
 
 export default function History() {
+    let { push, goBack } = useHistory();
+    const { state, dispatch } = useContext(AppContext);
+
     useEffect(() => {
 
         getLocalItem(Storage.HISTORY, (data) => {
@@ -48,6 +56,21 @@ export default function History() {
         })
 
     }, []);
+
+    const handleHistory = (item: HistoryType) => {
+        dispatch({type: Action.ADD_TO_HISTORY, payload: {
+                id: item.id,
+                pastebinlink: item.pastebinlink,
+                enc_mode: item.enc_mode,
+                key_length: item.key_length,
+                key: item.key,
+                enc_text: item.enc_text,
+                date: item.date,
+            }
+        })
+
+        push('/result');
+    }
 
     const [history, setHistory] = React.useState([]);
     const classes = useStyles();
@@ -66,12 +89,12 @@ export default function History() {
                 }
                 return (
             <>
-            {showitem && (<Typography variant='h4'>{printDateInCorrectFormat(item.date)}</Typography>)}
+            {showitem && (<Typography variant='h4'>{moment(item.date).format('MMMM D, YYYY')}</Typography>)}
             {/*{<Typography variant={'h4'}>Today</Typography>}*/}
             <Card variant="outlined" classes={{root: classes.card}}>
                 <ListItem key={item?.pastebinlink}>
                     <ListItemText primary={item?.pastebinlink ? item.pastebinlink : "Encrypted Plaintext"} secondary={printDateInCorrectFormat(item.date)} />
-                    <IconButton color="primary" aria-label="Unlock CipherText">
+                    <IconButton color="primary" aria-label="Unlock CipherText" onClick={(e) => handleHistory(item)}>
                       <LockOpenIcon />
                     </IconButton>
                 </ListItem>
@@ -84,4 +107,3 @@ export default function History() {
         </>
     );
 }
-

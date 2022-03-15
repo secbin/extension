@@ -183,7 +183,7 @@ export default function CustomizedMenus() {
         payload: {
           action: Action.ENCRYPT_PASTEBIN,
           plaintext: textBox,
-          ciphertext: res.data,
+          enc_text: res.data,
           key: res.key,
           pastebinlink: newNewlink,
         },
@@ -211,7 +211,7 @@ export default function CustomizedMenus() {
         payload: {
           action: Action.ENCRYPT,
           plaintext: textBox,
-          ciphertext: res.data,
+          enc_text: res.data,
           key: res.key,
         },
       })
@@ -359,8 +359,6 @@ export default function CustomizedMenus() {
       </div>
     );
   }
-
-
 
   // @ts-ignore
   return (

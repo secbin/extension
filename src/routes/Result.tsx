@@ -6,9 +6,9 @@ import ErrorIcon from '@mui/icons-material/Error';
 import { makeStyles, createStyles } from '@mui/styles';
 import { AppContext, HistoryType } from "../AppContext";
 import { getLocalItem, getSyncItem } from '../chrome/utils/storage';
-import { Storage } from '../constants'
+import {Action, Storage } from '../constants'
 import clsx from "clsx";
-import { copyTextClipboard } from "../chrome/utils"
+import { copyTextClipboard, printDateInCorrectFormat } from "../chrome/utils"
 import { useHistory } from "react-router-dom";
 import {ChevronLeft } from "@mui/icons-material";
 
@@ -58,6 +58,9 @@ const useStyles = makeStyles(theme => ({
     blue: {
         color: 'cadetblue'
     },
+    grey: {
+        color: 'grey',
+    },
     left: {
         textAlign: 'left',
         marginLeft: 10,
@@ -89,26 +92,40 @@ export default function Result(props: any) {
         getLocalItem(Storage.HISTORY, (data) => {
             console.log("HISTORY from there", data[Storage.HISTORY]);
             setHistory(data[Storage.HISTORY]);
+            setResult(state.history.pop() || data[Storage.HISTORY].pop());
         })
-    }, []);
+        console.log("HISTORY state", history)
+        // console.log("LAST ITEM", lastItem)
+        console.log("HISTORY CONTEXT", historyContext);
+        console.log("LAST ITEM ITEM", history[history.length - 1]);
+
+        console.log("SET RESULT", result);
+        return function cleanup () {
+            dispatch({type: Action.CLEAR_HISTORY});
+        }
+    }, [])
 
     let {push, goBack} = useHistory();
     const { state, dispatch } = React.useContext(AppContext);
     const classes = useStyles();
+    const historyContext = state.history;
     // const key = state.draft.key ;
     // const link = state.draft.pastebinlink;
     // const ctxt = state.draft.ciphertext;
     const [history, setHistory] = React.useState<LHistoryType[]>([]);
-    const lastItem = history[history.length - 1]
+    const [result, setResult] = React.useState<any>();
 
-    console.log("HISTORY state", history)
-    console.log("LAST ITEM", lastItem)
+    // const lastItem = historyContext ? historyContext[history.length - 1] : history[history.length - 1];
+
+
+
+
 
     return (
         <div className={classes.center}>
-            {lastItem && (
+            {result ? (
                 <>
-                    {lastItem?.pastebinlink && lastItem?.pastebinlink.includes("Error") ? (
+                {result?.pastebinlink && result?.pastebinlink.includes("Error") ? (
                 <>
                 <ErrorIcon className={clsx(classes.icon, classes.red)} />
                 <Typography variant={'h2'}>Error posting to Pastebin</Typography>
@@ -116,25 +133,25 @@ export default function Result(props: any) {
                 ) : (
                 <>
                 <CheckCircleIcon className={clsx(classes.icon, classes.green)}/>
-                    {lastItem?.pastebinlink && lastItem?.pastebinlink.length ?
+                    {result?.pastebinlink && result?.pastebinlink.length ?
                 <Typography variant={'h2'}>Posted to Pastebin</Typography> :
                 <Typography variant={'h2'}>Encrypted Ciphertext</Typography>
                 }
+                <Typography variant={'h4'}>{printDateInCorrectFormat(result.date)} with {result.key_length * 8} {result.enc_mode}</Typography>
                 </>
                 )}
-
                 <div className={classes.left}>
 
-                {lastItem?.pastebinlink && !lastItem?.pastebinlink.includes("Error") && (
+                {result?.pastebinlink && !result?.pastebinlink.includes("Error") && (
                     <>
                         <Typography variant={'h4'}>Link</Typography>
                         <Card className={classes.copybox}>
                             <InputBase
                                 className={classes.textArea}
-                                placeholder={lastItem?.pastebinlink}
-                                value={lastItem?.pastebinlink}
+                                placeholder={result?.pastebinlink}
+                                value={result?.pastebinlink}
                             />
-                            <IconButton onClick={() => copyTextClipboard(lastItem?.pastebinlink)} >
+                            <IconButton onClick={() => copyTextClipboard(result?.pastebinlink)} >
                                 <ContentPasteIcon color="primary"
                                 />
                             </IconButton>
@@ -145,10 +162,10 @@ export default function Result(props: any) {
                 <Card className={classes.copybox}>
                     <InputBase
                         className={classes.textArea}
-                        placeholder={lastItem.key}
-                        value={lastItem.key}
+                        placeholder={result.key}
+                        value={result.key}
                     />
-                    <IconButton onClick={() => copyTextClipboard(lastItem?.key)} >
+                    <IconButton onClick={() => copyTextClipboard(result?.key)} >
                        <ContentPasteIcon color="primary"/>
                     </IconButton>
                 </Card>
@@ -158,18 +175,26 @@ export default function Result(props: any) {
                     <InputBase
                         className={classes.textArea}
                         multiline
-                        placeholder={lastItem.enc_text}
-                        value={lastItem.enc_text}
+                        placeholder={result.enc_text}
+                        value={result.enc_text}
                         rows={5}
                     />
-                    <IconButton onClick={() => copyTextClipboard(lastItem?.enc_text)} >
+                    <IconButton onClick={() => copyTextClipboard(result?.enc_text)} >
                         <ContentPasteIcon color="primary"/>
                     </IconButton>
                 </Card>
                 </div>
                     <Button className={classes.marginTop} startIcon={<ChevronLeft />} onClick={() => { goBack()}}>Back</Button>
                 </>
-            )}
+            ) : (
+                <>
+                    <ContentPasteIcon className={clsx(classes.icon, classes.grey)} />
+                    <Typography variant={'h2'}>No History</Typography>
+                </>
+            )
+
+
+            }
         </div>
     );
 }
