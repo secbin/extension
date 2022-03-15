@@ -189,7 +189,7 @@ export default function Result(props: any) {
             ) : (
                 <>
                     <ContentPasteIcon className={clsx(classes.icon, classes.grey)} />
-                    <Typography variant={'h2'}>No History</Typography>
+                    <Typography variant={'h2'}>No Encryptions</Typography>
                 </>
             )
 

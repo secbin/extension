@@ -11,6 +11,9 @@ import moment from "moment";
 import {AppContext, HistoryType } from "../AppContext";
 import { useHistory } from "react-router-dom";
 import { printDateInCorrectFormat } from "../chrome/utils";
+import clsx from "clsx";
+import HistoryIcon from '@mui/icons-material/History';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 
 
 const useStyles = makeStyles(theme => ({
@@ -30,7 +33,25 @@ const useStyles = makeStyles(theme => ({
     },
     list: {
         padding: 20,
-    }
+    },
+    icon: {
+        fontSize: 80,
+        width: '100%',
+        color: 'green',
+        margin: 20,
+    },
+    grey: {
+        color: 'grey',
+    },
+    center: {
+        width: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        textAlign: 'center',
+        alignItems: 'center',
+    },
+
 }));
 
 // const history = {
@@ -79,7 +100,16 @@ export default function History() {
     return (
         <>
             {/*TODO Add moment to show times daily*/}
-            <Typography variant='h2' className={classes.pageHeading}>History</Typography>
+            {!history.length ? (
+                <div className={classes.center}>
+                    <HistoryIcon className={clsx(classes.icon, classes.grey)} />
+                    <Typography variant={'h2'}>No History</Typography>
+                </div>
+            ) :
+                (
+                    <Typography variant='h2' className={classes.pageHeading}>History</Typography>
+                )
+            }
             <List className={classes.list} >
             {history?.reverse().map((item: any, index: number) => {
                 let showitem = false;
@@ -95,7 +125,7 @@ export default function History() {
                 <ListItem key={item?.pastebinlink}>
                     <ListItemText primary={item?.pastebinlink ? item.pastebinlink : "Encrypted Plaintext"} secondary={printDateInCorrectFormat(item.date)} />
                     <IconButton color="primary" aria-label="Unlock CipherText" onClick={(e) => handleHistory(item)}>
-                      <LockOpenIcon />
+                      <InfoOutlinedIcon />
                     </IconButton>
                 </ListItem>
             </Card>
