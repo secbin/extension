@@ -41,7 +41,7 @@ function usePasteBinSearchJS(query) {
       if (!ignore) {
         setLoading(false);
         setError(false);
-        console.log(responseBody);
+        //console.log(responseBody);
         setResult(responseBody || []);
       }
     }

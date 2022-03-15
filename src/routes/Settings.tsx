@@ -4,7 +4,6 @@ import {
   MenuItem, Paper, Select, TextField, Typography
 } from "@mui/material";
 import { ChevronRight } from "@mui/icons-material";
-// import { ConfigContext } from "../ConfigContext";
 import { makeStyles, createStyles } from '@mui/styles';
 import { setSyncItem, getSyncItem, setLocalItem } from "../chrome/utils/storage";
 import { Storage, ENCRYPTION_METHODS, KEY_LENGTHS, DEFAULT_CONTEXT } from "../constants";
