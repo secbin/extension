@@ -97,10 +97,11 @@ export default function History() {
     const classes = useStyles();
     let lastLastDate = 0;
     //TODO Add moment JS to calculate time
+
     return (
         <>
-            {/*TODO Add moment to show times daily*/}
-            {!history.length ? (
+            {/* @ts-ignore */}
+            {!history && !history?.length ? (
                 <div className={classes.center}>
                     <HistoryIcon className={clsx(classes.icon, classes.grey)} />
                     <Typography variant={'h2'}>No History</Typography>
