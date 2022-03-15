@@ -28,7 +28,7 @@ const messagesFromReactAppListener = (
 }
 
 const main = () => {
-    console.log('[content.ts] Main')
+    //console.log('[content.ts] Main')
     /**
      * Fired when a message is sent from either an extension process or a content script.
      */
@@ -36,5 +36,3 @@ const main = () => {
 }
 
 main();
-
-

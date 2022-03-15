@@ -121,7 +121,7 @@ chrome.contextMenus.onClicked.addListener( async (clickData) => {
         let res = await encrypt(text)
         let mode = await getSyncItemAsync(Storage.ENC_MODE) as string
         let len = await getSyncItemAsync(Storage.KEY_LENGTH) as number
-        console.log("ENC text", res.data)
+        //console.log("ENC text", res.data)
 
         const history = {
             id: Math.floor(Math.random()),
@@ -132,7 +132,7 @@ chrome.contextMenus.onClicked.addListener( async (clickData) => {
             date: Date(),
         }
 
-        console.log("ENC text", history)
+        //console.log("ENC text", history)
         addLocalItem(Storage.HISTORY, history)
 
         alert("Key: " + res.key + "\nCiphertext:" + res.data);
@@ -154,13 +154,13 @@ chrome.contextMenus.onClicked.addListener( async (clickData) => {
         }else if(text.includes("C_TXT")){
             let res = decrypt(text, key);
             alert("Decrypted text: \n" + res);
-            console.log(res);
+            //console.log(res);
         }else if(text.includes("pastebin")){
             let link = text
             text = await getPastebin(link)
             let res = decrypt(text, key);
             alert("Decrypted text: \n" + res);
-            console.log(res);
+            //console.log(res);
         }else{
             console.log("Invalid Text");
         }

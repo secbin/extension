@@ -72,7 +72,7 @@ export default function History() {
     useEffect(() => {
 
         getLocalItem(Storage.HISTORY, (data) => {
-            console.log("HISTORY", data[Storage.HISTORY]);
+            //console.log("HISTORY", data[Storage.HISTORY]);
             setHistory(data[Storage.HISTORY]);
         })
 

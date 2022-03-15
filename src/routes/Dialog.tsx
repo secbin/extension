@@ -40,7 +40,7 @@ export default function FormDialog(props: any) {
 
     const handleClose = () => {
 
-        console.log("Setting the API KEY:",apiKey);
+        //console.log("Setting the API KEY:",apiKey);
         setSyncItem(Storage.API_KEY,apiKey);
         setOpen(false);
         getSyncItem(Storage.API_KEY, (data: any) => {

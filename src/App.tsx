@@ -127,7 +127,7 @@ export const App = () => {
 
     useEffect(() => {
         getLocalItem(Storage.HISTORY, (data) => {
-            console.log("HISTORY from there", data[Storage.HISTORY]);
+            //console.log("HISTORY from there", data[Storage.HISTORY]);
             setHistory(data[Storage.HISTORY]);
         })
     }, []);

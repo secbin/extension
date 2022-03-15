@@ -94,12 +94,12 @@ export default function Result(props: any) {
             setHistory(data[Storage.HISTORY]);
             setResult(state.history.pop() || data[Storage.HISTORY].pop());
         })
-        console.log("HISTORY state", history)
+        //console.log("HISTORY state", history)
         // console.log("LAST ITEM", lastItem)
-        console.log("HISTORY CONTEXT", historyContext);
-        console.log("LAST ITEM ITEM", history[history.length - 1]);
+      //  console.log("HISTORY CONTEXT", historyContext);
+        //console.log("LAST ITEM ITEM", history[history.length - 1]);
 
-        console.log("SET RESULT", result);
+      //  console.log("SET RESULT", result);
         return function cleanup () {
             dispatch({type: Action.CLEAR_HISTORY});
         }
@@ -198,4 +198,3 @@ export default function Result(props: any) {
         </div>
     );
 }
-
