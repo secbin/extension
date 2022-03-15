@@ -1,137 +1,201 @@
-import React, { useEffect, useState } from "react";
-import { useHistory } from "react-router-dom";
-import { ChromeMessage, Sender } from "../types";
-import { getCurrentTabUId, getCurrentTabUrl } from "../chrome/utils";
-import { Button, Checkbox, Divider, IconButton, List, ListItem, ListItemText, Paper, Select, TextField, Typography } from "@mui/material";
-// import usePasteBinSearch from '../hooks/usePasteBinSearch'
-import usePasteBinSearchJS from '../hooks/usePasteBinSearchJS'
-import History from "./History";
-import CustomizedMenus from "./DropDownButton";
-import CustomizedInputBase from "./SmartTextBox";
+import React, { useContext, useEffect, useState } from "react";
+import {
+  Button, Card, Checkbox, Divider, IconButton, List, ListItem, ListItemText,
+  MenuItem, Paper, Select, TextField, Typography
+} from "@mui/material";
 import { ChevronRight } from "@mui/icons-material";
-function ErrorPage(){
+// import { ConfigContext } from "../ConfigContext";
+import { makeStyles, createStyles } from '@mui/styles';
+import { setSyncItem, getSyncItem, setLocalItem } from "../chrome/utils/storage";
+import { Storage, ENCRYPTION_METHODS, KEY_LENGTHS, DEFAULT_CONTEXT } from "../constants";
+import FormDialog from "./Dialog"
 
-  return (
-    <h2> Sorry, the Decryption you were looking for is not valid. </h2>
-  )
-}
-
-function CiphertextItem({ciphertext}:any){
-return ( ciphertext ? (
-  // <div>
-  // {Object.keys(ciphertext).map((keyName, i) => (
-  //
-  //   <p> {ciphertext[i].success}</p>
-  // ))};
-  // </div>
-  <p>Output goes Here</p>
-
-): <ErrorPage/>
-
-)
-
-}
-function Ciphertext({query}:any){
-  const [ciphertext, setCiphertext] = usePasteBinSearchJS(query);
-
-//  console.log(query);
-
-
-  return(
-    <div>
-      <CiphertextItem ciphertext={ciphertext}/>
-    </div>
-
-  )
-}
+const useStyles = makeStyles(theme => ({
+  card: {
+    borderRadius: 6,
+    border: '1px solid #E0E0E0',
+    boxShadow: '0 0 7px 0 rgba(0,0,0,0.04)',
+    marginBottom: 14,
+  },
+  pageHeading: {
+    paddingLeft: 20,
+    paddingTop: 20,
+    marginBottom: 10,
+  },
+  listItemText: {
+    fontSize: 14,
+  },
+  list: {
+    padding: 20,
+  },
+  menuItem: {
+    height: 10,
+    boxShadow: "none"
+  },
+  select: {
+    height: 32,
+    marginBottom: 8,
+    marginTop: 8,
+  }
+}));
 
 export const Settings = () => {
-    const [query, setQuery] = useState<string>('');
-    const [inputValue, setInputValue] = useState<string>('');
-    const [url, setUrl] = useState<string>('');
-    const [responseFromContent, setResponseFromContent] = useState<string>('');
-    const [ciphertext, setCiphertext] = useState([]);
-    //const [ciphertext, setCiphertext] = usePasteBinSearch(query);
-    let {push} = useHistory();
+  const classes = useStyles();
+  const [APIKEY, setApiKey] = useState("");
+  const [ENC_MODE, setEncMode] = useState("");
+  const [THEME, setTheme] = useState(false);
+  const [KEY_LENGTH, setKeyLength] = useState("");
 
-    /**
-     * Get current URL
-     */
-    useEffect(() => {
-        getCurrentTabUrl((url) => {
-            setUrl(url || 'undefined');
-        })
-    }, []);
+  useEffect(() => {
+    getSettings();
+  }, []);
 
-    const sendTestMessage = () => {
-        const message: ChromeMessage = {
-            from: Sender.React,
-            message: "Hello from React",
-        }
+  // Note: a key size of 16 bytes will use AES-128, 24 => AES-192, 32 => AES-256
+  function getSettings(): any {
+    getSyncItem(Storage.API_KEY, (data) => {
+      setApiKey(data[Storage.API_KEY]);
+      //console.log(APIKEY)
+    })
 
-        getCurrentTabUId((id) => {
-            id && chrome.tabs.sendMessage(
-                id,
-                message,
-                (responseFromContentScript) => {
-                    setResponseFromContent(responseFromContentScript);
-                });
-        });
-    };
+    getSyncItem(Storage.ENC_MODE, (data) => {
+      setEncMode(data[Storage.ENC_MODE]);
+      //console.log(ENC_MODE)
+    })
 
-    const sendRemoveMessage = () => {
-        const message: ChromeMessage = {
-            from: Sender.React,
-            message: "delete logo",
-        }
+    getSyncItem(Storage.THEME, (data) => {
+      setTheme(data[Storage.THEME]);
+      //console.log("Getting theme", data[Storage.THEME])
+    })
 
-        getCurrentTabUId((id) => {
-            id && chrome.tabs.sendMessage(
-                id,
-                message,
-                (response) => {
-                    setResponseFromContent(response);
-                });
-        });
-    };
+    getSyncItem(Storage.KEY_LENGTH, (data) => {
+      setKeyLength(data[Storage.KEY_LENGTH]);
+      //console.log(KEY_LENGTH)
+    })
+  }
+
+  const keyLengthHandler = (e: any) => {
+    setSyncItem(Storage.KEY_LENGTH, e.target.value)
+    setKeyLength(e.target.value);
+    //console.log(KEY_LENGTH)
+
+    getSyncItem(Storage.KEY_LENGTH, (data) => {
+      //console.log(KEY_LENGTH)
+    })
+  }
+
+  const encModeHandler = (e: any) => {
+    setSyncItem(Storage.ENC_MODE, e.target.value);
+    setEncMode(e.target.value);
+  }
+
+  const clearHistory = (e: any) => {
+    setLocalItem(Storage.HISTORY, []);
+  }
+
+  const themeHandler = (e: any) => {
+    setSyncItem(Storage.THEME, !THEME);
+    setTheme(!THEME);
+    //TODO do darkmode magic here
+  }
+
+  const resetSettings = (e: any) => {
+    const d = DEFAULT_CONTEXT;
+
+    setSyncItem(Storage.THEME, d.theme);
+    setSyncItem(Storage.API_KEY, d.api_key);
+    setSyncItem(Storage.ENC_MODE, d.enc_mode);
+    setSyncItem(Storage.KEY_LENGTH, d.key_length);
+
+    setEncMode(d.enc_mode);
+    setKeyLength(String(d.key_length));
+    setApiKey(d.api_key);
+    setTheme(d.theme);
+
+  }
+  const signUp = () => {
+    window.open("https://pastebin.com/doc_api")
+  }
+
+  return (
+    <div>
+      <Typography variant='h2' className={classes.pageHeading} >Settings</Typography>
+      <List className={classes.list}>
+        <Typography variant={'h4'}>Theme</Typography>
+        <Card classes={{ root: classes.card }}>
+          <ListItem>
+            <ListItemText
+              primary="Dark Mode" />
+            <Checkbox checked={THEME} onChange={themeHandler} />
+          </ListItem>
+        </Card>
+
+        <Typography variant={'h4'}>Encryption</Typography>
+        <Card classes={{ root: classes.card }}>
+          <ListItem>
+            <ListItemText primary="Encryption Algorithm" />
+            <Select
+              className={classes.select}
+              value={ENC_MODE}
+              label={ENC_MODE}
+              onChange={encModeHandler}
+            >
+              {ENCRYPTION_METHODS.map((item) => (
+                <MenuItem classes={{ root: classes.menuItem }}
+                  key={item.value}
+                  value={item.value}>{item.prettyName}
+                </MenuItem>
+              ))}
+            </Select>
+          </ListItem>
+        </Card>
+
+        <Card classes={{ root: classes.card }}>
+          <ListItem>
+            <ListItemText primary="Key Length" />
+
+            {/* // Note: a key size of 16 bytes will use AES-128, 24 => AES-192, 32 => AES-256 */}
+            <Select
+              className={classes.select}
+              value={KEY_LENGTH}
+              onChange={keyLengthHandler}
+            >
+              {KEY_LENGTHS.map((item) => (
+                <MenuItem className={classes.menuItem}
+                  key={item.value}
+                  value={item.value}>{item.prettyName}
+                </MenuItem>
+              ))}
+            </Select>
+          </ListItem>
+        </Card>
+
+        <Typography variant={'h4'}>Pastebin API</Typography>
+        <Card classes={{ root: classes.card }}>
+          <ListItem>
+            <ListItemText primary="API Key" secondary={APIKEY ? APIKEY : "Not Set"} />
+            <FormDialog APIKEY={APIKEY}/>
+          </ListItem>
+        </Card>
 
 
-    return (
-        <div className="App">
-            <header className="App-header">
-                <List sx={{ width: '100%', maxWidth: 360 }}>
-                    <Paper style={{margin: "6px", textAlign: 'left'}}>
+        <Typography variant={'h4'}>Reset</Typography>
+        <Card classes={{ root: classes.card }}>
+          <ListItem>
+            <ListItemText
+              primary="Clear History" />
+            <Button onClick={clearHistory}>Clear</Button>
+          </ListItem>
+        </Card>
 
-                    <ListItem>
-                            <ListItemText primary="Dark Mode" secondary="Enabled" />
-                            <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
-                            <Checkbox defaultChecked />
-                    </ListItem>
-                    </Paper>
+        <Card classes={{ root: classes.card }}>
+          <ListItem>
+            <ListItemText
+              primary="Reset Settings" />
+            <Button onClick={resetSettings}>Reset</Button>
+          </ListItem>
+        </Card>
 
-                <Paper style={{margin: "6px", textAlign: 'left'}}>
-                    <ListItem>
-                        <ListItemText primary="Encryption Algorithm" secondary="argon2" />
-                        <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
-                        <Select
-                            labelId="demo-simple-select-label"
-                            id="demo-simple-select"
-                            value="argon2"
-                            label="Age"
-                        />
-                    </ListItem>
-                </Paper>
-                <Paper style={{margin: "6px", textAlign: 'left'}}>
-                    <ListItem>
-                        <ListItemText primary="PasteBin API Key" secondary="23ourwfodifkhjklfquhdkajdh" />
-                        <Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />
-                        <IconButton color="primary" sx={{ p: '10px' }} aria-label="directions">
-                            <ChevronRight />
-                        </IconButton>
-                    </ListItem>
-                </Paper>
-                </List>
-            </header>
-        </div>
-    )
+      </List>
+    </div>
+  )
 }

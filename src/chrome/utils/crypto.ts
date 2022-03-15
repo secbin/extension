@@ -1,41 +1,36 @@
 import forge from 'node-forge';
-import { getItem, Storage} from "./storage";
+import { getSyncItemAsync } from "./storage";
+import { Storage } from "../../constants"
 
-export function encrypt(data: string, password?: string){
-    // Get mode from storage
-    let mode: forge.cipher.Algorithm = 'AES-GCM'
-    getItem(Storage.ENC_MODE, (data) => {
-        mode = data[Storage.ENC_MODE] || "AES-GCM"
-    })
-    
+export async function encrypt(data: string, password?: string){
+    let mode = await getSyncItemAsync(Storage.ENC_MODE) as string
+    let len = await getSyncItemAsync(Storage.KEY_LENGTH) as number
+
     // encrypt data
-    const encRes = encryptText(data, password, mode)
+    const encRes = encryptText(data, mode, len, password)
     // encode data to string
     const cTXT = JSON.stringify(encRes.CipherData);
     
-    return {data: cTXT, key: encRes.Key}
+    return {data: cTXT, key: encRes.Key, mode:mode, key_len: len}
 }
 
 // Encrpts a string using the AES algorithm. Optional parameter: Password, AES Mode
-function encryptText(text: string, password?: string, mode?: string){
-    // password is used to generate key, if none gen random
-    if (password === undefined) {
-    password = forge.random.getBytesSync(48).toString();
-    }
-    
-    // if not mode is specified, use AES-GCM
-    if(mode === undefined) {
-        mode = "AES-GCM"
-    }
+function encryptText(text: string, mode: string, len: number, password?: string){
+    // Note: a key size of 16 bytes will use AES-128, 24 => AES-192, 32 => AES-256
+    let key = ""
+    let salt = ""
 
-    // generate key from password
-    let salt = forge.random.getBytesSync(128);
-    let key = forge.pkcs5.pbkdf2(password, salt, 10000, 32);
-
-    // set IV
-    let iv = forge.random.getBytesSync(16);
+    // If password, generate key from password and salt, otherwise use random key
+    if (password) {
+        salt = forge.random.getBytesSync(128);
+        //function pbkdf2(password: string, salt: string, iterations: number, keySize: number):
+        key = forge.pkcs5.pbkdf2(password, salt, 10000, len);
+    }else{
+        key = forge.random.getBytesSync(len);
+    }
 
     // Encrypt the text
+    let iv = forge.random.getBytesSync(16);
     let cipher = forge.cipher.createCipher(mode as forge.cipher.Algorithm, key);
     cipher.start({ iv: iv });
     cipher.update(forge.util.createBuffer(text));
@@ -43,10 +38,19 @@ function encryptText(text: string, password?: string, mode?: string){
 
     // encode bytes to base64
     let cTXT = forge.util.encode64(cipher.output.data);
-    let tag = forge.util.encode64(cipher.mode.tag.bytes().toString());
+    let tag = ""
+    if (mode === "AES-GCM"){
+        tag = forge.util.encode64(cipher.mode.tag.bytes().toString());
+    }
     iv = forge.util.encode64(iv);
     key = forge.util.encode64(key)
 
+    if (password){
+        salt = forge.util.encode64(salt)
+        return {CipherData: 
+            {C_TXT: cTXT, IV: iv, Mode: mode, Tag: tag, Salt: salt, Length: len},
+             Key: password}
+    }
     return {CipherData: 
             {C_TXT: cTXT, IV: iv, Mode: mode, Tag: tag},
              Key: key}
@@ -54,11 +58,11 @@ function encryptText(text: string, password?: string, mode?: string){
 
 export function decrypt(cData: string, key: string): string{
     let r = JSON.parse(cData)
-    let pTXT = decryptText(r.C_TXT, key, r.IV, r.Tag, r.Mode)
+    let pTXT = decryptText(r.C_TXT, key, r.IV, r.Tag, r.Mode, r.Salt, r.Length)
     return pTXT
 }
 
-function decryptText(cTXT: string|null, key: string|null, iv:string|null, tag:string|null, mode: string|null): string{
+function decryptText(cTXT: string|null, key: string|null, iv:string|null, tag:string|null, mode: string|null, salt: string|null, len: string|null): string{
     if(cTXT === null || key === null || iv === null || tag === null || mode === null) {
         return "Error"
     }
@@ -66,7 +70,13 @@ function decryptText(cTXT: string|null, key: string|null, iv:string|null, tag:st
     cTXT = forge.util.decode64(cTXT);
     tag = forge.util.decode64(tag);
     iv = forge.util.decode64(iv);
-    key = forge.util.decode64(key)
+    if (salt && len){
+        salt = forge.util.decode64(salt)
+        let size = len as unknown as number
+        key = forge.pkcs5.pbkdf2(key, salt, 10000, size);
+    }else{
+        key = forge.util.decode64(key)
+    }
     
     let decipher = forge.cipher.createDecipher(mode as forge.cipher.Algorithm, key);
     decipher.start({
