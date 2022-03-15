@@ -20,17 +20,7 @@ export default function CustomizedInputBase() {
             placeholder="Enter a PasteBin link or ciphertext to decrypt, plaintext to encrypt"
             inputProps={{ 'aria-label': 'search google maps', 'rows': '5'  }}
         />
-        {/*<IconButton type="submit" sx={{ p: '10px' }} aria-label="search">*/}
-        {/*  <SearchIcon />*/}
-        {/*</IconButton>*/}
-        {/*<Divider sx={{ height: 28, m: 0.5 }} orientation="vertical" />*/}
-        {/*<IconButton color="primary" sx={{ p: '10px' }} aria-label="directions">*/}
-        {/*  <DirectionsIcon />*/}
-
-        {/*</IconButton>*/}
-        {/*  <Divider sx={{ height: 28, m: 0.5 }} orientation="horizontal" />*/}
-          {/*<CustomizedMenus/>*/}
-
+  
 
       </Paper>
   );

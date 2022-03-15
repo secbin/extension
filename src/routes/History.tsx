@@ -54,16 +54,6 @@ const useStyles = makeStyles(theme => ({
 
 }));
 
-// const history = {
-//     action: Action.ENCRYPT_PASTEBIN,
-//     id: Math.floor(Math.random()),
-//     pastebinlink: newNewlink,
-//     key: res.key,
-//     enc_text: res.data,
-//     enc_mode: res.mode,
-//     key_length: res.key_len,
-//     date: new Date().getTime(),
-// }
 
 export default function History() {
     let { push, goBack } = useHistory();
@@ -72,7 +62,7 @@ export default function History() {
     useEffect(() => {
 
         getLocalItem(Storage.HISTORY, (data) => {
-            console.log("HISTORY", data[Storage.HISTORY]);
+            //console.log("HISTORY", data[Storage.HISTORY]);
             setHistory(data[Storage.HISTORY]);
         })
 

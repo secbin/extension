@@ -10,7 +10,7 @@ export async function encrypt(data: string, password?: string){
     const encRes = encryptText(data, mode, len, password)
     // encode data to string
     const cTXT = JSON.stringify(encRes.CipherData);
-    
+
     return {data: cTXT, key: encRes.Key, mode:mode, key_len: len}
 }
 
@@ -47,11 +47,11 @@ function encryptText(text: string, mode: string, len: number, password?: string)
 
     if (password){
         salt = forge.util.encode64(salt)
-        return {CipherData: 
+        return {CipherData:
             {C_TXT: cTXT, IV: iv, Mode: mode, Tag: tag, Salt: salt, Length: len},
              Key: password}
     }
-    return {CipherData: 
+    return {CipherData:
             {C_TXT: cTXT, IV: iv, Mode: mode, Tag: tag},
              Key: key}
 };
@@ -77,7 +77,7 @@ function decryptText(cTXT: string|null, key: string|null, iv:string|null, tag:st
     }else{
         key = forge.util.decode64(key)
     }
-    
+
     let decipher = forge.cipher.createDecipher(mode as forge.cipher.Algorithm, key);
     decipher.start({
       iv: iv,

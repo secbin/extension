@@ -152,7 +152,7 @@ export default function CustomizedMenus() {
 
   const actionWrapper = async (e: any) => {
     buttonText = e.target.innerText || "";
-    console.log("ACTION", e.target.innerText, buttonText);
+    //console.log("ACTION", e.target.innerText, buttonText);
     if (buttonText === Action.DECRYPT_PASTEBIN || buttonText === Action.DECRYPT) {
       setOpenDecForm(true);
     } else if (buttonText === Action.ENCRYPT_PASTEBIN || buttonText === Action.ENCRYPT) {
@@ -164,7 +164,7 @@ export default function CustomizedMenus() {
     //let buttonText = e.target.innerText || "";
     if (buttonText === Action.ENCRYPT_PASTEBIN) {
       let res = await encrypt(text, password)
-      console.log("ENC text", res)
+      //console.log("ENC text", res)
       let newNewlink = await postPastebin(res.data)
       const history = {
         action: Action.ENCRYPT_PASTEBIN,
@@ -188,12 +188,12 @@ export default function CustomizedMenus() {
           pastebinlink: newNewlink,
         },
       })
-      console.log("STATE", state)
+      //console.log("STATE", state)
       push('/result')
 
     } else if (buttonText === Action.ENCRYPT) {
       let res = await encrypt(text, password)
-      console.log("ENC text", res)
+      //console.log("ENC text", res)
       const history = {
         action: Action.ENCRYPT,
         id: Math.floor(Math.random()),
@@ -215,7 +215,7 @@ export default function CustomizedMenus() {
           key: res.key,
         },
       })
-      console.log("STATE", state)
+      //console.log("STATE", state)
       push('/result')
 
     } else if (buttonText === Action.DECRYPT_PASTEBIN) {
@@ -223,7 +223,7 @@ export default function CustomizedMenus() {
         let pasteText = await getPastebin(text)
         if (pasteText) {
           let res = decrypt(pasteText, decKey)
-          console.log("SETTING NEW PLAINTEXT TO:", res);
+          //console.log("SETTING NEW PLAINTEXT TO:", res);
           setTextBox(res);
           dispatch({
             type: Action.UPDATE_PLAINTEXT,
@@ -233,9 +233,9 @@ export default function CustomizedMenus() {
       }
     } else if (buttonText === Action.DECRYPT) {
       if (decKey !== "") {
-        console.log("Key:", decKey);
+        //console.log("Key:", decKey);
         let res = decrypt(text, decKey)
-        console.log("SETTING NEW PLAINTEXT TO:", res);
+        //console.log("SETTING NEW PLAINTEXT TO:", res);
         setTextBox(res);
         dispatch({
           type: Action.UPDATE_PLAINTEXT,
@@ -277,7 +277,7 @@ export default function CustomizedMenus() {
     const handleClose = () => {
       setOpenDecForm(false);
       decKey = key;
-      console.log("Setting the decKey:", decKey);
+      //console.log("Setting the decKey:", decKey);
       performAction();
     };
 
@@ -316,7 +316,7 @@ export default function CustomizedMenus() {
     const handleClose = () => {
       setOpenEncForm(false);
       password = key;
-      console.log("Setting the password:", password);
+      //console.log("Setting the password:", password);
       performAction();
     };
 
