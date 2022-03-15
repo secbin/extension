@@ -134,6 +134,8 @@ export default function CustomizedMenus() {
   const buttonEnabled = state.draft.buttonEnabled;
   const menu = state.draft.action;
   const text = state.draft.plaintext;
+  const [textBox, setTextBox] = React.useState(text);
+
   const [openDecForm, setOpenDecForm] = React.useState(false);
   const [openEncForm, setOpenEncForm] = React.useState(false);
   //console.log("STATE", state);
@@ -180,7 +182,7 @@ export default function CustomizedMenus() {
         type: Action.ENCRYPT_PASTEBIN,
         payload: {
           action: Action.ENCRYPT_PASTEBIN,
-          plaintext: text,
+          plaintext: textBox,
           ciphertext: res.data,
           key: res.key,
           pastebinlink: newNewlink,
@@ -208,7 +210,7 @@ export default function CustomizedMenus() {
         type: Action.ENCRYPT,
         payload: {
           action: Action.ENCRYPT,
-          plaintext: text,
+          plaintext: textBox,
           ciphertext: res.data,
           key: res.key,
         },
@@ -222,6 +224,7 @@ export default function CustomizedMenus() {
         if (pasteText) {
           let res = decrypt(pasteText, decKey)
           console.log("SETTING NEW PLAINTEXT TO:", res);
+          setTextBox(res);
           dispatch({
             type: Action.UPDATE_PLAINTEXT,
             payload: { plaintext: res, action: buttonText, buttonEnabled: buttonEnabled }
@@ -233,6 +236,7 @@ export default function CustomizedMenus() {
         console.log("Key:", decKey);
         let res = decrypt(text, decKey)
         console.log("SETTING NEW PLAINTEXT TO:", res);
+        setTextBox(res);
         dispatch({
           type: Action.UPDATE_PLAINTEXT,
           payload: { plaintext: res, action: buttonText, buttonEnabled: buttonEnabled }
@@ -264,6 +268,7 @@ export default function CustomizedMenus() {
     }
     // setMenu(buttonText)
     // setButtonEnabled(buttonEnabled)
+    setTextBox(textbox);
     dispatch({ type: Action.UPDATE_PLAINTEXT, payload: { plaintext: textbox, action: buttonText, buttonEnabled: buttonEnabled } });
   };
 
@@ -373,7 +378,7 @@ export default function CustomizedMenus() {
             )}
           rows={clsx(text.length < 350 ? 13 : 20)}
           onChange={checkTypeOfText}
-          defaultValue={text}
+          value={textBox}
           placeholder="Type or paste (⌘ + V) text you want to encrypt or a Pastebin.com link or ciphertext you want to decrypt here..."
           inputProps={{ 'aria-label': 'text to encrypt or decrypt', 'height': '300px' }}
         />
