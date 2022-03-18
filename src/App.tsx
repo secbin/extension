@@ -1,38 +1,35 @@
 import React, { useEffect, useContext, useReducer, useState } from 'react';
 import { Route, Switch } from 'react-router-dom';
-import { Home } from "./routes/Home";
-import SettingsIcon from '@mui/icons-material/Settings';
-import { Settings } from './routes/Settings'
-import { useHistory } from "react-router-dom";
-import usePasteBinSearch from './hooks/usePasteBinSearchJS';
+import { styled, alpha } from '@mui/material/styles';
+import { useHistory } from 'react-router-dom';
 import './App.css';
-import { AppBar, createMuiTheme, createTheme, Divider, IconButton, ThemeProvider, Toolbar, Typography, useTheme } from '@mui/material';
-import { makeStyles, createStyles } from '@mui/styles';
-import { ChevronLeft } from '@mui/icons-material';
-import History from "./routes/History";
-import HistoryIcon from '@mui/icons-material/History';
-import ContentPasteIcon from '@mui/icons-material/ContentPaste';
+import { AppBar, Box, createMuiTheme, createTheme, Divider, IconButton, Theme, ThemeProvider, Toolbar, Typography } from '@mui/material';
+import { makeStyles, createStyles, useTheme } from '@mui/styles';
+import { green, purple } from '@mui/material/colors';
+import { History as HistoryIcon, ChevronLeft, Settings as SettingsIcon, ContentPaste }  from '@mui/icons-material';
 import { AppProvider, AppContext } from './AppContext';
 import { DEFAULT_CONTEXT } from './constants'
 import { Storage } from './constants'
-import { green, purple } from '@mui/material/colors';
+import { Home } from './routes/Home';
+import { Settings } from './routes/Settings'
+import History from "./routes/History";
 import Result from './routes/Result';
-import { getLocalItem } from './chrome/utils/storage';
+import { getLocalItem, getSyncItem } from './chrome/utils/storage';
+import usePasteBinSearch from './hooks/usePasteBinSearchJS';
+import { currentTheme } from './hooks/theme';
 
-function reducer(state: any, action: any) {
-    switch(action.type) {
-        case "add":
-            return action.payload;
-    }
-}
+// declare module '@mui/styles/defaultTheme' {
+//     // eslint-disable-next-line @typescript-eslint/no-empty-interface (remove this line if you don't have the rule enabled)
+//     interface DefaultTheme extends Theme {}
+// }
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme: Theme) => ({
     root: {
         boxShadow: "none",
-        backgroundColor: "#fff",
     },
     content: {
-        marginTop: 64,
+        marginTop: 56,
+        minHeight: 'calc(100vh - 56px)',
     },
     hoverStyle: {
         '&:hover': {
@@ -45,124 +42,103 @@ const useStyles = makeStyles(theme => ({
             transform: 'scale(1.07)'
         },
         transition: '0.15s'
-    }
-}));
-
-declare module '@mui/material/styles' {
-    interface Theme {
-        status: {
-            danger: string;
-        };
-    }
-    // allow configuration using `createTheme`
-    interface ThemeOptions {
-        status?: {
-            danger?: string;
-        };
-    }
-}
-
-const theme = createMuiTheme({
-        palette: {
-            mode: 'light',
-        primary: {
-            main: '#3f51b5',
-        },
-        secondary: {
-            main: '#00acf5',
-        },
-        text: {
-            secondary: 'rgba(0,0,0,0.54)',
-        },
     },
-    typography: {
-        h1: {
-            fontSize: 36,
-            fontWeight: 700,
-        },
-        h2: {
-            fontSize: 24,
-            fontWeight: 800,
-        },
-        h3: {
-            fontSize: 14,
-            fontWeight: 700,
-            opacity: 0.7,
-        },
-        h4: {
-            fontSize: 14,
-            fontWeight: 500,
-            opacity: 0.7,
-            marginBottom: 12,
-            paddingTop: 12,
-        },
-        subtitle2: {
-            fontSize: 12,
-            fontWeight: 400,
-            opacity: 0.6,
-        },
-        body1: {
-            fontSize: 15,
-            lineHeight: 1.2,
-            fontWeight: 500,
-        },
-        button: {
-            fontSize: 14,
-            textTransform: 'none',
-            fontWeight: 600,
-        },
-    }
-});
+    background: {
+        bgColor: 'background.default',
+    },
+}));
 
 export const App = () => {
 
-    const [appConfig, setAppConfig] = useState({})
     const { state, dispatch } = React.useContext(AppContext);
-    let {push, goBack} = useHistory();
-    const classes = useStyles();
     const [history, setHistory] = useState([]);
+    const [appConfig, setAppConfig] = useState({})
+    const [darkmode, setDarkmode] = useState(true);
+
+    let { push, goBack } = useHistory();
 
     useEffect(() => {
-        getLocalItem(Storage.HISTORY, (data) => {
-            //console.log("HISTORY from there", data[Storage.HISTORY]);
-            setHistory(data[Storage.HISTORY]);
+        getSyncItem(Storage.THEME, (data) => {
+            setDarkmode(data[Storage.THEME]);
         })
     }, []);
 
+    const classes = useStyles();
 
 
-    // const theme = useTheme();
+    const theme = createMuiTheme({
+        palette: {
+            mode: darkmode ? 'dark' : 'light',
+            primary: {
+                main: '#3f51b5',
+            },
+            secondary: {
+                main: '#00acf5',
+            },
+        },
+        typography: {
+            h1: {
+                fontSize: 36,
+                fontWeight: 700,
+            },
+            h2: {
+                fontSize: 24,
+                fontWeight: 800,
+            },
+            h3: {
+                fontSize: 14,
+                fontWeight: 700,
+                opacity: 0.7,
+            },
+            h4: {
+                fontSize: 14,
+                fontWeight: 500,
+                opacity: 0.7,
+                marginBottom: 12,
+                paddingTop: 12,
+            },
+            subtitle2: {
+                fontSize: 12,
+                fontWeight: 400,
+                opacity: 0.6,
+            },
+            body1: {
+                fontSize: 15,
+                lineHeight: 1.2,
+                fontWeight: 500,
+            },
+            button: {
+                fontSize: 14,
+                textTransform: 'none',
+                fontWeight: 600,
+            },
+        }
+    });
 
     return (
-        // <div className="App">
-        //     <header className="App-header">
         <ThemeProvider theme={theme}>
          <AppProvider>
             <>
-                <div>
-                <AppBar className={classes.root} position="fixed" enableColorOnDark>
-
-                    <Toolbar >
-                        <img className={classes.hoverStyle} src="/securebinlogo.svg" alt="logo" onClick={() => { push('/home')}}/>
+            <div className={classes.background}>
+                <AppBar sx={{bgcolor: 'background.default'}} className={classes.root} position="fixed" enableColorOnDark>
+                    <Toolbar>
+                        <img className={classes.hoverStyle} src={darkmode ? '/securebinlogo_dark.svg' : '/securebinlogo.svg'} alt="logo" onClick={() => { push('/home')}}/>
                         <div style={{marginLeft: 'auto'}}>
-                        {/*<IconButton edge="start" color="inherit" aria-label="menu" sx={{ mr: 2 }} onClick={() => { goBack()}}>*/}
-                        {/*    <ChevronLeft />*/}
-                        {/*</IconButton>*/}
-                        {<IconButton className={classes.hoverStyle} aria-label="Latest paste" sx={{ mr: 1 }} disableRipple onClick={() => { push('/result')}}>
-                        <ContentPasteIcon />
-                        </IconButton>}
-                        <IconButton className={classes.hoverStyle} aria-label="History" sx={{ mr: 1 }} disableRipple onClick={() => { push('/history')}}>
-                            <HistoryIcon />
-                        </IconButton>
-                        <IconButton className={classes.hoverStyle} aria-label="Settings" disableRipple onClick={() => { push('/settings')}}>
-                            <SettingsIcon />
-                        </IconButton>
+                            {<IconButton className={classes.hoverStyle} aria-label="Latest paste" sx={{ mr: 1 }} disableRipple onClick={() => { push('/result')}}>
+                            <ContentPaste />
+                            </IconButton>}
+                            <IconButton className={classes.hoverStyle} aria-label="History" sx={{ mr: 1 }} disableRipple onClick={() => { push('/history')}}>
+                                <HistoryIcon />
+                            </IconButton>
+                            <IconButton className={classes.hoverStyle} aria-label="Settings" disableRipple onClick={() => { push('/settings')}}>
+                                <SettingsIcon />
+                            </IconButton>
                         </div>
                     </Toolbar>
                     <Divider/>
                 </AppBar>
             </div>
-            <div className={classes.content}>
+            <Box className={classes.content} sx={{bgcolor: 'background.default', color: 'text.primary'}}>
             <Switch >
                 <Route path="/home">
                     <Home/>
@@ -180,9 +156,9 @@ export const App = () => {
                     <Home/>
                 </Route>
             </Switch>
-            </div>
+            </Box>
             </>
-        </AppProvider>
+         </AppProvider>
         </ThemeProvider>
-            )
+    )
 };

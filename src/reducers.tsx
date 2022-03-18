@@ -1,4 +1,4 @@
-import {DraftType, HistoryType, SettingsType } from "./AppContext";
+import { DraftType, HistoryType, SettingsType } from "./AppContext";
 import { setSyncItem, getSyncItem } from "./chrome/utils/storage";
 import { Storage, Action, DEFAULT_CONTEXT } from "./constants"
 

@@ -1,16 +1,13 @@
 import React, { useEffect } from "react";
-import { Button, Card, Divider, IconButton, InputAdornment, InputBase, Paper, TextField, Typography } from '@mui/material';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import ContentPasteIcon from '@mui/icons-material/ContentPaste';
-import ErrorIcon from '@mui/icons-material/Error';
-import { makeStyles, createStyles } from '@mui/styles';
-import { AppContext, HistoryType } from "../AppContext";
-import { getLocalItem, getSyncItem } from '../chrome/utils/storage';
-import {Action, Storage } from '../constants'
 import clsx from "clsx";
+import { Button, Card, Divider, IconButton, InputAdornment, InputBase, Paper, TextField, Typography } from '@mui/material';
+import { makeStyles, createStyles } from "@mui/styles";
+import { AppContext, HistoryType } from "../AppContext";
+import { getLocalItem, getSyncItem } from "../chrome/utils/storage";
+import { Action, Storage } from "../constants"
 import { copyTextClipboard, printDateInCorrectFormat } from "../chrome/utils"
 import { useHistory } from "react-router-dom";
-import {ChevronLeft } from "@mui/icons-material";
+import { ChevronLeft, ContentPaste, CheckCircle, Error } from "@mui/icons-material";
 
 const useStyles = makeStyles(theme => ({
     icon: {
@@ -35,22 +32,21 @@ const useStyles = makeStyles(theme => ({
     },
     copybox: {
         paddingLeft: 10,
-        // margin: 15,
         borderRadius: 6,
-        border: '1px solid #E0E0E0',
+        border: '1px solid',
+        borderColor: 'rgba(170,170,170,0.25)',
         boxShadow: '0 0 7px 0 rgba(0,0,0,0.04)',
         marginBottom: 14,
         width: 390,
     },
     copyboxLarge: {
         paddingLeft: 10,
-        // margin: 15,
         borderRadius: 6,
-        border: '1px solid #E0E0E0',
+        border: '1px solid',
+        borderColor: 'rgba(170,170,170,0.25)',
         boxShadow: '0 0 7px 0 rgba(0,0,0,0.04)',
         marginBottom: 14,
         width: 390,
-
     },
     heading: {
         width: '400px',
@@ -76,7 +72,6 @@ const useStyles = makeStyles(theme => ({
     buttonMarginBottom: {
         marginBottom: 20,
     }
-
 }));
 
 export type LHistoryType = {
@@ -90,20 +85,11 @@ export type LHistoryType = {
 }
 
 export default function Result(props: any) {
-
-
     useEffect(() => {
         getLocalItem(Storage.HISTORY, (data) => {
-            //console.log("HISTORY from there", data[Storage.HISTORY]);
             setHistory(data[Storage.HISTORY]);
             setResult(state.history.pop() || data[Storage.HISTORY].pop());
         })
-        //console.log("HISTORY state", history)
-        // console.log("LAST ITEM", lastItem)
-      //  console.log("HISTORY CONTEXT", historyContext);
-        //console.log("LAST ITEM ITEM", history[history.length - 1]);
-
-      //  console.log("SET RESULT", result);
         return function cleanup () {
             dispatch({type: Action.CLEAR_HISTORY});
         }
@@ -122,12 +108,12 @@ export default function Result(props: any) {
                 <>
                 {result?.pastebinlink && result?.pastebinlink.includes("Error") ? (
                 <>
-                <ErrorIcon className={clsx(classes.icon, classes.red)} />
+                <Error className={clsx(classes.icon, classes.red)} />
                 <Typography variant={'h2'}>Error posting to Pastebin</Typography>
                 </>
                 ) : (
                 <>
-                <CheckCircleIcon className={clsx(classes.icon, classes.green)}/>
+                <CheckCircle className={clsx(classes.icon, classes.green)}/>
                     {result?.pastebinlink && result?.pastebinlink.length ?
                 <Typography variant={'h2'}>Posted to Pastebin</Typography> :
                 <Typography variant={'h2'}>Encrypted Ciphertext</Typography>
@@ -146,8 +132,8 @@ export default function Result(props: any) {
                                 placeholder={result?.pastebinlink}
                                 value={result?.pastebinlink}
                             />
-                            <IconButton onClick={() => copyTextClipboard(result?.pastebinlink)} >
-                                <ContentPasteIcon color="primary"
+                            <IconButton onClick={() => copyTextClipboard(result?.pastebinlink)} disableRipple>
+                                <ContentPaste color="primary"
                                 />
                             </IconButton>
                         </Card>
@@ -160,8 +146,8 @@ export default function Result(props: any) {
                         placeholder={result.key}
                         value={result.key}
                     />
-                    <IconButton onClick={() => copyTextClipboard(result?.key)} >
-                       <ContentPasteIcon color="primary"/>
+                    <IconButton onClick={() => copyTextClipboard(result?.key)} disableRipple>
+                       <ContentPaste color="primary"/>
                     </IconButton>
                 </Card>
 
@@ -174,8 +160,8 @@ export default function Result(props: any) {
                         value={result.enc_text}
                         rows={5}
                     />
-                    <IconButton onClick={() => copyTextClipboard(result?.enc_text)} >
-                        <ContentPasteIcon color="primary"/>
+                    <IconButton onClick={() => copyTextClipboard(result?.enc_text)} disableRipple>
+                        <ContentPaste color="primary"/>
                     </IconButton>
                 </Card>
                 </div>
@@ -183,11 +169,10 @@ export default function Result(props: any) {
                 </>
             ) : (
                 <>
-                    <ContentPasteIcon className={clsx(classes.icon, classes.grey)} />
+                    <ContentPaste className={clsx(classes.icon, classes.grey)} />
                     <Typography variant={'h2'}>No Encryptions</Typography>
                 </>
             )
-
 
             }
         </div>

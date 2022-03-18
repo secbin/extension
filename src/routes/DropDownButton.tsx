@@ -14,9 +14,10 @@ import ListItemText from '@mui/material/ListItemText';
 import InputBase from '@mui/material/InputBase';
 import { MAX_PASTEBIN_TEXT_LENGTH, MAX_ENC_TEXT_LENGTH, Action, Storage } from '../constants'
 import ErrorIcon from '@mui/icons-material/Error';
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Typography } from '@mui/material';
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Typography } from '@mui/material';
 import clsx from 'clsx';
 import { makeStyles, createStyles } from '@mui/styles';
+import { Theme } from '@mui/material';
 import { encrypt, decrypt } from "../chrome/utils/crypto";
 import { useHistory } from "react-router-dom";
 import { addLocalItem, getSyncItemAsync } from "../chrome/utils/storage";
@@ -26,7 +27,7 @@ let buttonText = "";
 let decKey = ""
 let password = ""
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme: Theme) => ({
   counterContainer: {
     margin: 15,
     marginTop: 10
@@ -52,13 +53,14 @@ const useStyles = makeStyles(theme => ({
     '&:active': {
       transition: '0.08s',
       opacity: 0.9,
-      transform: 'scale(1.035)'
+      tranresform: 'scale(1.035)'
     },
     transition: '0.15s'
   },
   large: {
     fontSize: '36px',
-  }, copybox: {
+  },
+  copybox: {
     paddingLeft: 10,
     paddingRight: 10,
     borderRadius: 6,
@@ -321,6 +323,7 @@ export default function CustomizedMenus() {
                 autoFocus
                 placeholder={"Dec Key"}
                 fullWidth
+                sx={{ bgcolor: 'background.default' }}
                 onChange={(event) => { setKey(event.target.value) }}
               />
             </Card>
@@ -389,7 +392,7 @@ export default function CustomizedMenus() {
       <div>
         <InputBase
           className={clsx(text.length < 30 && '24')}
-          sx={{ width: 440, height: 464, overflow: 'hidden', fontSize: clsx(text.length < 350 ? '24px' : '16px'), backgroundColor: 'white', textAlign: 'left', padding: 2 }}
+          sx={{ width: 440, height: 464, overflow: 'hidden', fontSize: clsx(text.length < 350 ? '24px' : '16px'), textAlign: 'left', padding: 2 }}
           multiline
           autoFocus
           onFocus={(e) =>
@@ -405,24 +408,20 @@ export default function CustomizedMenus() {
         />
 
         <Divider />
-        <div className={classes.bottomSection}>
+        <Box className={classes.bottomSection}>
           <TextCounter textLength={text.length} menu={menu} />
           <Card
             className={classes.hoverStyle}
-            style={{ minWidth: 100, textAlign: 'center', backgroundColor: '#1D6BC6', color: 'white', margin: 15, borderRadius: 50, marginLeft: 'auto' }}>
+            style={{ minWidth: 100, textAlign: 'center', backgroundColor: '#1D6BC6', margin: 15, borderRadius: 50, marginLeft: 'auto' }}>
             <ListItemButton sx={{ ml: 1, flex: 1, height: 40, textAlign: 'center', fontWeight: 800 }}
               onClick={actionWrapper}
-              id="demo-customized-button"
-              aria-controls={open ? 'demo-customized-menu' : undefined}
+              aria-controls={open ? 'Select type of action' : undefined}
               aria-haspopup="true"
               disabled={!buttonEnabled}
               aria-expanded={open ? 'true' : undefined}
-            // variant="contained"
-            // disableElevation
-
             >
               <ListItemText>{menu}</ListItemText>
-              <IconButton color="primary" sx={{ p: '10px', color: 'white' }} onClick={handleClick}
+              <IconButton sx={{ p: '10px', opacity: 0.85 }} onClick={handleClick} disableRipple
                 aria-label="encryption/decryption options">
                 <KeyboardArrowDownIcon />
               </IconButton>
@@ -459,7 +458,7 @@ export default function CustomizedMenus() {
           </StyledMenu>
           <DecryptFormDialog />
           <EncryptFormDialog />
-        </div>
+        </Box>
       </div>
     </>
   );

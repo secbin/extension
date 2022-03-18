@@ -12,7 +12,8 @@ import FormDialog from "./Dialog"
 const useStyles = makeStyles(theme => ({
   card: {
     borderRadius: 6,
-    border: '1px solid #E0E0E0',
+    border: '1px solid',
+    borderColor: 'rgba(170,170,170,0.25)',
     boxShadow: '0 0 7px 0 rgba(0,0,0,0.04)',
     marginBottom: 14,
   },
@@ -94,7 +95,6 @@ export const Settings = () => {
   const themeHandler = (e: any) => {
     setSyncItem(Storage.THEME, !THEME);
     setTheme(!THEME);
-    //TODO do darkmode magic here
   }
 
   const resetSettings = (e: any) => {
