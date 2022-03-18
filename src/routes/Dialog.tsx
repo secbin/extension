@@ -56,7 +56,7 @@ export default function FormDialog(props: any) {
     return (
         <div>
             <Button onClick={handleClickOpen}>
-                Set Api Key
+                { props.APIKEY ? "Change Key" : "Set Key" }
             </Button>
             <Dialog open={open} onClose={handleClose} >
                 <DialogTitle>

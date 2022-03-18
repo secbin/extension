@@ -20,7 +20,7 @@ import { makeStyles, createStyles } from '@mui/styles';
 import { Theme } from '@mui/material';
 import { encrypt, decrypt } from "../chrome/utils/crypto";
 import { useHistory } from "react-router-dom";
-import { addLocalItem, getSyncItemAsync } from "../chrome/utils/storage";
+import { addLocalItem, getSyncItem, getSyncItemAsync } from "../chrome/utils/storage";
 import { postPastebin, getPastebin } from "../chrome/utils/pastebin";
 
 let buttonText = "";
@@ -138,15 +138,21 @@ export default function CustomizedMenus() {
   const menu = state.draft.action;
   const text = state.draft.plaintext;
   const [textBox, setTextBox] = React.useState(text);
+  const [apiKey, setApiKey] = React.useState("")
 
   const [openDecForm, setOpenDecForm] = React.useState(false);
   const [openEncForm, setOpenEncForm] = React.useState(false);
-  //console.log("STATE", state);
   let { push, goBack } = useHistory();
 
   const handleClick = (event: any) => {
     setAnchorEl(event.currentTarget);
   };
+
+  useEffect(() => {
+    getSyncItem(Storage.API_KEY, (data) => {
+      setApiKey(data[Storage.API_KEY]);
+    })
+  })
 
   const handleClose = (text: Action.ENCRYPT | Action.DECRYPT | Action.DECRYPT_PASTEBIN | Action.ENCRYPT_PASTEBIN) => {
     setAnchorEl(null);
@@ -283,7 +289,7 @@ export default function CustomizedMenus() {
       // console.log("ENCRYPTED TEXT FOUND")
       buttonText = Action.DECRYPT
       buttonEnabled = true
-    } else if (textbox && e.target.value.length <= MAX_PASTEBIN_TEXT_LENGTH) {
+    } else if (textbox && e.target.value.length <= MAX_PASTEBIN_TEXT_LENGTH && apiKey) {
       // console.log("PLAINTEXT FOUND")
       buttonText = Action.ENCRYPT_PASTEBIN
       buttonEnabled = true
@@ -443,7 +449,7 @@ export default function CustomizedMenus() {
               <LockIcon />
               {Action.ENCRYPT}
             </MenuItem>
-            <MenuItem onClick={e => handleClose(Action.ENCRYPT_PASTEBIN)} dense disableRipple>
+            <MenuItem disabled={ !!!apiKey } onClick={e => handleClose(Action.ENCRYPT_PASTEBIN)} dense disableRipple>
               <LockIcon />
               {Action.ENCRYPT_PASTEBIN}
             </MenuItem>
@@ -452,8 +458,9 @@ export default function CustomizedMenus() {
               <LockOpenIcon />
               {Action.DECRYPT}
             </MenuItem>
-            <MenuItem onClick={e => handleClose(Action.DECRYPT_PASTEBIN)} dense disableRipple>
+            <MenuItem disabled={ !!!apiKey } onClick={e => handleClose(Action.DECRYPT_PASTEBIN)} dense disableRipple>
               <LockOpenIcon />
+
               {Action.DECRYPT_PASTEBIN}
             </MenuItem>
           </StyledMenu>
@@ -464,3 +471,7 @@ export default function CustomizedMenus() {
     </>
   );
 }
+      function setDarkmode(arg0: any) {
+          throw new Error("Function not implemented.");
+      }
+
