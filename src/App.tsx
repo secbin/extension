@@ -16,7 +16,6 @@ import History from "./routes/History";
 import Result from './routes/Result';
 import { getLocalItem, getSyncItem } from './chrome/utils/storage';
 import usePasteBinSearch from './hooks/usePasteBinSearchJS';
-import { currentTheme } from './hooks/theme';
 
 // declare module '@mui/styles/defaultTheme' {
 //     // eslint-disable-next-line @typescript-eslint/no-empty-interface (remove this line if you don't have the rule enabled)
