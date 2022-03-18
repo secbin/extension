@@ -125,7 +125,7 @@ export default function Result(props: any) {
 
                 {result?.pastebinlink && !result?.pastebinlink.includes("Error") && (
                     <>
-                        <Typography variant={'h4'}>Link</Typography>
+                        <Typography variant={'h4'}>Pastebin Link</Typography>
                         <Card className={classes.copybox}>
                             <InputBase
                                 className={classes.textArea}
@@ -139,7 +139,7 @@ export default function Result(props: any) {
                         </Card>
                     </>)}
 
-                <Typography variant={'h4'}>Key</Typography>
+                <Typography variant={'h4'}>Passkey</Typography>
                 <Card className={classes.copybox}>
                     <InputBase
                         className={classes.textArea}
@@ -155,10 +155,8 @@ export default function Result(props: any) {
                 <Card className={classes.copyboxLarge}>
                     <InputBase
                         className={classes.textArea}
-                        multiline
                         placeholder={result.enc_text}
                         value={result.enc_text}
-                        rows={5}
                     />
                     <IconButton onClick={() => copyTextClipboard(result?.enc_text)} disableRipple>
                         <ContentPaste color="primary"/>
