@@ -70,7 +70,7 @@ export const App = () => {
         palette: {
             mode: darkmode ? 'dark' : 'light',
             primary: {
-                main: '#3f51b5',
+                main: darkmode ? '#FF8C00' : '#3f51b5',
             },
             secondary: {
                 main: '#00acf5',
