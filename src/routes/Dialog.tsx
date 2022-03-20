@@ -18,7 +18,8 @@ const useStyles = makeStyles(theme => ({
         paddingRight: 10,
         // margin: 15,
         borderRadius: 6,
-        border: '1px solid #E0E0E0',
+        border: '1px solid',
+        borderColor: 'rgba(170,170,170,0.25)',
         boxShadow: '0 0 7px 0 rgba(0,0,0,0.04)',
         marginTop: 20,
         marginBottom: 14,
@@ -55,7 +56,7 @@ export default function FormDialog(props: any) {
     return (
         <div>
             <Button onClick={handleClickOpen}>
-                Set Api Key
+                { props.APIKEY ? "Change Key" : "Set Key" }
             </Button>
             <Dialog open={open} onClose={handleClose} >
                 <DialogTitle>

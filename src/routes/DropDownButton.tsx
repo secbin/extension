@@ -14,19 +14,20 @@ import ListItemText from '@mui/material/ListItemText';
 import InputBase from '@mui/material/InputBase';
 import { MAX_PASTEBIN_TEXT_LENGTH, MAX_ENC_TEXT_LENGTH, Action, Storage } from '../constants'
 import ErrorIcon from '@mui/icons-material/Error';
-import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Typography } from '@mui/material';
+import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Typography } from '@mui/material';
 import clsx from 'clsx';
 import { makeStyles, createStyles } from '@mui/styles';
+import { Theme } from '@mui/material';
 import { encrypt, decrypt } from "../chrome/utils/crypto";
 import { useHistory } from "react-router-dom";
-import { addLocalItem, getSyncItemAsync } from "../chrome/utils/storage";
+import { addLocalItem, getSyncItem, getSyncItemAsync } from "../chrome/utils/storage";
 import { postPastebin, getPastebin } from "../chrome/utils/pastebin";
 
 let buttonText = "";
 let decKey = ""
 let password = ""
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles((theme: Theme) => ({
   counterContainer: {
     margin: 15,
     marginTop: 10
@@ -52,17 +53,19 @@ const useStyles = makeStyles(theme => ({
     '&:active': {
       transition: '0.08s',
       opacity: 0.9,
-      transform: 'scale(1.035)'
+      tranresform: 'scale(1.035)'
     },
     transition: '0.15s'
   },
   large: {
     fontSize: '36px',
-  }, copybox: {
+  },
+  copybox: {
     paddingLeft: 10,
     paddingRight: 10,
     borderRadius: 6,
-    border: '1px solid #E0E0E0',
+    border: '1px solid',
+    borderColor: 'rgba(170,170,170,0.25)',
     boxShadow: '0 0 7px 0 rgba(0,0,0,0.04)',
     marginTop: 20,
     marginBottom: 14,
@@ -135,15 +138,21 @@ export default function CustomizedMenus() {
   const menu = state.draft.action;
   const text = state.draft.plaintext;
   const [textBox, setTextBox] = React.useState(text);
+  const [apiKey, setApiKey] = React.useState("")
 
   const [openDecForm, setOpenDecForm] = React.useState(false);
   const [openEncForm, setOpenEncForm] = React.useState(false);
-  //console.log("STATE", state);
   let { push, goBack } = useHistory();
 
   const handleClick = (event: any) => {
     setAnchorEl(event.currentTarget);
   };
+
+  useEffect(() => {
+    getSyncItem(Storage.API_KEY, (data) => {
+      setApiKey(data[Storage.API_KEY]);
+    })
+  })
 
   const handleClose = (text: Action.ENCRYPT | Action.DECRYPT | Action.DECRYPT_PASTEBIN | Action.ENCRYPT_PASTEBIN) => {
     setAnchorEl(null);
@@ -280,7 +289,7 @@ export default function CustomizedMenus() {
       // console.log("ENCRYPTED TEXT FOUND")
       buttonText = Action.DECRYPT
       buttonEnabled = true
-    } else if (textbox && e.target.value.length <= MAX_PASTEBIN_TEXT_LENGTH) {
+    } else if (textbox && e.target.value.length <= MAX_PASTEBIN_TEXT_LENGTH && apiKey) {
       // console.log("PLAINTEXT FOUND")
       buttonText = Action.ENCRYPT_PASTEBIN
       buttonEnabled = true
@@ -321,6 +330,7 @@ export default function CustomizedMenus() {
                 autoFocus
                 placeholder={"Dec Key"}
                 fullWidth
+                sx={{ bgcolor: 'background.default' }}
                 onChange={(event) => { setKey(event.target.value) }}
               />
             </Card>
@@ -389,7 +399,7 @@ export default function CustomizedMenus() {
       <div>
         <InputBase
           className={clsx(text.length < 30 && '24')}
-          sx={{ width: 440, height: 464, overflow: 'hidden', fontSize: clsx(text.length < 350 ? '24px' : '16px'), backgroundColor: 'white', textAlign: 'left', padding: 2 }}
+          sx={{ width: 440, height: 464, overflow: 'hidden', fontSize: clsx(text.length < 350 ? '24px' : '16px'), textAlign: 'left', padding: 2 }}
           multiline
           autoFocus
           onFocus={(e) =>
@@ -405,24 +415,20 @@ export default function CustomizedMenus() {
         />
 
         <Divider />
-        <div className={classes.bottomSection}>
+        <Box className={classes.bottomSection}>
           <TextCounter textLength={text.length} menu={menu} />
           <Card
             className={classes.hoverStyle}
-            style={{ minWidth: 100, textAlign: 'center', backgroundColor: '#1D6BC6', color: 'white', margin: 15, borderRadius: 50, marginLeft: 'auto' }}>
+            style={{ minWidth: 100, textAlign: 'center', backgroundColor: '#1D6BC6', margin: 15, borderRadius: 50, marginLeft: 'auto' }}>
             <ListItemButton sx={{ ml: 1, flex: 1, height: 40, textAlign: 'center', fontWeight: 800 }}
               onClick={actionWrapper}
-              id="demo-customized-button"
-              aria-controls={open ? 'demo-customized-menu' : undefined}
+              aria-controls={open ? 'Select type of action' : undefined}
               aria-haspopup="true"
               disabled={!buttonEnabled}
               aria-expanded={open ? 'true' : undefined}
-            // variant="contained"
-            // disableElevation
-
             >
               <ListItemText>{menu}</ListItemText>
-              <IconButton color="primary" sx={{ p: '10px', color: 'white' }} onClick={handleClick}
+              <IconButton sx={{ p: '10px', opacity: 0.85 }} onClick={handleClick} disableRipple
                 aria-label="encryption/decryption options">
                 <KeyboardArrowDownIcon />
               </IconButton>
@@ -443,7 +449,7 @@ export default function CustomizedMenus() {
               <LockIcon />
               {Action.ENCRYPT}
             </MenuItem>
-            <MenuItem onClick={e => handleClose(Action.ENCRYPT_PASTEBIN)} dense disableRipple>
+            <MenuItem disabled={ !!!apiKey } onClick={e => handleClose(Action.ENCRYPT_PASTEBIN)} dense disableRipple>
               <LockIcon />
               {Action.ENCRYPT_PASTEBIN}
             </MenuItem>
@@ -452,15 +458,20 @@ export default function CustomizedMenus() {
               <LockOpenIcon />
               {Action.DECRYPT}
             </MenuItem>
-            <MenuItem onClick={e => handleClose(Action.DECRYPT_PASTEBIN)} dense disableRipple>
+            <MenuItem disabled={ !!!apiKey } onClick={e => handleClose(Action.DECRYPT_PASTEBIN)} dense disableRipple>
               <LockOpenIcon />
+
               {Action.DECRYPT_PASTEBIN}
             </MenuItem>
           </StyledMenu>
           <DecryptFormDialog />
           <EncryptFormDialog />
-        </div>
+        </Box>
       </div>
     </>
   );
 }
+      function setDarkmode(arg0: any) {
+          throw new Error("Function not implemented.");
+      }
+

@@ -2,13 +2,13 @@ import React, {useContext, useEffect } from "react";
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
-import {Card, IconButton, Typography } from '@mui/material';
+import { Card, IconButton, Typography } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
 import { getLocalItem, getSyncItem } from '../chrome/utils/storage';
-import {Action, Storage } from '../constants'
+import { Action, Storage } from '../constants'
 import moment from "moment";
-import {AppContext, HistoryType } from "../AppContext";
+import { AppContext, HistoryType } from "../AppContext";
 import { useHistory } from "react-router-dom";
 import { printDateInCorrectFormat } from "../chrome/utils";
 import clsx from "clsx";
@@ -19,7 +19,8 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 const useStyles = makeStyles(theme => ({
     card: {
         borderRadius: 6,
-        border: '1px solid #E0E0E0',
+        border: '1px solid',
+        borderColor: 'rgba(170,170,170,0.25)',
         boxShadow: '0 0 7px 0 rgba(0,0,0,0.04)',
         marginBottom: 14,
     },
@@ -112,7 +113,7 @@ export default function History() {
             <>
             {showitem && (<Typography variant='h4'>{moment(item.date).format('MMMM D, YYYY')}</Typography>)}
             {/*{<Typography variant={'h4'}>Today</Typography>}*/}
-            <Card variant="outlined" classes={{root: classes.card}}>
+            <Card classes={{root: classes.card}}>
                 <ListItem key={item?.pastebinlink}>
                     <ListItemText primary={item?.pastebinlink ? item.pastebinlink : `${item.key_length * 8} ${item.enc_mode} Encrypted Plaintext`} secondary={printDateInCorrectFormat(item.date)} />
                     <IconButton color="primary" aria-label="Unlock CipherText" onClick={(e) => handleHistory(item)}>
