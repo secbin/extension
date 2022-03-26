@@ -1,5 +1,7 @@
 # securebin
 
+<a href="https://chrome.google.com/webstore/detail/securebin/ehjclckbpmkgjgfnebopjlilpdbjjpjj" target="_blank" rel="noreferrer noopener"><img width="50" src="https://upload.wikimedia.org/wikipedia/commons/0/0b/Chrome_Web_Store_logo_2012-2015.svg"></a>
+
 
 securebin is a Google Chrome extension for interfacing securely with PasteBin.
 
