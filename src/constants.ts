@@ -1,13 +1,13 @@
 export const DEFAULT_SETTINGS = {
     theme: false,
-    enc_mode: "AES-CBC",
+    enc_mode: "AES-GCM",
     key_length: 16,
 }
 
 export const DEFAULT_CONTEXT = {
     theme: false,
     api_key: "",
-    enc_mode: "AES-CBC",
+    enc_mode: "AES-GCM",
     key_length: 16,
     settings: DEFAULT_SETTINGS,
     history: []
