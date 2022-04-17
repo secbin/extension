@@ -11,8 +11,8 @@ chrome.runtime.onInstalled.addListener(async (details) => {
     console.log('onInstall, checking for settings, else set defaults', details);
     let mode = await getSyncItemAsync(Storage.ENC_MODE) as string
     if (mode === undefined) {
-        console.log("Mode = ", "AES-CBC");
-        setSyncItem(Storage.ENC_MODE, "AES-CBC")
+        console.log("Mode = ", "AES-GCM");
+        setSyncItem(Storage.ENC_MODE, "AES-GCM")
     }
 
     let len = await getSyncItemAsync(Storage.KEY_LENGTH) as number

@@ -289,10 +289,6 @@ export default function CustomizedMenus() {
       // console.log("ENCRYPTED TEXT FOUND")
       buttonText = Action.DECRYPT
       buttonEnabled = true
-    } else if (textbox && e.target.value.length <= MAX_PASTEBIN_TEXT_LENGTH && apiKey) {
-      // console.log("PLAINTEXT FOUND")
-      buttonText = Action.ENCRYPT_PASTEBIN
-      buttonEnabled = true
     } else if (buttonText === Action.ENCRYPT && e.target.value.length <= MAX_ENC_TEXT_LENGTH) {
       buttonEnabled = true
     } else {
@@ -419,7 +415,7 @@ export default function CustomizedMenus() {
           <TextCounter textLength={text.length} menu={menu} />
           <Card
             className={classes.hoverStyle}
-            style={{ minWidth: 100, textAlign: 'center', backgroundColor: '#1D6BC6', margin: 15, borderRadius: 50, marginLeft: 'auto' }}>
+            style={{ minWidth: 100, textAlign: 'center', backgroundColor: '#1D6BC6', color:'#fff', margin: 15, borderRadius: 50, marginLeft: 'auto' }}>
             <ListItemButton sx={{ ml: 1, flex: 1, height: 40, textAlign: 'center', fontWeight: 800 }}
               onClick={actionWrapper}
               aria-controls={open ? 'Select type of action' : undefined}
@@ -428,8 +424,9 @@ export default function CustomizedMenus() {
               aria-expanded={open ? 'true' : undefined}
             >
               <ListItemText>{menu}</ListItemText>
-              <IconButton sx={{ p: '10px', opacity: 0.85 }} onClick={handleClick} disableRipple
+              <IconButton sx={{ p: '10px', opacity: 0.85 }} color='inherit' onClick={handleClick} disableRipple
                 aria-label="encryption/decryption options">
+                  
                 <KeyboardArrowDownIcon />
               </IconButton>
             </ListItemButton>
