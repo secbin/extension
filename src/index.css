@@ -9,6 +9,11 @@ html, body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/*#root {*/
+/*  overflow-y: auto;*/
+/*  max-height: 100vh;*/
+/*}*/
+
 code {
   font-family: Roboto, source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;

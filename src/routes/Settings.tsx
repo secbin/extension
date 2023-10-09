@@ -141,7 +141,7 @@ export const Settings = () => {
               {ENCRYPTION_METHODS.map((item) => (
                 <MenuItem classes={{ root: classes.menuItem }}
                   key={item.value}
-                  value={item.value}>{item.prettyName}
+                  value={item.value}>{item.name}
                 </MenuItem>
               ))}
             </Select>
@@ -161,7 +161,7 @@ export const Settings = () => {
               {KEY_LENGTHS.map((item) => (
                 <MenuItem className={classes.menuItem}
                   key={item.value}
-                  value={item.value}>{item.prettyName}
+                  value={item.value}>{item.name}
                 </MenuItem>
               ))}
             </Select>

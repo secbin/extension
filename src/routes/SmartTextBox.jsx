@@ -12,7 +12,7 @@ export default function CustomizedInputBase() {
             sx={{ ml: 1, flex: 1 }}
             multiline
             placeholder="Enter a PasteBin link or ciphertext to decrypt, plaintext to encrypt"
-            inputProps={{ 'aria-label': 'search google maps', 'rows': '5'  }}
+            inputProps={{ 'aria-label': 'Enter a PasteBin link or ciphertext to decrypt, plaintext to encrypt ', 'rows': '5'  }}
         />
       </Paper>
   );

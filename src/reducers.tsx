@@ -46,11 +46,11 @@ type DraftPayload = {
     [Action.UPDATE_PLAINTEXT]: {
         plaintext: string,
         buttonEnabled: boolean,
-        action: Action.DECRYPT | Action.DECRYPT_PASTEBIN | Action.ENCRYPT | Action.ENCRYPT_PASTEBIN,
+        action: Action.DECRYPT | Action.DECRYPT_PASTEBIN | Action.ENCRYPT | Action.ENCRYPT_PASTEBIN | Action.UNENCRYPT_PASTEBIN,
     },
     [Action.UPDATE_ENC_MENU]: {
         buttonEnabled: boolean,
-        action: Action.DECRYPT | Action.DECRYPT_PASTEBIN | Action.ENCRYPT | Action.ENCRYPT_PASTEBIN,
+        action: Action.DECRYPT | Action.DECRYPT_PASTEBIN | Action.ENCRYPT | Action.ENCRYPT_PASTEBIN | Action.UNENCRYPT_PASTEBIN,
     }
 }
 

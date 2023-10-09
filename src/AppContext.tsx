@@ -12,7 +12,7 @@ export type SettingsType = {
 }
 
 export type DraftType = {
-    action: Action.DECRYPT | Action.DECRYPT_PASTEBIN | Action.ENCRYPT | Action.ENCRYPT_PASTEBIN,
+    action: Action.DECRYPT | Action.DECRYPT_PASTEBIN | Action.ENCRYPT | Action.ENCRYPT_PASTEBIN | Action.UNENCRYPT_PASTEBIN,
     plaintext: string,
     buttonEnabled: boolean,
     enc_text: string,
@@ -92,7 +92,6 @@ const mainReducer = ({ history, draft, settings }: InitialStateType, action: His
     history: historyReducer(history, action),
     draft: draftReducer(draft, action),
     settings: settingsReducer(settings, action),
-    // shoppingCart: shoppingCartReducer(shoppingCart, action),
 });
 
 

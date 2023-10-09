@@ -23,9 +23,7 @@ function usePasteBinPost(encryptQuery) {
             urlencoded.append("api_paste_code", encryptQuery);
             urlencoded.append("api_option", "paste");
 
-            // let responseBody : string[] = [];
             let responseBody = {};
-            //let responseBody = useState<string>('');
             setLoading(true);
             try {
                 const response = await fetch(
