@@ -131,7 +131,7 @@ export function TextCounter(props: any) {
   );
 }
 
-export default function CustomizedMenus() {
+export default function Editor() {
   const classes = useStyles();
   const { state, dispatch } = useContext(AppContext);
   const [anchorEl, setAnchorEl] = React.useState(null);
