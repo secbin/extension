@@ -63,7 +63,6 @@ export default function History() {
     useEffect(() => {
 
         getLocalItem(Storage.HISTORY, (data) => {
-            //console.log("HISTORY", data[Storage.HISTORY]);
             setHistory(data[Storage.HISTORY]);
         })
 
@@ -86,8 +85,7 @@ export default function History() {
 
     const [history, setHistory] = React.useState([]);
     const classes = useStyles();
-    let lastLastDate = 0;
-    //TODO Add moment JS to calculate time
+    let lastLastDate = '';
 
     return (
         <>
@@ -105,14 +103,15 @@ export default function History() {
             <List className={classes.list} >
             {history?.reverse().map((item: any, index: number) => {
                 let showitem = false;
-                if(item.date - lastLastDate > 43200) {
-                    lastLastDate = item.date;
+                const itemDate = new Date(item.date)
+                const itemTime = moment(item.date).format('MMMM D, YYYY');
+                if((itemTime !== lastLastDate)) {
+                    lastLastDate = itemTime;
                     showitem = true;
                 }
                 return (
             <>
             {showitem && (<Typography variant='h4'>{moment(item.date).format('MMMM D, YYYY')}</Typography>)}
-            {/*{<Typography variant={'h4'}>Today</Typography>}*/}
             <Card classes={{root: classes.card}}>
                 <ListItem key={item?.pastebinlink}>
                     <ListItemText primary={item?.pastebinlink ? item.pastebinlink : `${item.key_length * 8} ${item.enc_mode} Encrypted Plaintext`} secondary={printDateInCorrectFormat(item.date)} />

@@ -17,11 +17,6 @@ import Result from './routes/Result';
 import { getLocalItem, getSyncItem } from './chrome/utils/storage';
 import usePasteBinSearch from './hooks/usePasteBinSearchJS';
 
-// declare module '@mui/styles/defaultTheme' {
-//     // eslint-disable-next-line @typescript-eslint/no-empty-interface (remove this line if you don't have the rule enabled)
-//     interface DefaultTheme extends Theme {}
-// }
-
 const useStyles = makeStyles((theme: Theme) => ({
     root: {
         boxShadow: "none",
@@ -111,7 +106,14 @@ export const App = () => {
                 textTransform: 'none',
                 fontWeight: 600,
             },
-        }
+        },
+        components: {
+            MuiButtonBase: {
+                defaultProps: {
+                    disableRipple: true,
+                },
+            },
+        },
     });
 
     return (

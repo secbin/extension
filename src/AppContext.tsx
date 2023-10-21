@@ -28,7 +28,7 @@ export type HistoryType = {
     key_length: number,
     key: string,
     enc_text: string,
-    date: Date,
+    date:  Date,
 }
 
 function getSettingsValuesFromStorage() {
