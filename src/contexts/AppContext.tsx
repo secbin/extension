@@ -1,8 +1,8 @@
 import React, { createContext, Dispatch, useReducer } from 'react'
-import { Action } from './constants'
-import { setSyncItem, getSyncItem, getLocalItem } from "./chrome/utils/storage";
-import { Storage } from "./constants"
-import { HistoryActions, historyReducer, draftReducer, settingsReducer, DraftActions, SettingsActions } from './reducers';
+import { Action } from '../constants'
+import { setSyncItem, getSyncItem, getLocalItem } from "../chrome/utils/storage";
+import { Storage } from "../constants"
+import { HistoryActions, historyReducer, draftReducer, settingsReducer, DraftActions, SettingsActions } from '../reducers/reducers';
 
 export type SettingsType = {
     api_key: string,

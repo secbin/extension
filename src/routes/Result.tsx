@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import clsx from "clsx";
 import { Button, Card, Divider, IconButton, InputAdornment, InputBase, Paper, TextField, Typography } from '@mui/material';
 import { makeStyles, createStyles } from "@mui/styles";
-import { AppContext, HistoryType } from "../AppContext";
+import { AppContext, HistoryType } from "../contexts/AppContext";
 import { getLocalItem, getSyncItem } from "../chrome/utils/storage";
 import { Action, Storage } from "../constants"
 import { copyTextClipboard, printDateInCorrectFormat } from "../chrome/utils"

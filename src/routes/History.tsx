@@ -8,7 +8,7 @@ import LockOpenIcon from '@mui/icons-material/LockOpen';
 import { getLocalItem, getSyncItem } from '../chrome/utils/storage';
 import { Action, Storage } from '../constants'
 import moment from "moment";
-import { AppContext, HistoryType } from "../AppContext";
+import { AppContext, HistoryType } from "../contexts/AppContext";
 import { useHistory } from "react-router-dom";
 import { printDateInCorrectFormat } from "../chrome/utils";
 import clsx from "clsx";

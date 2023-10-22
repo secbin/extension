@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext, useCallback } from "react";
-import { AppContext } from "../AppContext";
+import { AppContext } from "../contexts/AppContext";
 import { styled, alpha } from '@mui/material/styles';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
@@ -411,7 +411,9 @@ export default function Editor() {
       <div>
         <Box sx={{height: '460px', overflow: 'hidden'}}>
         <InputBase
-          sx={{ width: '100vw', overflow: 'hidden', fontSize: fontSize(textBox.length), textAlign: 'left', padding: '0px', textField: { padding: '6px' }, inputRoot: { padding: '6px' }}}
+          sx={{ width: '100vw', overflow: 'hidden', fontSize: fontSize(textBox.length), textAlign: 'left', padding: '0px', textField: { padding: '6px' }, inputMultiline: { padding: '6px' }, fullWidth: { padding: '6px' }, textarea: {
+              root: { padding: "6px", color: "black" }
+            }, box: { padding: "6px" } }}
           multiline
           autoFocus
           onFocus={(e) =>
@@ -423,7 +425,7 @@ export default function Editor() {
           onChange={checkTypeOfText}
           value={textBox}
           placeholder="Type or paste (⌘ + V) text you want to encrypt or a Pastebin.com link or ciphertext you want to decrypt here..."
-          inputProps={{ 'aria-label': 'text to encrypt or decrypt', 'height': '300px' }}
+          inputProps={{ 'aria-label': 'text to encrypt or decrypt', 'height': '300px', 'padding': '6px' }}
         />
         </Box>
 

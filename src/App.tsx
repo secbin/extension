@@ -2,20 +2,20 @@ import React, { useEffect, useContext, useReducer, useState } from 'react';
 import { Route, Switch } from 'react-router-dom';
 import { styled, alpha } from '@mui/material/styles';
 import { useHistory } from 'react-router-dom';
-import './App.css';
+import './styles/App.css';
 import { AppBar, Box, createMuiTheme, createTheme, Divider, IconButton, Theme, ThemeProvider, Toolbar, Typography } from '@mui/material';
 import { makeStyles, createStyles, useTheme } from '@mui/styles';
 import { green, purple } from '@mui/material/colors';
 import { History as HistoryIcon, ChevronLeft, Settings as SettingsIcon, ContentPaste }  from '@mui/icons-material';
-import { AppProvider, AppContext } from './AppContext';
+import { AppProvider, AppContext } from './contexts/AppContext';
 import { DEFAULT_CONTEXT } from './constants'
 import { Storage } from './constants'
-import { Home } from './routes/Home';
 import { Settings } from './routes/Settings'
 import History from "./routes/History";
 import Result from './routes/Result';
 import { getLocalItem, getSyncItem } from './chrome/utils/storage';
-import usePasteBinSearch from './hooks/usePasteBinSearchJS';
+import usePasteBinSearch from './hooks/usePasteBinSearch';
+import Editor from "./routes/Editor";
 
 const useStyles = makeStyles((theme: Theme) => ({
     root: {
@@ -140,9 +140,9 @@ export const App = () => {
                 </AppBar>
             </div>
             <Box className={classes.content} sx={{bgcolor: 'background.default', color: 'text.primary'}}>
-            <Switch >
+            <Switch>
                 <Route path="/home">
-                    <Home/>
+                    <Editor/>
                 </Route>
                 <Route path="/settings">
                     <Settings/>
@@ -154,7 +154,7 @@ export const App = () => {
                     <Result/>
                 </Route>
                 <Route path="/">
-                    <Home/>
+                    <Editor/>
                 </Route>
             </Switch>
             </Box>
