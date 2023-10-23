@@ -22,8 +22,7 @@ const useStyles = makeStyles((theme: Theme) => ({
         boxShadow: "none",
     },
     content: {
-        marginTop: 56,
-        minHeight: 'calc(100vh - 56px)',
+        height: '542px',
     },
     hoverStyle: {
         '&:hover': {
@@ -121,7 +120,7 @@ export const App = () => {
          <AppProvider>
             <>
             <div className={classes.background}>
-                <AppBar sx={{bgcolor: 'background.default'}} className={classes.root} position="fixed" enableColorOnDark>
+                <AppBar sx={{bgcolor: 'background.default'}} className={classes.root} position="relative" enableColorOnDark>
                     <Toolbar>
                         <img className={classes.hoverStyle} src={darkmode ? '/securebinlogo_dark.svg' : '/securebinlogo.svg'} alt="logo" onClick={() => { push('/home')}}/>
                         <div style={{marginLeft: 'auto'}}>
@@ -139,24 +138,24 @@ export const App = () => {
                     <Divider/>
                 </AppBar>
             </div>
-            <Box className={classes.content} sx={{bgcolor: 'background.default', color: 'text.primary'}}>
-            <Switch>
-                <Route path="/home">
-                    <Editor/>
-                </Route>
-                <Route path="/settings">
-                    <Settings/>
-                </Route>
-                <Route path="/history">
-                    <History/>
-                </Route>
-                <Route path="/result">
-                    <Result/>
-                </Route>
-                <Route path="/">
-                    <Editor/>
-                </Route>
-            </Switch>
+            <Box className={classes.content} sx={{bgcolor: 'background.default', color: 'text.primary', overflow: 'auto'}}>
+                <Switch>
+                    <Route path="/home">
+                        <Editor/>
+                    </Route>
+                    <Route path="/settings">
+                        <Settings/>
+                    </Route>
+                    <Route path="/history">
+                        <History/>
+                    </Route>
+                    <Route path="/result">
+                        <Result/>
+                    </Route>
+                    <Route path="/">
+                        <Editor/>
+                    </Route>
+                </Switch>
             </Box>
             </>
          </AppProvider>
