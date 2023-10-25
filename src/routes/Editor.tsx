@@ -31,8 +31,8 @@ let password = ""
 
 const useStyles = makeStyles((theme: Theme) => ({
   counterContainer: {
-    margin: 15,
-    marginTop: 10
+    margin: '15px',
+    display: 'inline-flex',
   },
   counter: {
     fontSize: 11,
@@ -286,21 +286,20 @@ export default function Editor() {
 
     // Set a new timer
     const newTimerId = setTimeout(() => {
-      if (textbox.includes(PASTEBIN_BASEURL) && length <= MAX_ENC_TEXT_LENGTH) {
-        // console.log("PASTE BIN LINK FOUND")
+      if (length <= MAX_ENC_TEXT_LENGTH && textbox.includes(PASTEBIN_BASEURL)) {
         buttonText = Action.DECRYPT_PASTEBIN
-        buttonEnabled = true
-      } else if (buttonText === Action.ENCRYPT && length <= MAX_ENC_TEXT_LENGTH) {
         buttonEnabled = true
       } else if (length <= MAX_ENC_TEXT_LENGTH && textbox.includes("C_TXT")) {
         buttonText = Action.DECRYPT
         buttonEnabled = true;
+      } else if (length > 0 && length <= MAX_ENC_TEXT_LENGTH) {
+        buttonEnabled = true
       } else {
         buttonEnabled = false;
       }
       dispatch({ type: Action.UPDATE_PLAINTEXT, payload: { plaintext: textbox, action: buttonText, buttonEnabled: buttonEnabled } })
 
-    }, 500);
+    }, 250);
 
     // @ts-ignore
     setTimerId(newTimerId);
@@ -409,11 +408,11 @@ export default function Editor() {
   return (
     <>
       <div>
-        <Box sx={{height: '460px', overflow: 'hidden'}}>
+        <Box sx={{height: '470px', overflow: 'hidden'}}>
         <InputBase
-          sx={{ width: '100vw', overflow: 'hidden', fontSize: fontSize(textBox.length), textAlign: 'left', padding: '0px', textField: { padding: '6px' }, inputMultiline: { padding: '6px' }, fullWidth: { padding: '6px' }, textarea: {
-              root: { padding: "6px", color: "black" }
-            }, box: { padding: "6px" } }}
+          sx={{'& .MuiInputBase-inputMultiline': {
+            padding: '5px 10px', overflowX: 'hidden'
+          }, width: '100vw', overflow: 'hidden', fontSize: fontSize(textBox.length), textAlign: 'left', padding: '0px'}}
           multiline
           autoFocus
           onFocus={(e) =>
@@ -473,7 +472,7 @@ export default function Editor() {
               {Action.UNENCRYPT_PASTEBIN}
             </MenuItem>
             <Divider sx={{ my: 0.5 }} />
-            <MenuItem onClick={e => handleClose(Action.DECRYPT_PASTEBIN)} dense disableRipple>
+            <MenuItem onClick={e => handleClose(Action.DECRYPT)} dense disableRipple>
               <LockOpenIcon />
               {Action.DECRYPT}
             </MenuItem>
