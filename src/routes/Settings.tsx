@@ -1,13 +1,13 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import {
-  Button, Card, Checkbox, Divider, IconButton, List, ListItem, ListItemText,
-  MenuItem, Paper, Select, TextField, Typography
+  Button, Card, Checkbox, List, ListItem, ListItemText,
+  MenuItem, Select, Typography
 } from "@mui/material";
-import { ChevronRight } from "@mui/icons-material";
-import { makeStyles, createStyles } from '@mui/styles';
-import { setSyncItem, getSyncItem, setLocalItem } from "../chrome/utils/storage";
-import { Storage, ENCRYPTION_METHODS, KEY_LENGTHS, DEFAULT_CONTEXT } from "../constants";
+import { makeStyles } from '@mui/styles';
+import { getSyncItem, setLocalItem } from "../chrome/utils/storage";
+import {Storage, ENCRYPTION_METHODS, KEY_LENGTHS, Action} from "../constants";
 import FormDialog from "./Dialog"
+import {AppContext} from "../contexts/AppContext";
 
 const useStyles = makeStyles(theme => ({
   card: {
@@ -41,51 +41,20 @@ const useStyles = makeStyles(theme => ({
 
 export const Settings = () => {
   const classes = useStyles();
-  const [APIKEY, setApiKey] = useState("");
-  const [ENC_MODE, setEncMode] = useState("");
-  const [THEME, setTheme] = useState(false);
-  const [KEY_LENGTH, setKeyLength] = useState("");
-
-  useEffect(() => {
-    getSettings();
-  }, []);
+  const { state, dispatch } = useContext(AppContext);
+  const { api_key, enc_mode, theme, key_length } = state.settings;
+  const [THEME, setTheme] = useState(state.settings.theme);
 
   // Note: a key size of 16 bytes will use AES-128, 24 => AES-192, 32 => AES-256
-  function getSettings(): any {
-    getSyncItem(Storage.API_KEY, (data) => {
-      setApiKey(data[Storage.API_KEY]);
-      //console.log(APIKEY)
-    })
-
-    getSyncItem(Storage.ENC_MODE, (data) => {
-      setEncMode(data[Storage.ENC_MODE]);
-      //console.log(ENC_MODE)
-    })
-
-    getSyncItem(Storage.THEME, (data) => {
-      setTheme(data[Storage.THEME]);
-      //console.log("Getting theme", data[Storage.THEME])
-    })
-
-    getSyncItem(Storage.KEY_LENGTH, (data) => {
-      setKeyLength(data[Storage.KEY_LENGTH]);
-      //console.log(KEY_LENGTH)
-    })
-  }
-
   const keyLengthHandler = (e: any) => {
-    setSyncItem(Storage.KEY_LENGTH, e.target.value)
-    setKeyLength(e.target.value);
+    // setSyncItem(Storage.KEY_LENGTH, e.target.value);
+    dispatch({type: Action.UPDATE_SETTINGS, payload: {...state.settings, key_length: e.target.value} })
+    // setKeyLength(e.target.value);
     //console.log(KEY_LENGTH)
-
-    getSyncItem(Storage.KEY_LENGTH, (data) => {
-      //console.log(KEY_LENGTH)
-    })
   }
 
   const encModeHandler = (e: any) => {
-    setSyncItem(Storage.ENC_MODE, e.target.value);
-    setEncMode(e.target.value);
+    dispatch({type: Action.UPDATE_SETTINGS, payload: {...state.settings, enc_mode: e.target.value, } })
   }
 
   const clearHistory = (e: any) => {
@@ -93,23 +62,21 @@ export const Settings = () => {
   }
 
   const themeHandler = (e: any) => {
-    setSyncItem(Storage.THEME, !THEME);
+    // setSyncItem(Storage.THEME, !theme);
+    // dispatch({type: Action.UPDATE_SETTINGS, payload: {...state.settings, theme: false, } })
+    const newTheme = {
+      ...state.settings,
+        theme: theme ? false : true,
+    }
+    // dispatch({type: Action.UPDATE_SETTINGS, payload: newTheme })
+    dispatch({type: Action.UPDATE_THEME, payload: {theme: theme ? false : true}});
+
     setTheme(!THEME);
+    console.log("Theme", newTheme, state.settings.theme, {statemodified: !theme, stateoriginal: theme});
   }
 
   const resetSettings = (e: any) => {
-    const d = DEFAULT_CONTEXT;
-
-    setSyncItem(Storage.THEME, d.theme);
-    setSyncItem(Storage.API_KEY, d.api_key);
-    setSyncItem(Storage.ENC_MODE, d.enc_mode);
-    setSyncItem(Storage.KEY_LENGTH, d.key_length);
-
-    setEncMode(d.enc_mode);
-    setKeyLength(String(d.key_length));
-    setApiKey(d.api_key);
-    setTheme(d.theme);
-
+    dispatch({type: Action.RESET_SETTINGS, payload: null});
   }
   const signUp = () => {
     window.open("https://pastebin.com/doc_api")
@@ -124,7 +91,7 @@ export const Settings = () => {
           <ListItem>
             <ListItemText
               primary="Dark Mode" />
-            <Checkbox checked={THEME} onChange={themeHandler} />
+            <Checkbox checked={theme} onChange={themeHandler} />
           </ListItem>
         </Card>
 
@@ -134,8 +101,7 @@ export const Settings = () => {
             <ListItemText primary="Encryption Algorithm" />
             <Select
               className={classes.select}
-              value={ENC_MODE}
-              label={ENC_MODE}
+              value={enc_mode}
               onChange={encModeHandler}
             >
               {ENCRYPTION_METHODS.map((item) => (
@@ -155,7 +121,7 @@ export const Settings = () => {
             {/* // Note: a key size of 16 bytes will use AES-128, 24 => AES-192, 32 => AES-256 */}
             <Select
               className={classes.select}
-              value={KEY_LENGTH}
+              value={key_length}
               onChange={keyLengthHandler}
             >
               {KEY_LENGTHS.map((item) => (
@@ -171,8 +137,8 @@ export const Settings = () => {
         <Typography variant={'h4'}>Pastebin API</Typography>
         <Card classes={{ root: classes.card }}>
           <ListItem>
-            <ListItemText primary="API Key" secondary={APIKEY ? APIKEY : "Not Set"} />
-            <FormDialog APIKEY={APIKEY}/>
+            <ListItemText primary="API Key" secondary={api_key ? api_key : "Not Set"} />
+            <FormDialog APIKEY={api_key}/>
           </ListItem>
         </Card>
 

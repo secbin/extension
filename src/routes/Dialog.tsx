@@ -1,22 +1,20 @@
 import * as React from 'react';
 import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import {setSyncItem, getSyncItem} from "../chrome/utils/storage";
-import { Storage } from "../constants";
+import {Action, Storage} from "../constants";
 import {Card, Divider, InputBase, Typography } from '@mui/material';
 import { makeStyles, createStyles } from '@mui/styles';
+import {AppContext} from "../contexts/AppContext";
 
 
 const useStyles = makeStyles(theme => ({
     copybox: {
         paddingLeft: 10,
         paddingRight: 10,
-        // margin: 15,
         borderRadius: 6,
         border: '1px solid',
         borderColor: 'rgba(170,170,170,0.25)',
@@ -35,18 +33,14 @@ export default function FormDialog(props: any) {
     const classes = useStyles();
     const [open, setOpen] = React.useState(false);
     const [apiKey, setApiKey] = React.useState("");
+    const { state, dispatch } = React.useContext(AppContext);
     const handleClickOpen = () => {
         setOpen(true);
     };
 
     const handleClose = () => {
-
-        //console.log("Setting the API KEY:",apiKey);
-        setSyncItem(Storage.API_KEY,apiKey);
+        dispatch({type: Action.UPDATE_SETTINGS, payload: {...state.settings, api_key: apiKey} })
         setOpen(false);
-        getSyncItem(Storage.API_KEY, (data: any) => {
-            //console.log(KEY_LENGTH)
-          })
     };
 
     const handleCancel = () => {
@@ -56,21 +50,20 @@ export default function FormDialog(props: any) {
     return (
         <div>
             <Button onClick={handleClickOpen}>
-                { props.APIKEY ? "Change Key" : "Set Key" }
+                { props.APIKEY ? "Update" : "Set Key" }
             </Button>
             <Dialog open={open} onClose={handleClose} >
                 <DialogTitle>
-                    <Typography variant={'h3'}>Set Pastebin Api Key</Typography>
+                    <Typography variant={'h3'}>Set Pastebin API Key</Typography>
                 </DialogTitle>
-                <Divider/>
                 <DialogContent>
                     <DialogContentText>
                         <Typography variant={'body2'}>
-                        In order to be able to use the PasteBin Api, you will need to
-                        create an account with PasteBin in order to get an Api key.
+                            In order to be able to use the PasteBin API, you will need to
+                            create an account with PasteBin in order to get an Api key.
                         </Typography>
                         <Typography variant={'body2'} className={classes.margin}>
-                        Once you have made an account enter in the key here and you are all good to go!
+                            Once you have made an account enter in the key here and you are all good to go!
                         </Typography>
                     </DialogContentText>
                     <Card className={classes.copybox}>
@@ -88,9 +81,10 @@ export default function FormDialog(props: any) {
                         </Typography>
                     </DialogContentText>
                 </DialogContent>
+                <Divider/>
                 <DialogActions>
                     <Button onClick={handleCancel}>Cancel</Button>
-                    <Button onClick={handleClose}>Set</Button>
+                    <Button variant='contained' disableElevation onClick={handleClose}>Set</Button>
                 </DialogActions>
             </Dialog>
         </div>

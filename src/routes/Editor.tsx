@@ -50,12 +50,14 @@ const useStyles = makeStyles((theme: Theme) => ({
   hoverStyle: {
     '&:hover': {
       transition: '0.15s',
-      transform: 'scale(1.02)'
+      transform: 'scale(1.02)',
+      backgroundColor: 'black',
+      color: 'black'
     },
     '&:active': {
       transition: '0.08s',
       opacity: 0.9,
-      tranresform: 'scale(1.035)'
+      transform: 'scale(1.035)'
     },
     transition: '0.15s'
   },
@@ -72,6 +74,9 @@ const useStyles = makeStyles((theme: Theme) => ({
     marginTop: 20,
     marginBottom: 14,
   },
+  animated: {
+    transition: 'all 0.25s',
+  }
 }));
 
 
@@ -117,7 +122,7 @@ const StyledMenu = styled((props) => (
 
 export function TextCounter(props: any) {
   let MAX = MAX_ENC_TEXT_LENGTH;
-  if (props.menu === Action.ENCRYPT_PASTEBIN) { // button is pastebine enc
+  if (props.menu === Action.ENCRYPT_PASTEBIN) { // button is pastebin enc
     MAX = MAX_PASTEBIN_TEXT_LENGTH;
   }
   const classes = useStyles();
@@ -139,7 +144,8 @@ export default function Editor() {
   const buttonEnabled = state.draft.buttonEnabled;
   const menu = state.draft.action;
   const text = state.draft.plaintext;
-  const [textBox, setTextBox] = React.useState(text);
+  console.log("textbox: ", {text, sdraft: state.draft});
+  const [textBox, setTextBox] = React.useState(state.draft.plaintext);
   const [timerId, setTimerId] = useState(null);
   const [apiKey, setApiKey] = React.useState("")
 
@@ -155,7 +161,9 @@ export default function Editor() {
     getSyncItem(Storage.API_KEY, (data) => {
       setApiKey(data[Storage.API_KEY]);
     })
-  })
+
+    setTextBox(state.draft.plaintext);
+  }, [state.draft.plaintext]);
 
   const handleClose = (text: Action.ENCRYPT | Action.DECRYPT | Action.DECRYPT_PASTEBIN | Action.ENCRYPT_PASTEBIN | Action.UNENCRYPT_PASTEBIN) => {
     setAnchorEl(null);
@@ -404,6 +412,8 @@ export default function Editor() {
     else return '16px'
   }
 
+  console.log("TEXTBOX", {textBox});
+
   // @ts-ignore
   return (
     <>
@@ -422,6 +432,7 @@ export default function Editor() {
             )}
           rows={clsx(textBox.length < 385 ? 13 : 20)}
           onChange={checkTypeOfText}
+          defaultValue={state.draft.plaintext}
           value={textBox}
           placeholder="Type or paste (⌘ + V) text you want to encrypt or a Pastebin.com link or ciphertext you want to decrypt here..."
           inputProps={{ 'aria-label': 'text to encrypt or decrypt', 'height': '300px', 'padding': '6px' }}
@@ -432,7 +443,7 @@ export default function Editor() {
         <Box className={classes.bottomSection}>
           <TextCounter textLength={textBox.length} menu={menu} />
           <Card
-            className={classes.hoverStyle}
+            className={classes.animated}
             style={{ minWidth: 100, textAlign: 'center', backgroundColor: '#1D6BC6', color:'#fff', margin: 15, borderRadius: 50, marginLeft: 'auto' }}>
             <ListItemButton sx={{ ml: 1, flex: 1, height: 40, textAlign: 'center', fontWeight: 800 }}
               onClick={actionWrapper}
@@ -441,7 +452,7 @@ export default function Editor() {
               disabled={!buttonEnabled}
               aria-expanded={open ? 'true' : undefined}
             >
-              <ListItemText>{menu}</ListItemText>
+              <ListItemText className={classes.animated}>{menu}</ListItemText>
               <IconButton sx={{ p: '10px', opacity: 0.85 }} color='inherit' onClick={handleClick} disableRipple
                 aria-label="encryption/decryption options">
                   

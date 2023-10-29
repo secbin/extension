@@ -2,7 +2,16 @@ import React, { createContext, Dispatch, useReducer } from 'react'
 import { Action } from '../constants'
 import { setSyncItem, getSyncItem, getLocalItem } from "../chrome/utils/storage";
 import { Storage } from "../constants"
-import { HistoryActions, historyReducer, draftReducer, settingsReducer, DraftActions, SettingsActions } from '../reducers/reducers';
+import {
+    HistoryActions,
+    historyReducer,
+    appReducer,
+    draftReducer,
+    settingsReducer,
+    DraftActions,
+    SettingsActions,
+    AppActions
+} from '../reducers/reducers';
 
 export type SettingsType = {
     api_key: string,
@@ -31,6 +40,10 @@ export type HistoryType = {
     date:  Date,
 }
 
+export type AppType = {
+    location: string | null,
+}
+
 function getSettingsValuesFromStorage() {
     getSyncItem(null, (data) => {
         return {
@@ -56,12 +69,16 @@ function getHistoryValuesFromStorage() {
 }
 
 type InitialStateType = {
+    app: AppType;
     history: HistoryType[];
     draft: DraftType;
     settings: SettingsType;
 }
 
 const initialState = {
+    app: {
+        location: null,
+    },
     history: [],
     draft: {
         action: Action.ENCRYPT,
@@ -82,13 +99,14 @@ const initialState = {
 
 const AppContext = createContext<{
     state: InitialStateType;
-    dispatch: Dispatch<HistoryActions | DraftActions | SettingsActions>;
+    dispatch: Dispatch<AppActions | HistoryActions | DraftActions | SettingsActions>;
 }>({
     state: initialState,
     dispatch: () => null
 });
 
-const mainReducer = ({ history, draft, settings }: InitialStateType, action: HistoryActions | DraftActions | SettingsActions ) => ({
+const mainReducer = ({ app, history, draft, settings }: InitialStateType, action: AppActions | HistoryActions | DraftActions | SettingsActions ) => ({
+    app: appReducer(app, action),
     history: historyReducer(history, action),
     draft: draftReducer(draft, action),
     settings: settingsReducer(settings, action),

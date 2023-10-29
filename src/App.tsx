@@ -1,73 +1,117 @@
-import React, { useEffect, useContext, useReducer, useState } from 'react';
-import { Route, Switch } from 'react-router-dom';
-import { styled, alpha } from '@mui/material/styles';
+import React, { useEffect, useState } from 'react';
+import {Route, Switch, useLocation} from 'react-router-dom';
 import { useHistory } from 'react-router-dom';
 import './styles/App.css';
-import { AppBar, Box, createMuiTheme, createTheme, Divider, IconButton, Theme, ThemeProvider, Toolbar, Typography } from '@mui/material';
-import { makeStyles, createStyles, useTheme } from '@mui/styles';
-import { green, purple } from '@mui/material/colors';
-import { History as HistoryIcon, ChevronLeft, Settings as SettingsIcon, ContentPaste }  from '@mui/icons-material';
-import { AppProvider, AppContext } from './contexts/AppContext';
-import { DEFAULT_CONTEXT } from './constants'
-import { Storage } from './constants'
+import { AppBar, Box, createMuiTheme, createTheme, Divider, IconButton, Theme, ThemeProvider, Toolbar } from '@mui/material';
+import { makeStyles } from '@mui/styles';
+import { HistorySharp as HistoryIcon, SettingsSharp as SettingsIcon, ContentPasteSharp as ContentPaste, EditSharp as EditIcon }  from '@mui/icons-material';
+import { AppContext } from './contexts/AppContext';
+import {Action, DEFAULT_CONTEXT, DEFAULT_SETTINGS, Storage} from './constants'
 import { Settings } from './routes/Settings'
 import History from "./routes/History";
 import Result from './routes/Result';
-import { getLocalItem, getSyncItem } from './chrome/utils/storage';
-import usePasteBinSearch from './hooks/usePasteBinSearch';
 import Editor from "./routes/Editor";
-
-const useStyles = makeStyles((theme: Theme) => ({
-    root: {
-        boxShadow: "none",
-    },
-    content: {
-        height: '542px',
-    },
-    hoverStyle: {
-        '&:hover': {
-            transition: '0.15s',
-            transform: 'scale(1.05)'
-        },
-        '&:active': {
-            transition: '0.08s',
-            opacity: 0.9,
-            transform: 'scale(1.07)'
-        },
-        transition: '0.15s'
-    },
-    background: {
-        bgColor: 'background.default',
-    },
-}));
+import {getSyncItem, setSyncItem} from "./chrome/utils/storage";
 
 export const App = () => {
 
     const { state, dispatch } = React.useContext(AppContext);
-    const [history, setHistory] = useState([]);
-    const [appConfig, setAppConfig] = useState({})
-    const [darkmode, setDarkmode] = useState(true);
+    const [darkmode, setDarkmode] = useState(state.settings.theme);
 
-    let { push, goBack } = useHistory();
+    const useStyles = makeStyles((theme: Theme) => ({
+        root: {
+            boxShadow: "none",
+        },
+        content: {
+            height: '542px',
+        },
+        hoverStyle: {
+            fontSize: '0.9em',
+            '&:hover': {
+                transition: '0.10s',
+                color: darkmode ? '#d5d5d5' : '#4b4b4b',
+            },
+            '&:active': {
+                transition: '0.08s',
+                color: '#4b4b4b',
+            },
+            transition: '0.15s'
+        },
+        background: {
+            bgColor: 'background.default',
+        },
+    }));
+
+    let { push } = useHistory();
+
+    const location = useLocation();
+
 
     useEffect(() => {
+
         getSyncItem(Storage.THEME, (data) => {
-            setDarkmode(data[Storage.THEME]);
-        })
+
+            console.log("UPDATING SETTINGS", data[Storage.THEME]);
+
+
+            dispatch({ type: Action.SET_THEME, payload: JSON.parse(data[Storage.THEME]) });
+
+        });
+
+        getSyncItem(Storage.DRAFT, (data) => {
+
+            console.log("UPDATING DRAFT", data[Storage.DRAFT]);
+
+
+            dispatch({ type: Action.SET_DRAFT, payload: JSON.parse(data[Storage.DRAFT]) });
+
+        });
+
+        console.log("getting SETTINGS");
+
+        getSyncItem(Storage.SETTINGS, (data) => {
+
+            console.log("UPDATING SETTINGS", data[Storage.SETTINGS]);
+
+
+            dispatch({ type: Action.SET_SETTINGS, payload: JSON.parse(data[Storage.SETTINGS]) || DEFAULT_SETTINGS });
+
+        });
+
+        getSyncItem(Storage.APP, (data) => {
+            if (data[Storage.APP].length > 2) {
+                const path = JSON.parse(data[Storage.APP])
+                console.log("UPDATING APP", path);
+                push(path);
+            }
+        });
     }, []);
+
+    useEffect(() => {
+        console.log("UPDATING THEME");
+        setDarkmode(state.settings.theme);
+    }, [state.settings.theme]);
+
+    useEffect(() => {
+        setSyncItem(Storage.APP, JSON.stringify(location));
+    }, [location]);
 
     const classes = useStyles();
 
+    // setTimeout(() => { setDarkmode(true) }, 4000);
 
     const theme = createMuiTheme({
         palette: {
             mode: darkmode ? 'dark' : 'light',
             primary: {
-                main: darkmode ? '#FF8C00' : '#3f51b5',
+                main: darkmode ? '#FF8C00' : '#1D6BC6',
             },
             secondary: {
                 main: '#00acf5',
             },
+        },
+        shape: {
+            borderRadius: 12,
         },
         typography: {
             h1: {
@@ -81,7 +125,7 @@ export const App = () => {
             h3: {
                 fontSize: 14,
                 fontWeight: 700,
-                opacity: 0.7,
+                opacity: 0.95,
             },
             h4: {
                 fontSize: 14,
@@ -104,6 +148,7 @@ export const App = () => {
                 fontSize: 14,
                 textTransform: 'none',
                 fontWeight: 600,
+                borderRadius: '50px',
             },
         },
         components: {
@@ -112,53 +157,77 @@ export const App = () => {
                     disableRipple: true,
                 },
             },
+            MuiButton: {
+                styleOverrides: {
+                    root: {
+                        // padding: '10px 16px',
+                    },
+                },
+            },
+            MuiMenu: {
+                styleOverrides: {
+                    paper: {
+                        boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.02)',
+                    },
+                },
+            },
+            MuiPaper: {
+                styleOverrides: {
+                    elevation8: {
+                        border: '1px solid #eaeaea',
+                        boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.07), 0px 1px 1px rgba(0, 0, 0, 0.06)',
+                    },
+                },
+            },
         },
     });
 
     return (
-        <ThemeProvider theme={theme}>
-         <AppProvider>
-            <>
-            <div className={classes.background}>
-                <AppBar sx={{bgcolor: 'background.default'}} className={classes.root} position="relative" enableColorOnDark>
-                    <Toolbar>
-                        <img className={classes.hoverStyle} src={darkmode ? '/securebinlogo_dark.svg' : '/securebinlogo.svg'} alt="logo" onClick={() => { push('/home')}}/>
-                        <div style={{marginLeft: 'auto'}}>
-                            {<IconButton className={classes.hoverStyle} aria-label="Latest paste" sx={{ mr: 1 }} disableRipple onClick={() => { push('/result')}}>
-                            <ContentPaste />
-                            </IconButton>}
-                            <IconButton className={classes.hoverStyle} aria-label="History" sx={{ mr: 1 }} disableRipple onClick={() => { push('/history')}}>
-                                <HistoryIcon />
-                            </IconButton>
-                            <IconButton className={classes.hoverStyle} aria-label="Settings" disableRipple onClick={() => { push('/settings')}}>
-                                <SettingsIcon />
-                            </IconButton>
-                        </div>
-                    </Toolbar>
-                    <Divider/>
-                </AppBar>
-            </div>
-            <Box className={classes.content} sx={{bgcolor: 'background.default', color: 'text.primary', overflow: 'auto'}}>
-                <Switch>
-                    <Route path="/home">
-                        <Editor/>
-                    </Route>
-                    <Route path="/settings">
-                        <Settings/>
-                    </Route>
-                    <Route path="/history">
-                        <History/>
-                    </Route>
-                    <Route path="/result">
-                        <Result/>
-                    </Route>
-                    <Route path="/">
-                        <Editor/>
-                    </Route>
-                </Switch>
-            </Box>
-            </>
-         </AppProvider>
-        </ThemeProvider>
+            <ThemeProvider theme={theme}>
+                <>
+                <div className={classes.background}>
+                    <AppBar sx={{bgcolor: 'background.default'}} className={classes.root} position="relative" enableColorOnDark>
+                        <Toolbar>
+                            <img src={darkmode ? '/securebinlogo_dark.svg' : '/securebinlogo.svg'} alt="logo"/>
+                            <div style={{marginLeft: 'auto'}}>
+                                {<IconButton className={classes.hoverStyle} aria-label="Latest paste" sx={{ mr: 1 }} disableRipple onClick={() => { push('/home')}}>
+                                    <EditIcon />
+                                </IconButton>}
+                                {<IconButton className={classes.hoverStyle} aria-label="Latest paste" sx={{ mr: 1 }} disableRipple onClick={() => { push('/result')}}>
+                                <ContentPaste />
+                                </IconButton>}
+                                <IconButton className={classes.hoverStyle} aria-label="History" sx={{ mr: 1 }} disableRipple onClick={() => { push('/history')}}>
+                                    <HistoryIcon />
+                                </IconButton>
+                                <IconButton className={classes.hoverStyle} aria-label="Settings" disableRipple onClick={() => { push('/settings')}}>
+                                    <SettingsIcon />
+                                </IconButton>
+                            </div>
+                        </Toolbar>
+                        <Divider/>
+                    </AppBar>
+                </div>
+                <Box className={classes.content} sx={{bgcolor: 'background.default', color: 'text.primary', overflow: 'auto'}}>
+                    <Switch>
+                        <Route path="/home">
+                            <Editor/>
+                        </Route>
+                        <Route path="/settings">
+                            <Settings/>
+                        </Route>
+                        <Route path="/history">
+                            <History/>
+                        </Route>
+                        <Route path="/result">
+                            <Result/>
+                        </Route>
+                        <Route path="/">
+                            <Editor/>
+                        </Route>
+                    </Switch>
+                </Box>
+                </>
+            </ThemeProvider>
+
     )
 };
