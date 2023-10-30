@@ -14,6 +14,7 @@ import { printDateInCorrectFormat } from "../chrome/utils";
 import clsx from "clsx";
 import HistoryIcon from '@mui/icons-material/History';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import StatusIcon from "../components/StatusIcon";
 
 
 const useStyles = makeStyles(theme => ({
@@ -90,7 +91,9 @@ export default function History() {
                 </div>
             ) :
                 (
-                    <Typography variant='h2' className={classes.pageHeading}>History</Typography>
+                    <>
+                        <Typography variant='h2' className={classes.pageHeading}>History</Typography>
+                    </>
                 )
             }
             <List className={classes.list} >
