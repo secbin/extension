@@ -27,7 +27,7 @@ export type DraftType = {
     enc_text: string,
     pastebinlink: string,
     key: string,
-    success: any
+    success: any,
 }
 
 export type HistoryType = {

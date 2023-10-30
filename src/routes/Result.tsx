@@ -1,10 +1,9 @@
-import React, { useEffect } from "react";
+import React from "react";
+import { useEffect } from "react";
 import clsx from "clsx";
-import { Button, Card, Divider, IconButton, InputAdornment, InputBase, Paper, TextField, Typography } from '@mui/material';
-import { makeStyles, createStyles } from "@mui/styles";
-import { AppContext, HistoryType } from "../contexts/AppContext";
-import { getLocalItem, getSyncItem } from "../chrome/utils/storage";
-import { Action, Storage } from "../constants"
+import { Button, Card, IconButton, InputBase, Typography } from '@mui/material';
+import { makeStyles } from "@mui/styles";
+import {AppContext, HistoryType} from "../contexts/AppContext";
 import { copyTextClipboard, printDateInCorrectFormat } from "../chrome/utils"
 import { useHistory } from "react-router-dom";
 import { ChevronLeft, ContentPaste, CheckCircle, Error } from "@mui/icons-material";
@@ -55,7 +54,7 @@ const useStyles = makeStyles(theme => ({
         color: 'cadetblue'
     },
     grey: {
-        color: 'grey',
+        color: '#f0f0f0',
     },
     left: {
         textAlign: 'left',
@@ -84,23 +83,17 @@ export type LHistoryType = {
     date: Date,
 }
 
-export default function Result(props: any) {
+export default function Result() {
+    const { state } = React.useContext(AppContext);
+
     useEffect(() => {
-        getLocalItem(Storage.HISTORY, (data) => {
-            setHistory(data[Storage.HISTORY]);
-            setResult(state.history.pop() || data[Storage.HISTORY].pop());
-        })
-        return function cleanup () {
-            dispatch({type: Action.CLEAR_HISTORY});
-        }
+        setResult(state.history.length ? state.history[state.history.length - 1] : null);
     }, [])
 
-    let {push, goBack} = useHistory();
-    const { state, dispatch } = React.useContext(AppContext);
+    let { goBack } = useHistory();
     const classes = useStyles();
-    const historyContext = state.history;
-    const [history, setHistory] = React.useState<LHistoryType[]>([]);
-    const [result, setResult] = React.useState<any>();
+
+    const [result, setResult] = React.useState<HistoryType | null>();
 
     return (
         <div className={classes.center}>
@@ -168,10 +161,9 @@ export default function Result(props: any) {
             ) : (
                 <>
                     <ContentPaste className={clsx(classes.icon, classes.grey)} />
-                    <Typography variant={'h2'}>No Encryptions</Typography>
+                    <Typography className={classes.grey} variant={'h2'}>No Encryptions</Typography>
                 </>
             )
-
             }
         </div>
     );

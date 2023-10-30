@@ -211,6 +211,7 @@ export default function Editor() {
 
       console.log("STATE", state)
 
+      dispatch({type: Action.RESET_DRAFT, payload: null});
       push('/result')
 
     } else if (buttonText === Action.ENCRYPT) {

@@ -4,10 +4,10 @@ import {
   MenuItem, Select, Typography
 } from "@mui/material";
 import { makeStyles } from '@mui/styles';
-import { getSyncItem, setLocalItem } from "../chrome/utils/storage";
-import {Storage, ENCRYPTION_METHODS, KEY_LENGTHS, Action} from "../constants";
+import { setLocalItem } from "../chrome/utils/storage";
+import { Storage, ENCRYPTION_METHODS, KEY_LENGTHS, Action } from "../constants";
 import FormDialog from "./Dialog"
-import {AppContext} from "../contexts/AppContext";
+import { AppContext } from "../contexts/AppContext";
 
 const useStyles = makeStyles(theme => ({
   card: {
@@ -39,7 +39,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export const Settings = () => {
+export default function Settings() {
   const classes = useStyles();
   const { state, dispatch } = useContext(AppContext);
   const { api_key, enc_mode, theme, key_length } = state.settings;
@@ -47,10 +47,7 @@ export const Settings = () => {
 
   // Note: a key size of 16 bytes will use AES-128, 24 => AES-192, 32 => AES-256
   const keyLengthHandler = (e: any) => {
-    // setSyncItem(Storage.KEY_LENGTH, e.target.value);
     dispatch({type: Action.UPDATE_SETTINGS, payload: {...state.settings, key_length: e.target.value} })
-    // setKeyLength(e.target.value);
-    //console.log(KEY_LENGTH)
   }
 
   const encModeHandler = (e: any) => {
@@ -77,9 +74,6 @@ export const Settings = () => {
 
   const resetSettings = (e: any) => {
     dispatch({type: Action.RESET_SETTINGS, payload: null});
-  }
-  const signUp = () => {
-    window.open("https://pastebin.com/doc_api")
   }
 
   return (
@@ -159,7 +153,6 @@ export const Settings = () => {
             <Button onClick={resetSettings}>Reset</Button>
           </ListItem>
         </Card>
-
       </List>
     </div>
   )

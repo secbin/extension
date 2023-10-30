@@ -1,5 +1,5 @@
 import {AppType, DraftType, HistoryType, SettingsType} from "../contexts/AppContext";
-import { setSyncItem, getSyncItem } from "../chrome/utils/storage";
+import {setSyncItem, deleteSyncItem} from "../chrome/utils/storage";
 import { Storage, Action, DEFAULT_CONTEXT } from "../constants"
 
 type ActionMap<M extends { [index: string]: any }> = {
@@ -14,6 +14,15 @@ type ActionMap<M extends { [index: string]: any }> = {
 };
 
 type HistoryPayload = {
+    [Action.SET_HISTORY] : [{
+        id: number,
+        pastebinlink: string,
+        enc_mode: string,
+        key_length: number,
+        key: string,
+        enc_text: string,
+        date: Date,
+    }];
     [Action.ADD_TO_HISTORY] : {
         id: number,
         pastebinlink: string,
@@ -56,16 +65,17 @@ type DraftPayload = {
         plaintext: string,
         buttonEnabled: boolean,
         action: Action.DECRYPT | Action.DECRYPT_PASTEBIN | Action.ENCRYPT | Action.ENCRYPT_PASTEBIN | Action.UNENCRYPT_PASTEBIN,
-    },
+    };
     [Action.UPDATE_ENC_MENU]: {
         buttonEnabled: boolean,
         action: Action.DECRYPT | Action.DECRYPT_PASTEBIN | Action.ENCRYPT | Action.ENCRYPT_PASTEBIN | Action.UNENCRYPT_PASTEBIN,
-    },
+    };
     [Action.SET_DRAFT]: {
         plaintext: string;
         buttonEnabled: boolean,
         action: Action.DECRYPT | Action.DECRYPT_PASTEBIN | Action.ENCRYPT | Action.ENCRYPT_PASTEBIN | Action.UNENCRYPT_PASTEBIN,
-    }
+    };
+    [Action.RESET_DRAFT]: null | undefined,
 }
 
 type SettingsPayload = {
@@ -98,6 +108,8 @@ export type HistoryActions = ActionMap<HistoryPayload>[keyof ActionMap<HistoryPa
 
 export const historyReducer = (state: HistoryType[], action: AppActions | SettingsActions | DraftActions | HistoryActions ) => {
     switch (action.type) {
+        case Action.SET_HISTORY:
+            return action.payload
         case Action.ADD_TO_HISTORY:
             return [
                 ...state,
@@ -184,6 +196,15 @@ export const draftReducer = (state: DraftType, action: AppActions | SettingsActi
                 buttonEnabled: action.payload.buttonEnabled,
             };
             return setPlaintext;
+        case Action.RESET_DRAFT:
+            const resetDraft = {
+                ...state,
+                plaintext: '',
+                action: Action.ENCRYPT,
+                buttonEnabled: false,
+            } as DraftType;
+            deleteSyncItem(Storage.DRAFT);
+            return resetDraft;
         default:
             return state;
     }

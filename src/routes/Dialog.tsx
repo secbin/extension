@@ -1,15 +1,8 @@
 import * as React from 'react';
-import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
-import {Action, Storage} from "../constants";
-import {Card, Divider, InputBase, Typography } from '@mui/material';
-import { makeStyles, createStyles } from '@mui/styles';
-import {AppContext} from "../contexts/AppContext";
-
+import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Card, Divider, InputBase, Typography } from '@mui/material';
+import { Action } from "../constants";
+import { AppContext } from "../contexts/AppContext";
+import { makeStyles } from '@mui/styles';
 
 const useStyles = makeStyles(theme => ({
     copybox: {

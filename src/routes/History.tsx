@@ -57,16 +57,9 @@ const useStyles = makeStyles(theme => ({
 
 
 export default function History() {
-    let { push, goBack } = useHistory();
+    let { push } = useHistory();
     const { state, dispatch } = useContext(AppContext);
-
-    useEffect(() => {
-
-        getLocalItem(Storage.HISTORY, (data) => {
-            setHistory(data[Storage.HISTORY]);
-        })
-
-    }, []);
+    const { history } = state;
 
     const handleHistory = (item: HistoryType) => {
         dispatch({type: Action.ADD_TO_HISTORY, payload: {
@@ -83,7 +76,7 @@ export default function History() {
         push('/result');
     }
 
-    const [history, setHistory] = React.useState([]);
+
     const classes = useStyles();
     let lastLastDate = '';
 

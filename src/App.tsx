@@ -1,20 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import {Route, Switch, useLocation} from 'react-router-dom';
+import { Route, Switch, useLocation } from 'react-router-dom';
 import { useHistory } from 'react-router-dom';
 import './styles/App.css';
 import { AppBar, Box, createMuiTheme, createTheme, Divider, IconButton, Theme, ThemeProvider, Toolbar } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { HistorySharp as HistoryIcon, SettingsSharp as SettingsIcon, ContentPasteSharp as ContentPaste, EditSharp as EditIcon }  from '@mui/icons-material';
 import { AppContext } from './contexts/AppContext';
-import {Action, DEFAULT_CONTEXT, DEFAULT_SETTINGS, Storage} from './constants'
-import { Settings } from './routes/Settings'
+import { Action, DEFAULT_SETTINGS, Storage } from './constants';
+import Settings from './routes/Settings';
 import History from "./routes/History";
 import Result from './routes/Result';
 import Editor from "./routes/Editor";
-import {getSyncItem, setSyncItem} from "./chrome/utils/storage";
+import { getLocalItem, getSyncItem, setSyncItem } from "./chrome/utils/storage";
 
 export const App = () => {
-
     const { state, dispatch } = React.useContext(AppContext);
     const [darkmode, setDarkmode] = useState(state.settings.theme);
 
@@ -43,28 +42,18 @@ export const App = () => {
     }));
 
     let { push } = useHistory();
-
     const location = useLocation();
-
 
     useEffect(() => {
 
         getSyncItem(Storage.THEME, (data) => {
-
-            console.log("UPDATING SETTINGS", data[Storage.THEME]);
-
-
+            console.log("UPDATING THEME", data[Storage.THEME]);
             dispatch({ type: Action.SET_THEME, payload: JSON.parse(data[Storage.THEME]) });
-
+            setDarkmode(JSON.parse(data[Storage.THEME]));
         });
 
         getSyncItem(Storage.DRAFT, (data) => {
-
-            console.log("UPDATING DRAFT", data[Storage.DRAFT]);
-
-
             dispatch({ type: Action.SET_DRAFT, payload: JSON.parse(data[Storage.DRAFT]) });
-
         });
 
         console.log("getting SETTINGS");
@@ -78,11 +67,18 @@ export const App = () => {
 
         });
 
+        getLocalItem(Storage.HISTORY, (data) => {
+            dispatch({ type: Action.SET_HISTORY, payload: data[Storage.HISTORY] || [] });
+        })
+
+        // Preserve app state for 10 seconds
         getSyncItem(Storage.APP, (data) => {
-            if (data[Storage.APP].length > 2) {
-                const path = JSON.parse(data[Storage.APP])
-                console.log("UPDATING APP", path);
-                push(path);
+            const TEN_SECONDS = 10 * 1000;
+            if (data[Storage.APP]) {
+                const { location, date } = JSON.parse(data[Storage.APP])
+                if(date + TEN_SECONDS > new Date().getTime()) {
+                    push(location);
+                }
             }
         });
     }, []);
@@ -93,7 +89,7 @@ export const App = () => {
     }, [state.settings.theme]);
 
     useEffect(() => {
-        setSyncItem(Storage.APP, JSON.stringify(location));
+        setSyncItem(Storage.APP, JSON.stringify({location, date: new Date().getTime()}));
     }, [location]);
 
     const classes = useStyles();
@@ -185,49 +181,48 @@ export const App = () => {
     return (
             <ThemeProvider theme={theme}>
                 <>
-                <div className={classes.background}>
-                    <AppBar sx={{bgcolor: 'background.default'}} className={classes.root} position="relative" enableColorOnDark>
-                        <Toolbar>
-                            <img src={darkmode ? '/securebinlogo_dark.svg' : '/securebinlogo.svg'} alt="logo"/>
-                            <div style={{marginLeft: 'auto'}}>
-                                {<IconButton className={classes.hoverStyle} aria-label="Latest paste" sx={{ mr: 1 }} disableRipple onClick={() => { push('/home')}}>
-                                    <EditIcon />
-                                </IconButton>}
-                                {<IconButton className={classes.hoverStyle} aria-label="Latest paste" sx={{ mr: 1 }} disableRipple onClick={() => { push('/result')}}>
-                                <ContentPaste />
-                                </IconButton>}
-                                <IconButton className={classes.hoverStyle} aria-label="History" sx={{ mr: 1 }} disableRipple onClick={() => { push('/history')}}>
-                                    <HistoryIcon />
-                                </IconButton>
-                                <IconButton className={classes.hoverStyle} aria-label="Settings" disableRipple onClick={() => { push('/settings')}}>
-                                    <SettingsIcon />
-                                </IconButton>
-                            </div>
-                        </Toolbar>
-                        <Divider/>
-                    </AppBar>
-                </div>
-                <Box className={classes.content} sx={{bgcolor: 'background.default', color: 'text.primary', overflow: 'auto'}}>
-                    <Switch>
-                        <Route path="/home">
-                            <Editor/>
-                        </Route>
-                        <Route path="/settings">
-                            <Settings/>
-                        </Route>
-                        <Route path="/history">
-                            <History/>
-                        </Route>
-                        <Route path="/result">
-                            <Result/>
-                        </Route>
-                        <Route path="/">
-                            <Editor/>
-                        </Route>
-                    </Switch>
-                </Box>
+                    <div className={classes.background}>
+                        <AppBar sx={{bgcolor: 'background.default'}} className={classes.root} position="relative" enableColorOnDark>
+                            <Toolbar>
+                                <img src={darkmode ? '/securebinlogo_dark.svg' : '/securebinlogo.svg'} alt="logo"/>
+                                <div style={{marginLeft: 'auto'}}>
+                                    {<IconButton className={classes.hoverStyle} aria-label="Latest paste" sx={{ mr: 1 }} disableRipple onClick={() => { push('/home')}}>
+                                        <EditIcon />
+                                    </IconButton>}
+                                    {<IconButton className={classes.hoverStyle} aria-label="Latest paste" sx={{ mr: 1 }} disableRipple onClick={() => { push('/result')}}>
+                                    <ContentPaste />
+                                    </IconButton>}
+                                    <IconButton className={classes.hoverStyle} aria-label="History" sx={{ mr: 1 }} disableRipple onClick={() => { push('/history')}}>
+                                        <HistoryIcon />
+                                    </IconButton>
+                                    <IconButton className={classes.hoverStyle} aria-label="Settings" disableRipple onClick={() => { push('/settings')}}>
+                                        <SettingsIcon />
+                                    </IconButton>
+                                </div>
+                            </Toolbar>
+                            <Divider/>
+                        </AppBar>
+                    </div>
+                    <Box className={classes.content} sx={{bgcolor: 'background.default', color: 'text.primary', overflow: 'auto'}}>
+                        <Switch>
+                            <Route path="/home">
+                                <Editor/>
+                            </Route>
+                            <Route path="/settings">
+                                <Settings/>
+                            </Route>
+                            <Route path="/history">
+                                <History/>
+                            </Route>
+                            <Route path="/result">
+                                <Result/>
+                            </Route>
+                            <Route path="/">
+                                <Editor/>
+                            </Route>
+                        </Switch>
+                    </Box>
                 </>
             </ThemeProvider>
-
     )
 };
