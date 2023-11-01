@@ -13,8 +13,7 @@ import Card from '@mui/material/Card';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import InputBase from '@mui/material/InputBase';
-import { MAX_PASTEBIN_TEXT_LENGTH, MAX_ENC_TEXT_LENGTH, Action, Storage, PASTEBIN_BASEURL } from '../constants'
-import ErrorIcon from '@mui/icons-material/Error';
+import { MAX_ENC_TEXT_LENGTH, Action, Storage, PASTEBIN_BASEURL } from '../constants'
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Typography } from '@mui/material';
 import clsx from 'clsx';
 import { makeStyles, createStyles } from '@mui/styles';
@@ -23,27 +22,13 @@ import { encrypt, decrypt } from "../chrome/utils/crypto";
 import { useHistory } from "react-router-dom";
 import { addLocalItem, getSyncItem, getSyncItemAsync } from "../chrome/utils/storage";
 import { postPastebin, getPastebin } from "../chrome/utils/pastebin";
-import { debounce } from 'lodash';
+import TextCounter from "../components/TextCounter";
 
 let buttonText = "";
 let decKey = ""
 let password = ""
 
 const useStyles = makeStyles((theme: Theme) => ({
-  counterContainer: {
-    margin: '15px',
-    display: 'inline-flex',
-  },
-  counter: {
-    fontSize: 11,
-  },
-  red: {
-    color: 'red',
-    fontWeight: 600
-  },
-  grey: {
-    color: 'grey'
-  },
   bottomSection: {
     display: 'flex',
   },
@@ -120,22 +105,6 @@ const StyledMenu = styled((props) => (
   },
 }));
 
-export function TextCounter(props: any) {
-  let MAX = MAX_ENC_TEXT_LENGTH;
-  if (props.menu === Action.ENCRYPT_PASTEBIN) { // button is pastebin enc
-    MAX = MAX_PASTEBIN_TEXT_LENGTH;
-  }
-  const classes = useStyles();
-  let safe = props.textLength < MAX
-
-  return (
-    <div className={classes.counterContainer}>
-      {!safe && <ErrorIcon className={clsx(classes.red, classes.counter)} sx={{ mr: 0.5, mb: -0.25 }} />}
-      <Typography className={clsx(safe ? classes.grey : classes.red, classes.counter)} variant={'body1'} >{props.textLength}/{MAX}</Typography>
-    </div>
-  );
-}
-
 export default function Editor() {
   const classes = useStyles();
   const { state, dispatch } = useContext(AppContext);
@@ -151,7 +120,7 @@ export default function Editor() {
 
   const [openDecForm, setOpenDecForm] = React.useState(false);
   const [openEncForm, setOpenEncForm] = React.useState(false);
-  let { push, goBack } = useHistory();
+  let { push } = useHistory();
 
   const handleClick = (event: any) => {
     setAnchorEl(event.currentTarget);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { getSyncItemAsync, getSyncItem } from "../chrome/utils/storage";
+import { getSyncItemAsync } from "../chrome/utils/storage";
 import { Storage } from "../constants";
 
 function usePasteBinPost(encryptQuery) {
