@@ -130,7 +130,6 @@ export default function Settings() {
         <Typography variant={'h4'}>Reset</Typography>
         <SettingsItem
             primary={'Clear History'}
-            secondary={api_key ? api_key : 'Not Set'}
             children={(
                 <Button onClick={clearHistory}>Clear</Button>
             )}
