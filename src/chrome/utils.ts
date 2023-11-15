@@ -16,7 +16,7 @@ export const getCurrentTabUId = (callback: (url: number | undefined) => void): v
     });
 }
 
-export const printDateInCorrectFormat = (dateOfEvent: number) => {
+export const printDateInCorrectFormat = (dateOfEvent: number | Date) => {
     const now = new Date().getTime();
     let eventDate = new Date(dateOfEvent).getTime();
     if(Math.abs(now - eventDate ) < 170000000) {

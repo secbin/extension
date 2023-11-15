@@ -1,19 +1,19 @@
-import React, { useEffect, useState, useContext } from "react";
-import { AppContext } from "../AppContext";
+import React, { useEffect, useState, useContext, useCallback } from "react";
+import { AppContext } from "../contexts/AppContext";
 import { styled, alpha } from '@mui/material/styles';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Divider from '@mui/material/Divider';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
-import LockIcon from '@mui/icons-material/Lock';
+import KeyIcon from '@mui/icons-material/Key';
+import KeyOffIcon from '@mui/icons-material/KeyOff';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import IconButton from '@mui/material/IconButton';
 import Card from '@mui/material/Card';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import InputBase from '@mui/material/InputBase';
-import { MAX_PASTEBIN_TEXT_LENGTH, MAX_ENC_TEXT_LENGTH, Action, Storage } from '../constants'
-import ErrorIcon from '@mui/icons-material/Error';
+import { MAX_ENC_TEXT_LENGTH, Action, Storage, PASTEBIN_BASEURL } from '../constants'
 import { Box, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Typography } from '@mui/material';
 import clsx from 'clsx';
 import { makeStyles, createStyles } from '@mui/styles';
@@ -22,38 +22,27 @@ import { encrypt, decrypt } from "../chrome/utils/crypto";
 import { useHistory } from "react-router-dom";
 import { addLocalItem, getSyncItem, getSyncItemAsync } from "../chrome/utils/storage";
 import { postPastebin, getPastebin } from "../chrome/utils/pastebin";
+import TextCounter from "../components/TextCounter";
 
 let buttonText = "";
 let decKey = ""
 let password = ""
 
 const useStyles = makeStyles((theme: Theme) => ({
-  counterContainer: {
-    margin: 15,
-    marginTop: 10
-  },
-  counter: {
-    fontSize: 11,
-  },
-  red: {
-    color: 'red',
-    fontWeight: 600
-  },
-  grey: {
-    color: 'grey'
-  },
   bottomSection: {
     display: 'flex',
   },
   hoverStyle: {
     '&:hover': {
       transition: '0.15s',
-      transform: 'scale(1.02)'
+      transform: 'scale(1.02)',
+      backgroundColor: 'black',
+      color: 'black'
     },
     '&:active': {
       transition: '0.08s',
       opacity: 0.9,
-      tranresform: 'scale(1.035)'
+      transform: 'scale(1.035)'
     },
     transition: '0.15s'
   },
@@ -70,6 +59,9 @@ const useStyles = makeStyles((theme: Theme) => ({
     marginTop: 20,
     marginBottom: 14,
   },
+  animated: {
+    transition: 'all 0.25s',
+  }
 }));
 
 
@@ -113,23 +105,7 @@ const StyledMenu = styled((props) => (
   },
 }));
 
-export function TextCounter(props: any) {
-  let MAX = MAX_ENC_TEXT_LENGTH;
-  if (props.menu === Action.ENCRYPT_PASTEBIN) { // button is pastebine enc
-    MAX = MAX_PASTEBIN_TEXT_LENGTH;
-  }
-  const classes = useStyles();
-  let safe = props.textLength < MAX
-
-  return (
-    <div className={classes.counterContainer}>
-      {!safe && <ErrorIcon className={clsx(classes.red, classes.counter)} sx={{ mr: 0.5, mb: -0.25 }} />}
-      <Typography className={clsx(safe ? classes.grey : classes.red, classes.counter)} variant={'body1'} >{props.textLength}/{MAX}</Typography>
-    </div>
-  );
-}
-
-export default function CustomizedMenus() {
+export default function Editor() {
   const classes = useStyles();
   const { state, dispatch } = useContext(AppContext);
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -137,12 +113,14 @@ export default function CustomizedMenus() {
   const buttonEnabled = state.draft.buttonEnabled;
   const menu = state.draft.action;
   const text = state.draft.plaintext;
-  const [textBox, setTextBox] = React.useState(text);
+  console.log("textbox: ", {text, sdraft: state.draft});
+  const [textBox, setTextBox] = React.useState(state.draft.plaintext);
+  const [timerId, setTimerId] = useState(null);
   const [apiKey, setApiKey] = React.useState("")
 
   const [openDecForm, setOpenDecForm] = React.useState(false);
   const [openEncForm, setOpenEncForm] = React.useState(false);
-  let { push, goBack } = useHistory();
+  let { push } = useHistory();
 
   const handleClick = (event: any) => {
     setAnchorEl(event.currentTarget);
@@ -152,9 +130,11 @@ export default function CustomizedMenus() {
     getSyncItem(Storage.API_KEY, (data) => {
       setApiKey(data[Storage.API_KEY]);
     })
-  })
 
-  const handleClose = (text: Action.ENCRYPT | Action.DECRYPT | Action.DECRYPT_PASTEBIN | Action.ENCRYPT_PASTEBIN) => {
+    setTextBox(state.draft.plaintext);
+  }, [state.draft.plaintext]);
+
+  const handleClose = (text: Action.ENCRYPT | Action.DECRYPT | Action.DECRYPT_PASTEBIN | Action.ENCRYPT_PASTEBIN | Action.UNENCRYPT_PASTEBIN) => {
     setAnchorEl(null);
     dispatch({ type: Action.UPDATE_ENC_MENU, payload: { action: text, buttonEnabled: buttonEnabled } })
   };
@@ -197,18 +177,10 @@ export default function CustomizedMenus() {
         }
       })
       addLocalItem(Storage.HISTORY, history);
-      // dispatch({
-      //   type: Action.ENCRYPT_PASTEBIN,
-      //   payload: {
-      //     action: Action.ENCRYPT_PASTEBIN,
-      //     plaintext: textBox,
-      //     enc_text: res.data,
-      //     key: res.key,
-      //     pastebinlink: newNewlink,
-      //   },
-      // })
+
       console.log("STATE", state)
 
+      dispatch({type: Action.RESET_DRAFT, payload: null});
       push('/result')
 
     } else if (buttonText === Action.ENCRYPT) {
@@ -279,26 +251,41 @@ export default function CustomizedMenus() {
 
   const checkTypeOfText = (e: any) => {
     let textbox = e.target.value || "";
+    let length = textbox.length;
     let buttonEnabled = false;
-    let buttonText = Action.ENCRYPT;
-    if (textbox.includes("pastebin.com") && e.target.value.length <= MAX_ENC_TEXT_LENGTH) {
-      // console.log("PASTE BIN LINK FOUND")
-      buttonText = Action.DECRYPT_PASTEBIN
-      buttonEnabled = true
-    } else if (textbox.includes("C_TXT") && e.target.value.length <= MAX_ENC_TEXT_LENGTH) {
-      // console.log("ENCRYPTED TEXT FOUND")
-      buttonText = Action.DECRYPT
-      buttonEnabled = true
-    } else if (buttonText === Action.ENCRYPT && e.target.value.length <= MAX_ENC_TEXT_LENGTH) {
-      buttonEnabled = true
-    } else {
-      buttonEnabled = false
-    }
-    // setMenu(buttonText)
-    // setButtonEnabled(buttonEnabled)
+    let buttonText: Action.ENCRYPT | Action.DECRYPT | Action.ENCRYPT_PASTEBIN | Action.DECRYPT_PASTEBIN | Action.UNENCRYPT_PASTEBIN = Action.ENCRYPT;
     setTextBox(textbox);
-    dispatch({ type: Action.UPDATE_PLAINTEXT, payload: { plaintext: textbox, action: buttonText, buttonEnabled: buttonEnabled } });
+
+    if(timerId !== null) {
+      // @ts-ignore
+
+      clearTimeout(timerId);
+    }
+
+    // Set a new timer
+    const newTimerId = setTimeout(() => {
+      if (length <= MAX_ENC_TEXT_LENGTH && textbox.includes(PASTEBIN_BASEURL)) {
+        buttonText = Action.DECRYPT_PASTEBIN
+        buttonEnabled = true
+      } else if (length <= MAX_ENC_TEXT_LENGTH && textbox.includes("C_TXT")) {
+        buttonText = Action.DECRYPT
+        buttonEnabled = true;
+      } else if (length > 0 && length <= MAX_ENC_TEXT_LENGTH) {
+        buttonEnabled = true
+      } else {
+        buttonEnabled = false;
+      }
+      dispatch({ type: Action.UPDATE_PLAINTEXT, payload: { plaintext: textbox, action: buttonText, buttonEnabled: buttonEnabled } })
+
+    }, 250);
+
+    // @ts-ignore
+    setTimerId(newTimerId);
   };
+
+  // const debouncedChangeHandler = (plaintext, action, buttonEnabled) => useCallback(
+  //     debounce(updateDraft(plaintext, action, buttonEnabled), 300)
+  //     , []);
 
   function DecryptFormDialog() {
     const [key, setKey] = React.useState("");
@@ -389,13 +376,23 @@ export default function CustomizedMenus() {
     );
   }
 
+
+  const fontSize = (length: number) => {
+    if(length < 385) return '24px'
+    else return '16px'
+  }
+
+  console.log("TEXTBOX", {textBox});
+
   // @ts-ignore
   return (
     <>
       <div>
+        <Box sx={{height: '470px', overflow: 'hidden'}}>
         <InputBase
-          className={clsx(text.length < 30 && '24')}
-          sx={{ width: 440, height: 464, overflow: 'hidden', fontSize: clsx(text.length < 350 ? '24px' : '16px'), textAlign: 'left', padding: 2 }}
+          sx={{'& .MuiInputBase-inputMultiline': {
+            padding: '5px 10px', overflowX: 'hidden'
+          }, width: '100vw', overflow: 'hidden', fontSize: fontSize(textBox.length), textAlign: 'left', padding: '0px'}}
           multiline
           autoFocus
           onFocus={(e) =>
@@ -403,18 +400,20 @@ export default function CustomizedMenus() {
               e.currentTarget.value.length,
               e.currentTarget.value.length
             )}
-          rows={clsx(text.length < 350 ? 13 : 20)}
+          rows={clsx(textBox.length < 385 ? 13 : 20)}
           onChange={checkTypeOfText}
+          defaultValue={state.draft.plaintext}
           value={textBox}
           placeholder="Type or paste (⌘ + V) text you want to encrypt or a Pastebin.com link or ciphertext you want to decrypt here..."
-          inputProps={{ 'aria-label': 'text to encrypt or decrypt', 'height': '300px' }}
+          inputProps={{ 'aria-label': 'text to encrypt or decrypt', 'height': '300px', 'padding': '6px' }}
         />
+        </Box>
 
         <Divider />
         <Box className={classes.bottomSection}>
-          <TextCounter textLength={text.length} menu={menu} />
+          <TextCounter textLength={textBox.length} menu={menu} />
           <Card
-            className={classes.hoverStyle}
+            className={classes.animated}
             style={{ minWidth: 100, textAlign: 'center', backgroundColor: '#1D6BC6', color:'#fff', margin: 15, borderRadius: 50, marginLeft: 'auto' }}>
             <ListItemButton sx={{ ml: 1, flex: 1, height: 40, textAlign: 'center', fontWeight: 800 }}
               onClick={actionWrapper}
@@ -423,7 +422,7 @@ export default function CustomizedMenus() {
               disabled={!buttonEnabled}
               aria-expanded={open ? 'true' : undefined}
             >
-              <ListItemText>{menu}</ListItemText>
+              <ListItemText className={classes.animated}>{menu}</ListItemText>
               <IconButton sx={{ p: '10px', opacity: 0.85 }} color='inherit' onClick={handleClick} disableRipple
                 aria-label="encryption/decryption options">
                   
@@ -441,23 +440,25 @@ export default function CustomizedMenus() {
             <MenuItem sx={{ fontWeight: 700, color: 'grey' }} disabled dense disableRipple>
               Select Action
             </MenuItem>
-            <Divider />
             <MenuItem onClick={e => handleClose(Action.ENCRYPT)} dense disableRipple>
-              <LockIcon />
+              <KeyIcon />
               {Action.ENCRYPT}
             </MenuItem>
             <MenuItem disabled={ !!!apiKey } onClick={e => handleClose(Action.ENCRYPT_PASTEBIN)} dense disableRipple>
-              <LockIcon />
+              <KeyIcon />
               {Action.ENCRYPT_PASTEBIN}
             </MenuItem>
+            <MenuItem disabled={ !!!apiKey } onClick={e => handleClose(Action.UNENCRYPT_PASTEBIN)} dense disableRipple>
+              <KeyOffIcon />
+              {Action.UNENCRYPT_PASTEBIN}
+            </MenuItem>
             <Divider sx={{ my: 0.5 }} />
-            <MenuItem onClick={e => handleClose(Action.DECRYPT_PASTEBIN)} dense disableRipple>
+            <MenuItem onClick={e => handleClose(Action.DECRYPT)} dense disableRipple>
               <LockOpenIcon />
               {Action.DECRYPT}
             </MenuItem>
             <MenuItem disabled={ !!!apiKey } onClick={e => handleClose(Action.DECRYPT_PASTEBIN)} dense disableRipple>
               <LockOpenIcon />
-
               {Action.DECRYPT_PASTEBIN}
             </MenuItem>
           </StyledMenu>
@@ -468,7 +469,3 @@ export default function CustomizedMenus() {
     </>
   );
 }
-      function setDarkmode(arg0: any) {
-          throw new Error("Function not implemented.");
-      }
-

@@ -1,19 +1,22 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-import './index.css';
+import './styles/index.css';
 import { App } from './App';
 import reportWebVitals from './reportWebVitals';
 import { BrowserRouter } from 'react-router-dom';
 import { StyledEngineProvider } from '@mui/material';
+import {AppProvider} from "./contexts/AppContext";
 
 ReactDOM.render(
     <React.StrictMode>
-        <StyledEngineProvider injectFirst>
-            <BrowserRouter>
-                <App/>
-            </BrowserRouter>
-        </StyledEngineProvider>
+        <AppProvider>
+            <StyledEngineProvider injectFirst>
+                <BrowserRouter>
+                    <App/>
+                </BrowserRouter>
+            </StyledEngineProvider>
+        </AppProvider>
     </React.StrictMode>,
     document.getElementById('root')
 );

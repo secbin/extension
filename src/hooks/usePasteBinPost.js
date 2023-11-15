@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { getSyncItemAsync, getSyncItem } from "../chrome/utils/storage";
+import { getSyncItemAsync } from "../chrome/utils/storage";
 import { Storage } from "../constants";
 
 function usePasteBinPost(encryptQuery) {
@@ -23,9 +23,7 @@ function usePasteBinPost(encryptQuery) {
             urlencoded.append("api_paste_code", encryptQuery);
             urlencoded.append("api_option", "paste");
 
-            // let responseBody : string[] = [];
             let responseBody = {};
-            //let responseBody = useState<string>('');
             setLoading(true);
             try {
                 const response = await fetch(
