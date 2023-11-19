@@ -1,6 +1,6 @@
 import React, { createContext, Dispatch, useReducer } from 'react'
 import { Action } from '../constants'
-import { setSyncItem, getSyncItem, getLocalItem } from "../chrome/utils/storage";
+import { getSyncItem, getLocalItem } from "../chrome/utils/storage";
 import { Storage } from "../constants"
 import {
     HistoryActions,
@@ -42,6 +42,7 @@ export type HistoryType = {
 
 export type AppType = {
     location: string | null,
+    dialog_id: string | null,
 }
 
 function getSettingsValuesFromStorage() {
@@ -61,13 +62,6 @@ function getSettingsValuesFromStorage() {
     } as SettingsType
 }
 
-function getHistoryValuesFromStorage() {
-    getLocalItem(Storage.HISTORY, (data) => {
-        return data[Storage.HISTORY] as HistoryType[]
-    })
-    return [] as HistoryType[]
-}
-
 type InitialStateType = {
     app: AppType;
     history: HistoryType[];
@@ -78,6 +72,7 @@ type InitialStateType = {
 const initialState = {
     app: {
         location: null,
+        dialog_id: null,
     },
     history: [],
     draft: {

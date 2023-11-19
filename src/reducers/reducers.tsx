@@ -45,6 +45,10 @@ type AppPayload = {
     [Action.UPDATE_NAVIGATION] : {
         location: Action.ENCRYPT,
     };
+    [Action.OPEN_DIALOG] : {
+        dialog_id: string,
+    };
+    [Action.CLOSE_DIALOG] : undefined;
 }
 
 type DraftPayload = {
@@ -74,6 +78,12 @@ type DraftPayload = {
         plaintext: string;
         buttonEnabled: boolean,
         action: Action.DECRYPT | Action.DECRYPT_PASTEBIN | Action.ENCRYPT | Action.ENCRYPT_PASTEBIN | Action.UNENCRYPT_PASTEBIN,
+    };
+    [Action.SET_KEY]: {
+        key: string;
+    };
+    [Action.SET_ACTION]: {
+        action: Action.DECRYPT | Action.DECRYPT_PASTEBIN | Action.ENCRYPT | Action.ENCRYPT_PASTEBIN | Action.UNENCRYPT_PASTEBIN;
     };
     [Action.RESET_DRAFT]: null | undefined,
 }
@@ -149,6 +159,18 @@ export const appReducer = (state: AppType, action: AppActions | SettingsActions 
                 location: action.payload.location,
             }
             return setNavigation;
+        case Action.OPEN_DIALOG:
+            const updatedId = {
+                ...state,
+                dialog_id: action.payload.dialog_id,
+            }
+            return updatedId;
+        case Action.CLOSE_DIALOG:
+            const updatedClosedId = {
+                ...state,
+                dialog_id: null,
+            }
+            return updatedClosedId;
         default:
             return state;
     }
@@ -162,7 +184,7 @@ export const draftReducer = (state: DraftType, action: AppActions | SettingsActi
                     action: action.payload.action,
                     plaintext: action.payload.plaintext,
                     enc_text: action.payload.enc_text,
-                    key: action.payload.key,
+                    // key: action.payload.key,
             }
         case Action.ENCRYPT_PASTEBIN:
             return {
@@ -170,7 +192,7 @@ export const draftReducer = (state: DraftType, action: AppActions | SettingsActi
                 action: action.payload.action,
                 plaintext: action.payload.plaintext,
                 enc_text: action.payload.enc_text,
-                key: action.payload.key,
+                // key: action.payload.key,
                 pastebinlink: action.payload.pastebinlink,
             }
         case Action.UPDATE_PLAINTEXT:
@@ -196,9 +218,22 @@ export const draftReducer = (state: DraftType, action: AppActions | SettingsActi
                 buttonEnabled: action.payload.buttonEnabled,
             };
             return setPlaintext;
+        case Action.SET_KEY:
+            const setKey = {
+                ...state,
+                key: action.payload.key,
+            };
+            return setKey;
+        case Action.SET_ACTION:
+            const setAction = {
+                ...state,
+                action: action.payload.action,
+            };
+            return setAction;
         case Action.RESET_DRAFT:
             const resetDraft = {
                 ...state,
+                key: '',
                 plaintext: '',
                 action: Action.ENCRYPT,
                 buttonEnabled: false,
@@ -222,7 +257,7 @@ export const settingsReducer = (state: SettingsType, action: AppActions | Settin
         case Action.SET_THEME:
             return {
                 ...state,
-                theme: action.payload.theme
+                theme: action.payload.theme || state.theme,
             };
         case Action.UPDATE_THEME:
             setSyncItem(Storage.THEME, action.payload.theme);
@@ -230,7 +265,6 @@ export const settingsReducer = (state: SettingsType, action: AppActions | Settin
                 ...state,
                 theme: action.payload.theme
             };
-            // setSyncItem(Storage.SETTINGS, JSON.stringify(newTheme));
             return newTheme;
         case Action.UPDATE_SETTINGS:
             const newState = {

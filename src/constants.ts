@@ -39,6 +39,8 @@ export enum Action {
     UPDATE_ENC_MENU =           "update_enc_options",
     SET_DRAFT =                 "set_draft",
     RESET_DRAFT =               "reset_draft",
+    SET_KEY =                   "set_key",
+    SET_ACTION =                "set_action",
     CLEAR_DRAFT =               "clear_draft",
     ADD_TO_HISTORY =            "add_to_history",
     SET_HISTORY =               "set_history",
@@ -56,6 +58,8 @@ export enum Action {
     CLEAR_PREVIEW =             "clear_preview",
     SET_NAVIGATION =            "set_navigation",
     UPDATE_NAVIGATION =         "update_navigation",
+    OPEN_DIALOG =               "open_dialog",
+    CLOSE_DIALOG =              "close_dialog",
 }
 
 export const ENCRYPTION_METHODS = [
@@ -96,3 +100,4 @@ export const MAX_ENC_TEXT_LENGTH = 4096
 
 export const API_ERROR = "PasteBin Error"
 export const PASTEBIN_BASEURL = "pastebin.com"
+export const CIPHER_PREFIX = "C_TXT"

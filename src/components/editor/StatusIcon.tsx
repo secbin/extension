@@ -1,10 +1,10 @@
 import React from "react";
 import clsx from "clsx";
-import { Typography } from '@mui/material';
+import {Box, Typography} from '@mui/material';
 import { makeStyles } from "@mui/styles";
-import { HistoryType } from "../contexts/AppContext";
-import { printDateInCorrectFormat } from "../chrome/utils"
-import { ContentPaste, CheckCircle, Error } from "@mui/icons-material";
+import { HistoryType } from "../../contexts/AppContext";
+import { printDateInCorrectFormat } from "../../chrome/utils"
+import { ContentPaste, CheckCircle, Error, History } from "@mui/icons-material";
 
 const useStyles = makeStyles(theme => ({
   icon: {
@@ -21,10 +21,13 @@ const useStyles = makeStyles(theme => ({
   grey: {
     color: '#b6b6b6',
   },
+    topMargin: {
+        marginTop: 164,
+    }
 }));
 
 export type LStatusType = {
-  variant: 'error' | 'success' | 'empty'
+  variant: 'error' | 'success' | 'empty-history' | 'empty-clipboard',
   result?: HistoryType,
 
 }
@@ -51,13 +54,20 @@ const StatusIcon = ({variant, result}: LStatusType) => {
           <Typography variant={'h2'}>Error posting to Pastebin</Typography>
         </>
     );
-  } else {
+  } else if (variant === 'empty-clipboard') {
     return (
-        <>
-          <ContentPaste className={clsx(classes.icon, classes.grey)} />
-          <Typography className={classes.grey} variant={'h2'}>No Encryptions</Typography>
-        </>
+        <div className={classes.topMargin}>
+            <ContentPaste className={clsx(classes.icon, classes.grey)} />
+            <Typography className={classes.grey} variant={'h2'}>No Encryptions</Typography>
+        </div>
     );
+  } else {
+      return (
+            <div className={classes.topMargin}>
+              <History className={clsx(classes.icon, classes.grey)} />
+              <Typography className={classes.grey} variant={'h2'}>No History</Typography>
+            </div>
+      );
   }
 
 }

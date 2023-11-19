@@ -5,8 +5,8 @@ import { makeStyles } from "@mui/styles";
 import {AppContext, HistoryType} from "../contexts/AppContext";
 import { useHistory } from "react-router-dom";
 import { ChevronLeft} from "@mui/icons-material";
-import StatusIcon from "../components/StatusIcon";
-import Copybox from "../components/Copybox";
+import StatusIcon from "../components/editor/StatusIcon";
+import Copybox from "../components/common/Copybox";
 
 const useStyles = makeStyles(theme => ({
     center: {
@@ -26,6 +26,9 @@ const useStyles = makeStyles(theme => ({
         marginTop: 10,
         marginBottom: 15,
     },
+    topMargin: {
+        marginTop: 164,
+    }
 }));
 
 export type LHistoryType = {
@@ -72,7 +75,7 @@ const Result = () => {
                     <Button className={classes.bottomButton} startIcon={<ChevronLeft />} onClick={() => { goBack()}}>Back</Button>
                 </>
             ) : (
-                <StatusIcon variant={'empty'} />
+                <StatusIcon variant={'empty-clipboard'} />
             )
             }
         </div>

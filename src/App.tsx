@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Route, Switch, useLocation } from 'react-router-dom';
 import { useHistory } from 'react-router-dom';
 import './styles/App.css';
-import { AppBar, Box, createMuiTheme, createTheme, Divider, IconButton, Theme, ThemeProvider, Toolbar } from '@mui/material';
+import { AppBar, Box, createMuiTheme, Divider, IconButton, Theme, ThemeProvider, Toolbar } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { HistorySharp as HistoryIcon, SettingsSharp as SettingsIcon, ContentPasteSharp as ContentPaste, EditSharp as EditIcon }  from '@mui/icons-material';
 import { AppContext } from './contexts/AppContext';
@@ -48,8 +48,7 @@ export const App = () => {
 
         getSyncItem(Storage.THEME, (data) => {
             console.log("UPDATING THEME", data[Storage.THEME]);
-            dispatch({ type: Action.SET_THEME, payload: JSON.parse(data[Storage.THEME]) });
-            setDarkmode(JSON.parse(data[Storage.THEME]));
+            dispatch({ type: Action.SET_THEME, payload: {theme: JSON.parse(data[Storage.THEME])} });
         });
 
         getSyncItem(Storage.DRAFT, (data) => {
@@ -63,7 +62,8 @@ export const App = () => {
             console.log("UPDATING SETTINGS", data[Storage.SETTINGS]);
 
 
-            dispatch({ type: Action.SET_SETTINGS, payload: JSON.parse(data[Storage.SETTINGS]) || DEFAULT_SETTINGS });
+            dispatch({ type: Action.SET_SETTINGS, payload: JSON.parse(data[Storage.SETTINGS]) //|| DEFAULT_SETTINGS//
+         });
 
         });
 

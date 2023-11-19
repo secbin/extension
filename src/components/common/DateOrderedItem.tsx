@@ -5,7 +5,7 @@ import moment from "moment";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import {HistoryType} from "../contexts/AppContext";
+import {HistoryType} from "../../contexts/AppContext";
 
 const useStyles = makeStyles(theme => ({
   card: {

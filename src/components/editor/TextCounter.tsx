@@ -1,7 +1,7 @@
 import React from "react";
 import { Typography } from '@mui/material';
 import { makeStyles } from "@mui/styles";
-import { Action, MAX_ENC_TEXT_LENGTH, MAX_PASTEBIN_TEXT_LENGTH } from "../constants";
+import { Action, MAX_ENC_TEXT_LENGTH, MAX_PASTEBIN_TEXT_LENGTH } from "../../constants";
 import ErrorIcon from "@mui/icons-material/Error";
 import clsx from "clsx";
 

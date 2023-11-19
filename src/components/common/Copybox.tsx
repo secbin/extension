@@ -1,7 +1,7 @@
 import React from "react";
 import { Card, IconButton, InputBase, Typography } from '@mui/material';
 import { makeStyles } from "@mui/styles";
-import {copyTextClipboard} from "../chrome/utils"
+import {copyTextClipboard} from "../../chrome/utils"
 import { ContentPaste } from "@mui/icons-material";
 
 const useStyles = makeStyles(theme => ({

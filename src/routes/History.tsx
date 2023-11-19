@@ -7,9 +7,8 @@ import moment from "moment";
 import { AppContext, HistoryType } from "../contexts/AppContext";
 import { useHistory } from "react-router-dom";
 import { printDateInCorrectFormat } from "../chrome/utils";
-import clsx from "clsx";
-import HistoryIcon from '@mui/icons-material/History';
-import DateOrderedItem from "../components/DateOrderedItem";
+import DateOrderedItem from "../components/common/DateOrderedItem";
+import StatusIcon from "../components/editor/StatusIcon";
 
 
 const useStyles = makeStyles(theme => ({
@@ -37,10 +36,8 @@ const useStyles = makeStyles(theme => ({
         justifyContent: 'center',
         textAlign: 'center',
         alignItems: 'center',
-    },
-
+    }
 }));
-
 
 export default function History() {
     let { push } = useHistory();
@@ -68,20 +65,20 @@ export default function History() {
     return (
         <>
             {/* @ts-ignore */}
-            {!history && !history?.length ? (
-                <div className={classes.center}>
-                    <HistoryIcon className={clsx(classes.icon, classes.grey)} />
-                    <Typography variant={'h2'}>No History</Typography>
-                </div>
+            {history && history?.length ? (
+                    <Typography variant='h2' className={classes.pageHeading}>History</Typography>
             ) :
                 (
+                    console.log({history}),
                     <>
-                        <Typography variant='h2' className={classes.pageHeading}>History</Typography>
+                        <div className={classes.center}>
+                            <StatusIcon variant={'empty-history'} />
+                        </div>
                     </>
                 )
             }
             <List className={classes.list} >
-                {history?.reverse().map((item: any, index: number) => {
+                {history?.slice().reverse().map((item: any, index: number) => {
                     let showItem = false;
                     const itemTime = moment(item.date).format('MMMM D, YYYY');
                     if(itemTime !== lastLastDate) {

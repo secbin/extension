@@ -5,7 +5,7 @@ import {
 import { makeStyles } from '@mui/styles';
 import { setLocalItem } from "../chrome/utils/storage";
 import { Storage, ENCRYPTION_METHODS, KEY_LENGTHS, Action } from "../constants";
-import FormDialog from "../components/Dialog"
+import FormDialog from "../components/dialog/Dialog"
 import { AppContext } from "../contexts/AppContext";
 import SettingsItem from "../components/SettingsItem";
 
@@ -40,7 +40,7 @@ export default function Settings() {
   const classes = useStyles();
   const { state, dispatch } = useContext(AppContext);
   const { api_key, enc_mode, theme, key_length } = state.settings;
-  const [THEME, setTheme] = useState(state.settings.theme);
+  // const [THEME, setTheme] = useState(state.settings.theme);
 
   // Note: a key size of 16 bytes will use AES-128, 24 => AES-192, 32 => AES-256
   const keyLengthHandler = (e: any) => {
@@ -62,7 +62,7 @@ export default function Settings() {
     }
     dispatch({type: Action.UPDATE_THEME, payload: {theme: theme ? false : true}});
 
-    setTheme(!THEME);
+    // setTheme(!THEME);
     console.log("Theme", newTheme, state.settings.theme, {statemodified: !theme, stateoriginal: theme});
   }
 

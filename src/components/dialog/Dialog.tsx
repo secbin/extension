@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Card, Divider, InputBase, Typography } from '@mui/material';
-import { Action } from "../constants";
-import { AppContext } from "../contexts/AppContext";
+import { Action } from "../../constants";
+import { AppContext } from "../../contexts/AppContext";
 import { makeStyles } from '@mui/styles';
 
 const useStyles = makeStyles(theme => ({
@@ -77,7 +77,7 @@ export default function FormDialog(props: any) {
                 <Divider/>
                 <DialogActions>
                     <Button onClick={handleCancel}>Cancel</Button>
-                    <Button variant='contained' disableElevation onClick={handleClose}>Set</Button>
+                    <Button disableElevation onClick={handleClose}>Set</Button>
                 </DialogActions>
             </Dialog>
         </div>
