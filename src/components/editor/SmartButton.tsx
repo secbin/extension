@@ -7,6 +7,7 @@ import { makeStyles } from "@mui/styles";
 import {AppContext} from "../../contexts/AppContext";
 import {Action} from "../../constants";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
+import {useCreatePost} from "../../hooks/useCreatePost";
 
 const useStyles = makeStyles(theme => ({
   copybox: {
@@ -38,8 +39,35 @@ const SmartButton = ({setAnchorEl, open}: any) => {
   const { state, dispatch } = useContext(AppContext);
   const { draft: {
     buttonEnabled,
-    action: menu }
+    action: menu },
+      settings: {
+    encryption
+      }
 } = state;
+
+  const createPost = useCreatePost();
+
+  const encryptionMap: any = {
+    [Action.SEND_TO_PASTEBIN]: Action.ENCRYPT_PASTEBIN,
+    [Action.OPEN_PASTEBIN]: Action.DECRYPT_PASTEBIN,
+    [Action.SAVE_DRAFT]: Action.ENCRYPT
+  }
+
+  const plainMap: any = {
+    [Action.ENCRYPT_PASTEBIN]: Action.SEND_TO_PASTEBIN,
+    [Action.DECRYPT_PASTEBIN]: Action.OPEN_PASTEBIN,
+    [Action.ENCRYPT]: Action.SAVE_DRAFT,
+  }
+
+  const getButtonText = () => {
+    if (plainMap.hasOwnProperty(menu) && !encryption) {
+      return plainMap[menu];
+    } else if (encryptionMap.hasOwnProperty(menu) && encryption) {
+      return encryptionMap[menu];
+    }
+    return menu;
+  }
+
 
   const handleClick = (event: any) => {
     setAnchorEl(event.currentTarget);
@@ -47,11 +75,13 @@ const SmartButton = ({setAnchorEl, open}: any) => {
 
   const actionWrapper = async (e: any) => {
     const buttonText = e.target.innerText || "";
-    dispatch({ type: Action.SET_ACTION, payload: { action: buttonText || menu } })
+    dispatch({ type: Action.SET_ACTION, payload: { action: buttonText || getButtonText() } })
     if (buttonText === Action.DECRYPT_PASTEBIN || buttonText === Action.DECRYPT) {
       dispatch({ type: Action.OPEN_DIALOG, payload: { dialog_id: 'dec_form' } })
     } else if (buttonText === Action.ENCRYPT_PASTEBIN || buttonText === Action.ENCRYPT) {
       dispatch({ type: Action.OPEN_DIALOG, payload: { dialog_id: 'enc_form' } })
+    } else if (buttonText === Action.UNENCRYPT_PASTEBIN || buttonText === Action.SAVE_DRAFT || buttonText === Action.OPEN_PASTEBIN) {
+      await createPost();
     }
   }
 
@@ -66,7 +96,7 @@ const SmartButton = ({setAnchorEl, open}: any) => {
                         disabled={!buttonEnabled}
                         aria-expanded={open ? 'true' : undefined}
         >
-          <ListItemText className={classes.animated}>{menu}</ListItemText>
+          <ListItemText className={classes.animated}>{getButtonText()}</ListItemText>
           <IconButton sx={{ p: '10px', opacity: 0.85 }} color='inherit' onClick={handleClick} disableRipple
                       aria-label="encryption/decryption options">
 

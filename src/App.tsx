@@ -12,6 +12,10 @@ import History from "./routes/History";
 import Result from './routes/Result';
 import Editor from "./routes/Editor";
 import { getLocalItem, getSyncItem, setSyncItem } from "./chrome/utils/storage";
+import SubHeader from './components/common/SubHeader';
+import ApiKeyConfig from "./routes/ApiKeyConfig";
+import EncConfig from "./routes/EncConfig";
+import Support from "./routes/Support";
 
 export const App = () => {
     const { state, dispatch } = React.useContext(AppContext);
@@ -21,8 +25,15 @@ export const App = () => {
         root: {
             boxShadow: "none",
         },
+        container: {
+            display: 'flex',
+            flexDirection: 'column',
+            height: '600px'
+        },
         content: {
-            height: '542px',
+            flexGrow: 1,
+            willChange: 'scroll-position',
+            scrollBehavior: 'smooth'
         },
         hoverStyle: {
             fontSize: '0.9em',
@@ -52,7 +63,10 @@ export const App = () => {
         });
 
         getSyncItem(Storage.DRAFT, (data) => {
-            dispatch({ type: Action.SET_DRAFT, payload: JSON.parse(data[Storage.DRAFT]) });
+            // Only update draft if there is content
+            if(data[Storage.DRAFT]?.plaintext?.length) {
+                dispatch({ type: Action.SET_DRAFT, payload: JSON.parse(data[Storage.DRAFT]) });
+            }
         });
 
         console.log("getting SETTINGS");
@@ -89,8 +103,13 @@ export const App = () => {
     }, [state.settings.theme]);
 
     useEffect(() => {
-        setSyncItem(Storage.APP, JSON.stringify({location, date: new Date().getTime()}));
+
+        dispatch({ type: Action.UPDATE_NAVIGATION, payload: {location} });
+        // setSyncItem(Storage.APP, JSON.stringify({location, date: new Date().getTime()}));
     }, [location]);
+
+    useEffect(() => {
+    }, [state.app.subheader]);
 
     const classes = useStyles();
 
@@ -103,7 +122,7 @@ export const App = () => {
                 main: darkmode ? '#FF8C00' : '#1D6BC6',
             },
             secondary: {
-                main: '#00acf5',
+                main: darkmode ? '#f3f3f3' : '#242424'
             },
         },
         shape: {
@@ -180,18 +199,18 @@ export const App = () => {
 
     return (
             <ThemeProvider theme={theme}>
-                <>
+                <Box className={classes.container} sx={{display: 'flex', flexDirection: 'column', height: '100vh'}}>
                     <div className={classes.background}>
                         <AppBar sx={{bgcolor: 'background.default'}} className={classes.root} position="relative" enableColorOnDark>
-                            <Toolbar>
+                            <Toolbar sx={{bgcolor: 'background.default' }}>
                                 <img src={darkmode ? '/securebinlogo_dark.svg' : '/securebinlogo.svg'} alt="logo"/>
                                 <div style={{marginLeft: 'auto'}}>
                                     {<IconButton className={classes.hoverStyle} aria-label="Latest paste" sx={{ mr: 1 }} disableRipple onClick={() => { push('/home')}}>
                                         <EditIcon />
                                     </IconButton>}
-                                    {<IconButton className={classes.hoverStyle} aria-label="Latest paste" sx={{ mr: 1 }} disableRipple onClick={() => { push('/result')}}>
-                                    <ContentPaste />
-                                    </IconButton>}
+                                    {/*{<IconButton className={classes.hoverStyle} aria-label="Latest paste" sx={{ mr: 1 }} disableRipple onClick={() => { push('/result')}}>*/}
+                                    {/*<ContentPaste />*/}
+                                    {/*</IconButton>}*/}
                                     <IconButton className={classes.hoverStyle} aria-label="History" sx={{ mr: 1 }} disableRipple onClick={() => { push('/history')}}>
                                         <HistoryIcon />
                                     </IconButton>
@@ -201,6 +220,7 @@ export const App = () => {
                                 </div>
                             </Toolbar>
                             <Divider/>
+                            {!!state.app.subheader && <SubHeader/>}
                         </AppBar>
                     </div>
                     <Box className={classes.content} sx={{bgcolor: 'background.default', color: 'text.primary', overflow: 'auto'}}>
@@ -211,6 +231,16 @@ export const App = () => {
                             <Route path="/settings">
                                 <Settings/>
                             </Route>
+                            {/*Sub heading routes*/}
+                            <Route path="/apikey">
+                                <ApiKeyConfig />
+                            </Route>
+                            <Route path="/encconfig">
+                                <EncConfig />
+                            </Route>
+                            <Route path="/support">
+                                <Support />
+                            </Route>
                             <Route path="/history">
                                 <History/>
                             </Route>
@@ -220,9 +250,10 @@ export const App = () => {
                             <Route path="/">
                                 <Editor/>
                             </Route>
+
                         </Switch>
                     </Box>
-                </>
+                </Box>
             </ThemeProvider>
     )
 };

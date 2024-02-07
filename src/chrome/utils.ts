@@ -1,5 +1,9 @@
 import moment from "moment";
 
+export const openLinkInNewWindow = (url: string) => {
+    window.open(url, '_blank', 'noopener,noreferrer');
+};
+
 export const getCurrentTabUrl = (callback: (url: string | undefined) => void): void => {
     const queryInfo = {active: true, lastFocusedWindow: true};
 

@@ -44,7 +44,7 @@ const StatusIcon = ({variant, result}: LStatusType) => {
           <Typography variant={'h2'}>Encrypted Ciphertext</Typography>
       }
 
-        {result && (<Typography variant={'h4'}>{printDateInCorrectFormat(result?.date)} with {result?.key_length * 8} {result?.enc_mode}</Typography>)}
+        {result && (<Typography variant={'h4'}>{printDateInCorrectFormat(result?.date)}{result?.key_length ? ` with ${result?.key_length * 8} ${result?.enc_mode}` : ""}</Typography>)}
         </>
     );
   } else if (variant === 'error') {

@@ -1,8 +1,5 @@
 import React, {useContext, useEffect, useState} from "react";
-import {
-  Box,
-  InputBase,
-} from '@mui/material';
+import {Box, InputBase,} from '@mui/material';
 import {AppContext} from "../../contexts/AppContext";
 import {Action, CIPHER_PREFIX, MAX_ENC_TEXT_LENGTH, PASTEBIN_BASEURL} from "../../constants";
 import clsx from "clsx";
@@ -21,7 +18,8 @@ const TextEditor = () => {
     let textbox = e.target.value || "";
     let length = textbox.length;
     let buttonEnabled = false;
-    let buttonText: Action.ENCRYPT | Action.DECRYPT | Action.ENCRYPT_PASTEBIN | Action.DECRYPT_PASTEBIN | Action.UNENCRYPT_PASTEBIN = Action.ENCRYPT;
+    const encryptionEnabled = state.settings.encryption;
+    let buttonText: Action.ENCRYPT | Action.DECRYPT | Action.ENCRYPT_PASTEBIN | Action.DECRYPT_PASTEBIN | Action.UNENCRYPT_PASTEBIN | Action.SEND_TO_PASTEBIN | Action.SAVE_DRAFT | Action.OPEN_PASTEBIN = encryptionEnabled ? Action.ENCRYPT_PASTEBIN : Action.SEND_TO_PASTEBIN;
     setTextBox(textbox);
 
     if(timerId !== null) {
@@ -31,7 +29,7 @@ const TextEditor = () => {
 
     const newTimerId = setTimeout(() => {
       if (length <= MAX_ENC_TEXT_LENGTH && textbox.includes(PASTEBIN_BASEURL)) {
-        buttonText = Action.DECRYPT_PASTEBIN
+        buttonText = encryptionEnabled ? Action.DECRYPT_PASTEBIN : Action.OPEN_PASTEBIN
         buttonEnabled = true
       } else if (length <= MAX_ENC_TEXT_LENGTH && textbox.includes(CIPHER_PREFIX)) {
         buttonText = Action.DECRYPT

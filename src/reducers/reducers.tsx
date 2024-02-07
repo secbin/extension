@@ -1,4 +1,4 @@
-import {AppType, DraftType, HistoryType, SettingsType} from "../contexts/AppContext";
+import {AppType, DraftType, HistoryType, SettingsType, SubHeaderType} from "../contexts/AppContext";
 import {setSyncItem, deleteSyncItem} from "../chrome/utils/storage";
 import { Storage, Action, DEFAULT_CONTEXT } from "../constants"
 
@@ -17,19 +17,19 @@ type HistoryPayload = {
     [Action.SET_HISTORY] : [{
         id: number,
         pastebinlink: string,
-        enc_mode: string,
-        key_length: number,
-        key: string,
-        enc_text: string,
+        enc_mode: string | null,
+        key_length: number | null,
+        key: string | null,
+        enc_text: string | null,
         date: Date,
     }];
     [Action.ADD_TO_HISTORY] : {
         id: number,
         pastebinlink: string,
-        enc_mode: string,
-        key_length: number,
-        key: string,
-        enc_text: string,
+        enc_mode: string | null,
+        key_length: number | null,
+        key: string | null,
+        enc_text: string | null,
         date: Date,
     };
     [Action.CLEAR_HISTORY] : undefined,
@@ -49,6 +49,9 @@ type AppPayload = {
         dialog_id: string,
     };
     [Action.CLOSE_DIALOG] : undefined;
+    [Action.SET_SUBHEADER]: {
+        subheader: SubHeaderType | null,
+    }
 }
 
 type DraftPayload = {
@@ -68,22 +71,22 @@ type DraftPayload = {
     [Action.UPDATE_PLAINTEXT]: {
         plaintext: string,
         buttonEnabled: boolean,
-        action: Action.DECRYPT | Action.DECRYPT_PASTEBIN | Action.ENCRYPT | Action.ENCRYPT_PASTEBIN | Action.UNENCRYPT_PASTEBIN,
+        action: Action.DECRYPT | Action.DECRYPT_PASTEBIN | Action.ENCRYPT | Action.ENCRYPT_PASTEBIN | Action.UNENCRYPT_PASTEBIN | Action.OPEN_PASTEBIN | Action.SAVE_DRAFT,
     };
     [Action.UPDATE_ENC_MENU]: {
         buttonEnabled: boolean,
-        action: Action.DECRYPT | Action.DECRYPT_PASTEBIN | Action.ENCRYPT | Action.ENCRYPT_PASTEBIN | Action.UNENCRYPT_PASTEBIN,
+        action: Action.DECRYPT | Action.DECRYPT_PASTEBIN | Action.ENCRYPT | Action.ENCRYPT_PASTEBIN | Action.UNENCRYPT_PASTEBIN | Action.OPEN_PASTEBIN | Action.SAVE_DRAFT,
     };
     [Action.SET_DRAFT]: {
         plaintext: string;
         buttonEnabled: boolean,
-        action: Action.DECRYPT | Action.DECRYPT_PASTEBIN | Action.ENCRYPT | Action.ENCRYPT_PASTEBIN | Action.UNENCRYPT_PASTEBIN,
+        action: Action.DECRYPT | Action.DECRYPT_PASTEBIN | Action.ENCRYPT | Action.ENCRYPT_PASTEBIN | Action.UNENCRYPT_PASTEBIN | Action.OPEN_PASTEBIN | Action.SAVE_DRAFT,
     };
     [Action.SET_KEY]: {
         key: string;
     };
     [Action.SET_ACTION]: {
-        action: Action.DECRYPT | Action.DECRYPT_PASTEBIN | Action.ENCRYPT | Action.ENCRYPT_PASTEBIN | Action.UNENCRYPT_PASTEBIN;
+        action: Action.DECRYPT | Action.DECRYPT_PASTEBIN | Action.ENCRYPT | Action.ENCRYPT_PASTEBIN | Action.UNENCRYPT_PASTEBIN | Action.OPEN_PASTEBIN | Action.SAVE_DRAFT;
     };
     [Action.RESET_DRAFT]: null | undefined,
 }
@@ -92,14 +95,20 @@ type SettingsPayload = {
     [Action.UPDATE_SETTINGS] : {
         api_key?: string,
         enc_mode?: string,
+        encryption?: boolean,
         key_length?: number,
         theme?: boolean,
+        sync_theme?: boolean,
+
     };
     [Action.SET_SETTINGS] : {
         api_key?: string,
         enc_mode?: string,
+        encryption?: boolean,
         key_length?: number,
         theme?: boolean,
+        sync_theme?: boolean,
+
     };
     [Action.UPDATE_THEME] : {
         theme: boolean,
@@ -111,12 +120,26 @@ type SettingsPayload = {
 
 }
 
+type GlobalPayload = {
+    [Action.CREATE_POST] : {
+        id: number,
+        pastebinlink: string,
+        enc_mode: string | null,
+        key_length: number | null,
+        key: string | null,
+        enc_text: string | null,
+        date: Date,
+    };
+}
+
 export type DraftActions = ActionMap<DraftPayload>[keyof ActionMap<DraftPayload>];
 export type AppActions = ActionMap<AppPayload>[keyof ActionMap<AppPayload>];
 export type SettingsActions = ActionMap<SettingsPayload>[keyof ActionMap<SettingsPayload>];
 export type HistoryActions = ActionMap<HistoryPayload>[keyof ActionMap<HistoryPayload>];
+export type GlobalActions = ActionMap<GlobalPayload>[keyof ActionMap<GlobalPayload>];
 
-export const historyReducer = (state: HistoryType[], action: AppActions | SettingsActions | DraftActions | HistoryActions ) => {
+
+export const historyReducer = (state: HistoryType[], action: AppActions | SettingsActions | DraftActions | HistoryActions | GlobalActions ) => {
     switch (action.type) {
         case Action.SET_HISTORY:
             return action.payload
@@ -144,19 +167,35 @@ export const historyReducer = (state: HistoryType[], action: AppActions | Settin
     }
 }
 
-export const appReducer = (state: AppType, action: AppActions | SettingsActions | DraftActions | HistoryActions | AppActions ) => {
+export const postReducer = (state: HistoryType[], action: AppActions | SettingsActions | DraftActions | HistoryActions | GlobalActions ) => {
+    switch (action.type) {
+        case Action.CREATE_POST:
+
+
+
+
+            return state;
+        default:
+            return state;
+    }
+}
+
+export const appReducer = (state: AppType, action: AppActions | SettingsActions | DraftActions | HistoryActions | GlobalActions ) => {
     switch (action.type) {
         case Action.UPDATE_NAVIGATION:
+            const location = action.payload.location;
             const updatedNavigation = {
                 ...state,
-                location: action.payload.location,
+                location: location,
+                subheader: null,
             }
-            setSyncItem(Storage.APP, JSON.stringify(updatedNavigation));
+            // setSyncItem(Storage.APP, JSON.stringify({location, date: new Date().getTime()}));
         return updatedNavigation;
         case Action.SET_NAVIGATION:
             const setNavigation = {
                 ...state,
                 location: action.payload.location,
+                subheader: null,
             }
             return setNavigation;
         case Action.OPEN_DIALOG:
@@ -171,12 +210,19 @@ export const appReducer = (state: AppType, action: AppActions | SettingsActions 
                 dialog_id: null,
             }
             return updatedClosedId;
+        case Action.SET_SUBHEADER:
+            console.log("RECEIEVED SUBHEADER", action.payload.subheader);
+            const updatedSubheader = {
+                ...state,
+                subheader: action.payload.subheader,
+            }
+            return updatedSubheader;
         default:
             return state;
     }
 }
 
-export const draftReducer = (state: DraftType, action: AppActions | SettingsActions | DraftActions | HistoryActions ) => {
+export const draftReducer = (state: DraftType, action: AppActions | SettingsActions | DraftActions | HistoryActions | GlobalActions) => {
     switch (action.type) {
         case Action.ENCRYPT:
             return {
@@ -245,14 +291,22 @@ export const draftReducer = (state: DraftType, action: AppActions | SettingsActi
     }
 }
 
-export const settingsReducer = (state: SettingsType, action: AppActions | SettingsActions | DraftActions | HistoryActions ) => {
+export const settingsReducer = (state: SettingsType, action: AppActions | SettingsActions | DraftActions | HistoryActions | GlobalActions) => {
+
     switch (action.type) {
         case Action.SET_SETTINGS:
+            // @ts-ignore
+            const { encryption, sync_theme } = action.payload || {};
+            const setEncryption = encryption !== undefined ? encryption : state.encryption;
+            const setSyncTheme = sync_theme !== undefined ? sync_theme : state.sync_theme;
+
             return {
                 ...state,
                 api_key: action.payload?.api_key || state.api_key,
                 enc_mode: action.payload?.enc_mode || state.enc_mode,
+                encryption: setEncryption,
                 key_length: action.payload?.key_length || state.key_length,
+                sync_theme:  setSyncTheme,
             };
         case Action.SET_THEME:
             return {
@@ -267,11 +321,19 @@ export const settingsReducer = (state: SettingsType, action: AppActions | Settin
             };
             return newTheme;
         case Action.UPDATE_SETTINGS:
+            // @ts-ignore
+            const { encryption: enc, sync_theme: sync } = action.payload || {};
+            const testedEncryption = enc !== undefined ? enc : state.encryption;
+            const testedSyncTheme = sync !== undefined ? sync : state.sync_theme;
+
             const newState = {
                 ...state,
                 api_key: action.payload?.api_key || state.api_key,
                 enc_mode: action.payload?.enc_mode || state.enc_mode,
+                encryption:  testedEncryption,
                 key_length: action.payload?.key_length || state.key_length,
+                sync_theme:  testedSyncTheme,
+
             };
             setSyncItem(Storage.SETTINGS, JSON.stringify(newState));
             return newState;

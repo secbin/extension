@@ -16,15 +16,16 @@ export type LSettingsItemType = {
   primary: string,
   secondary?: string,
   children: any,
+  multilineSecondaryText?: boolean,
 }
 
-const SettingsItem = ({ primary, secondary, children }: LSettingsItemType) => {
+const SettingsItem = ({ primary, secondary, children, multilineSecondaryText = false }: LSettingsItemType) => {
   const classes = useStyles();
   return (
       <>
         <Card classes={{ root: classes.card }}>
           <ListItem>
-            <ListItemText
+            <ListItemText secondaryTypographyProps={{ lineHeight: '1.1'}} primaryTypographyProps={{ marginBottom: multilineSecondaryText ? '3px' : '0' }}
                 primary={primary}
                 secondary={secondary ? secondary : null}
             />

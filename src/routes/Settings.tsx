@@ -5,9 +5,10 @@ import {
 import { makeStyles } from '@mui/styles';
 import { setLocalItem } from "../chrome/utils/storage";
 import { Storage, ENCRYPTION_METHODS, KEY_LENGTHS, Action } from "../constants";
-import FormDialog from "../components/dialog/Dialog"
+import FormDialog from "../components/dialog/ButtonRedirect"
 import { AppContext } from "../contexts/AppContext";
 import SettingsItem from "../components/SettingsItem";
+import ButtonRedirect from "../components/dialog/ButtonRedirect";
 
 const useStyles = makeStyles(theme => ({
   card: {
@@ -39,17 +40,8 @@ const useStyles = makeStyles(theme => ({
 export default function Settings() {
   const classes = useStyles();
   const { state, dispatch } = useContext(AppContext);
-  const { api_key, enc_mode, theme, key_length } = state.settings;
+  const { api_key, enc_mode, theme, key_length, encryption } = state.settings;
   // const [THEME, setTheme] = useState(state.settings.theme);
-
-  // Note: a key size of 16 bytes will use AES-128, 24 => AES-192, 32 => AES-256
-  const keyLengthHandler = (e: any) => {
-    dispatch({type: Action.UPDATE_SETTINGS, payload: {...state.settings, key_length: e.target.value} })
-  }
-
-  const encModeHandler = (e: any) => {
-    dispatch({type: Action.UPDATE_SETTINGS, payload: {...state.settings, enc_mode: e.target.value, } })
-  }
 
   const clearHistory = (e: any) => {
     setLocalItem(Storage.HISTORY, []);
@@ -65,6 +57,7 @@ export default function Settings() {
     // setTheme(!THEME);
     console.log("Theme", newTheme, state.settings.theme, {statemodified: !theme, stateoriginal: theme});
   }
+
 
   const resetSettings = (e: any) => {
     dispatch({type: Action.RESET_SETTINGS, payload: null});
@@ -82,38 +75,10 @@ export default function Settings() {
 
         <Typography variant={'h4'}>Encryption</Typography>
         <SettingsItem
-            primary={'Encryption Algorithm'}
+            primary={'Encryption Settings'}
+            secondary={encryption ? `Enabled with ${key_length * 8}-bit ${enc_mode} ` : 'Disabled'}
             children={(
-              <Select
-                className={classes.select}
-                value={enc_mode}
-                onChange={encModeHandler}
-              >
-              {ENCRYPTION_METHODS.map((item) => (
-                  <MenuItem classes={{ root: classes.menuItem }}
-                            key={item.value}
-                            value={item.value}>{item.name}
-                  </MenuItem>
-              ))}
-            </Select>)}
-        />
-
-        <SettingsItem
-            primary={'Key Length'}
-            children={(
-              <Select
-                  // Note: a key size of 16 bytes will use AES-128, 24 => AES-192, 32 => AES-256
-                  className={classes.select}
-                  value={key_length}
-                  onChange={keyLengthHandler}
-                >
-                  {KEY_LENGTHS.map((item) => (
-                      <MenuItem className={classes.menuItem}
-                                key={item.value}
-                                value={item.value}>{item.name}
-                      </MenuItem>
-                  ))}
-                </Select>
+                <ButtonRedirect value={"Configure"} url={'/encconfig'}/>
             )}
         />
 
@@ -122,7 +87,15 @@ export default function Settings() {
             primary={'API Key'}
             secondary={api_key ? api_key : "Not Set"}
             children={(
-                <FormDialog APIKEY={api_key}/>
+                <ButtonRedirect value={api_key ? "Change" : "Set Key"} url={'/apikey'}/>
+            )}
+        />
+
+        <Typography variant={'h4'}>Help</Typography>
+        <SettingsItem
+            primary={'Support'}
+            children={(
+                <ButtonRedirect value={"Get Help"} url={'/support'}/>
             )}
         />
 

@@ -7,7 +7,13 @@ import {Action} from "../../constants";
 import KeyIcon from "@mui/icons-material/Key";
 import KeyOffIcon from "@mui/icons-material/KeyOff";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import EditNoteIcon from '@mui/icons-material/EditNote';
+import LinkIcon from '@mui/icons-material/Link';
+import AddLinkIcon from '@mui/icons-material/AddLink';
 import {alpha, styled} from "@mui/material/styles";
+import AddIcon from '@mui/icons-material/Add';
 
 const DropDown = ({anchorEl, setAnchorEl, open}: any) => {
   const { state, dispatch } = useContext(AppContext);
@@ -16,7 +22,7 @@ const DropDown = ({anchorEl, setAnchorEl, open}: any) => {
     action: menu,
   },
     settings: {api_key:
-        apiKey},
+        apiKey, encryption},
 } = state;
 
   const StyledMenu = styled((props) => (
@@ -59,44 +65,83 @@ const DropDown = ({anchorEl, setAnchorEl, open}: any) => {
     },
   }));
 
-  const handleClose = (text: Action.ENCRYPT | Action.DECRYPT | Action.DECRYPT_PASTEBIN | Action.ENCRYPT_PASTEBIN | Action.UNENCRYPT_PASTEBIN) => {
+  const handleClose = (text: Action.ENCRYPT | Action.DECRYPT | Action.DECRYPT_PASTEBIN | Action.ENCRYPT_PASTEBIN | Action.UNENCRYPT_PASTEBIN | Action.OPEN_PASTEBIN | Action.SAVE_DRAFT) => {
     setAnchorEl(null);
     dispatch({ type: Action.UPDATE_ENC_MENU, payload: { action: text, buttonEnabled: buttonEnabled } })
   };
 
+  const EncryptionMenu = () => {
+    return (
+        <div>
+          <StyledMenu
+              /* @ts-ignore */
+              anchorEl={anchorEl}
+              open={open}
+              onClose={(e: any) => handleClose(menu)}
+          >
+            <MenuItem sx={{ fontWeight: 700, color: 'grey' }} disabled dense disableRipple>
+              Select Action
+            </MenuItem>
+            <MenuItem onClick={e => handleClose(Action.ENCRYPT)} dense disableRipple>
+              <KeyIcon className={'muted'} />
+              {Action.ENCRYPT}
+            </MenuItem>
+            <MenuItem disabled={ !!!apiKey } onClick={e => handleClose(Action.ENCRYPT_PASTEBIN)} dense disableRipple>
+              <KeyIcon className={'muted'} />
+              {Action.ENCRYPT_PASTEBIN}
+            </MenuItem>
+            <MenuItem disabled={ !!!apiKey } onClick={e => handleClose(Action.UNENCRYPT_PASTEBIN)} dense disableRipple>
+              <KeyOffIcon className={'muted'} />
+              {Action.UNENCRYPT_PASTEBIN}
+            </MenuItem>
+            <Divider sx={{ my: 0.5 }} />
+            <MenuItem onClick={e => handleClose(Action.DECRYPT)} dense disableRipple>
+              <LockOpenIcon className={'muted'} />
+              {Action.DECRYPT}
+            </MenuItem>
+            <MenuItem disabled={ !!!apiKey } onClick={e => handleClose(Action.DECRYPT_PASTEBIN)} dense disableRipple>
+              <LockOpenIcon className={'muted'} />
+              {Action.DECRYPT_PASTEBIN}
+            </MenuItem>
+          </StyledMenu>
+        </div>
+    );
+  }
+
+  const RegularMenu = () => {
+    return (
+        <div>
+          <StyledMenu
+              /* @ts-ignore */
+              anchorEl={anchorEl}
+              open={open}
+              onClose={(e: any) => handleClose(menu)}
+          >
+            <MenuItem sx={{ fontWeight: 700, color: 'grey' }} disabled dense disableRipple>
+              Select Action
+            </MenuItem>
+            <MenuItem onClick={e => handleClose(Action.SAVE_DRAFT)} dense disableRipple>
+              <EditNoteIcon className={'muted'} />
+              {Action.SAVE_DRAFT}
+            </MenuItem>
+            <MenuItem disabled={ !!!apiKey } onClick={e => handleClose(Action.UNENCRYPT_PASTEBIN)} dense disableRipple>
+              <AddIcon className={'muted'} />
+              Post to Pastebin
+            </MenuItem>
+            <Divider sx={{ my: 0.5 }} />
+            <MenuItem disabled={ !!!apiKey } onClick={e => handleClose(Action.OPEN_PASTEBIN)} dense disableRipple>
+              <LinkIcon className={'muted'} />
+              {Action.OPEN_PASTEBIN}
+            </MenuItem>
+          </StyledMenu>
+        </div>
+    );
+  }
+
+
   return (
       <div>
-        <StyledMenu
-            /* @ts-ignore */
-            anchorEl={anchorEl}
-            open={open}
-            onClose={(e: any) => handleClose(menu)}
-        >
-          <MenuItem sx={{ fontWeight: 700, color: 'grey' }} disabled dense disableRipple>
-            Select Action
-          </MenuItem>
-          <MenuItem onClick={e => handleClose(Action.ENCRYPT)} dense disableRipple>
-            <KeyIcon className={'muted'} />
-            {Action.ENCRYPT}
-          </MenuItem>
-          <MenuItem disabled={ !!!apiKey } onClick={e => handleClose(Action.ENCRYPT_PASTEBIN)} dense disableRipple>
-            <KeyIcon className={'muted'} />
-            {Action.ENCRYPT_PASTEBIN}
-          </MenuItem>
-          <MenuItem disabled={ !!!apiKey } onClick={e => handleClose(Action.UNENCRYPT_PASTEBIN)} dense disableRipple>
-            <KeyOffIcon className={'muted'} />
-            {Action.UNENCRYPT_PASTEBIN}
-          </MenuItem>
-          <Divider sx={{ my: 0.5 }} />
-          <MenuItem onClick={e => handleClose(Action.DECRYPT)} dense disableRipple>
-            <LockOpenIcon className={'muted'} />
-            {Action.DECRYPT}
-          </MenuItem>
-          <MenuItem disabled={ !!!apiKey } onClick={e => handleClose(Action.DECRYPT_PASTEBIN)} dense disableRipple>
-            <LockOpenIcon className={'muted'} />
-            {Action.DECRYPT_PASTEBIN}
-          </MenuItem>
-        </StyledMenu>
+        { encryption ? <EncryptionMenu /> : <RegularMenu /> }
       </div>
   );
 }
