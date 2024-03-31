@@ -101,7 +101,7 @@ const Result = () => {
                 <div className={classes.left}>
 
                     {result?.pastebinlink && !result?.pastebinlink.includes("PasteBin Error") && (
-                    <Copybox value={result?.pastebinlink} title={'Pastebin Link'} />
+                    <Copybox value={result?.pastebinlink} title={'Pastebin Link'} allowCopy openInNew />
                 )}
                 {isPasteBin && hasError && errorMessage && (
                         <Copybox value={errorMessage} title={'PasteBin Error'} allowCopy={false} />

@@ -11,7 +11,7 @@ export default function ButtonRedirect(props: any) {
 
     const handleClickOpen = () => {
         if(props.external) {
-            window.open("https://pastebin.com/signup");
+            window.open(props.url);
 
         } else {
             push(props.url);

@@ -9,6 +9,8 @@ import FormDialog from "../components/dialog/ButtonRedirect"
 import { AppContext } from "../contexts/AppContext";
 import SettingsItem from "../components/SettingsItem";
 import ButtonRedirect from "../components/dialog/ButtonRedirect";
+import WarningDialog from "../components/dialog/WarningDialog";
+import ResetWarningDialog from "../components/dialog/ResetWarningDialog";
 
 const useStyles = makeStyles(theme => ({
   card: {
@@ -44,7 +46,7 @@ export default function Settings() {
   // const [THEME, setTheme] = useState(state.settings.theme);
 
   const clearHistory = (e: any) => {
-    setLocalItem(Storage.HISTORY, []);
+    dispatch({ type: Action.OPEN_DIALOG, payload: { dialog_id: 'reset_history' } })
   }
 
   const themeHandler = (e: any) => {
@@ -60,11 +62,13 @@ export default function Settings() {
 
 
   const resetSettings = (e: any) => {
-    dispatch({type: Action.RESET_SETTINGS, payload: null});
+    dispatch({ type: Action.OPEN_DIALOG, payload: { dialog_id: 'reset_settings' } })
   }
 
   return (
     <div>
+      <WarningDialog />
+      <ResetWarningDialog />
       <Typography variant='h2' className={classes.pageHeading}>Settings</Typography>
       <List className={classes.list}>
         <Typography variant={'h4'}>Theme</Typography>

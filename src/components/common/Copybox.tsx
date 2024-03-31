@@ -86,7 +86,7 @@ const Copybox = ({ title, value, type = 'text', allowCopy = false, toggleVisibil
               {show === 'password' ? <VisibilityOutlined color="primary"/> : <VisibilityOffOutlined color="primary"/>}
             </IconButton>
           )}
-          {false && (
+          {openInNew && (
               <IconButton size={'small'} onClick={() => openLinkInNewWindow(value)} disableRipple>
                 {<OpenInNewRounded color="primary"/>}
               </IconButton>

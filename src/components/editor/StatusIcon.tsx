@@ -10,7 +10,7 @@ const useStyles = makeStyles(theme => ({
   icon: {
     fontSize: 80,
     width: '100%',
-    margin: 20,
+    margin: "20px 0",
   },
   green: {
     color: 'green',
