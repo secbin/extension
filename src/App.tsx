@@ -82,6 +82,7 @@ export const App = () => {
         });
 
         getLocalItem(Storage.HISTORY, (data) => {
+            console.log("HISTORY FROM STORAGE", {history: data[Storage.HISTORY]});
             dispatch({ type: Action.SET_HISTORY, payload: data[Storage.HISTORY] || [] });
         })
 
@@ -119,7 +120,7 @@ export const App = () => {
         palette: {
             mode: darkmode ? 'dark' : 'light',
             primary: {
-                main: darkmode ? '#FF8C00' : '#1D6BC6',
+                main: darkmode ? '#4795fd' : '#1D6BC6',
             },
             secondary: {
                 main: darkmode ? '#f3f3f3' : '#242424'

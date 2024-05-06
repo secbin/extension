@@ -39,7 +39,7 @@ export function useCreatePost() {
         enc_text: res.data,
         enc_mode: res.mode,
         key_length: res.key_len,
-        date: new Date(),
+        date: new Date().getTime(),
       }
 
       dispatch({type: Action.ADD_TO_HISTORY, payload: history })
@@ -58,7 +58,7 @@ export function useCreatePost() {
         enc_text: text,
         enc_mode: null,
         key_length: null,
-        date: new Date(),
+        date: new Date().getTime(),
       }
 
       console.log("NEW NEW LINK UNENCRYPT", history);
@@ -78,7 +78,7 @@ export function useCreatePost() {
         enc_text: res.data,
         enc_mode: res.mode,
         key_length: res.key_len,
-        date: new Date(),
+        date: new Date().getTime(),
       }
 
       dispatch({type: Action.ADD_TO_HISTORY, payload: history})
@@ -95,7 +95,7 @@ export function useCreatePost() {
         enc_text: text,
         enc_mode: null,
         key_length: null,
-        date: new Date(),
+        date: new Date().getTime(),
       }
 
       dispatch({type: Action.ADD_TO_HISTORY, payload: history})

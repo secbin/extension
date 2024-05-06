@@ -59,6 +59,20 @@ export default function History() {
         push('/result');
     }
 
+const handleTitle = (item: HistoryType) => {
+    let title = "";
+
+    if(item?.pastebinlink) {
+        return item.pastebinlink;
+    } else {
+        if(!!item?.key_length && !!item.enc_mode) {
+            return `${item.key_length * 8} ${item.enc_mode} Encrypted Draft`
+        } else {
+            return "Draft"
+        }
+    }
+}
+    
     const classes = useStyles();
     let lastLastDate = '';
 
@@ -69,7 +83,6 @@ export default function History() {
                     <Typography variant='h2' className={classes.pageHeading}>History</Typography>
             ) :
                 (
-                    console.log({history}),
                     <>
                         <div className={classes.center}>
                             <StatusIcon variant={'empty-history'} />
@@ -90,7 +103,7 @@ export default function History() {
                             showDateHeading={showItem}
                             clickHandler={handleHistory}
                             payload={item}
-                            primary={item?.pastebinlink ? item.pastebinlink : `${item.key_length * 8} ${item.enc_mode} Encrypted Plaintext`}
+                            primary={handleTitle(item)}
                             secondary={printDateInCorrectFormat(item.date)}
                             date={item.date}
                         />
