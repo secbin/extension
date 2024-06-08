@@ -12,6 +12,7 @@ import {
 import { makeStyles } from "@mui/styles";
 import {AppContext} from "../../contexts/AppContext";
 import {Action} from "../../constants";
+import KeyRoundedIcon from "@mui/icons-material/KeyRounded";
 
 const useStyles = makeStyles(theme => ({
   copybox: {
@@ -22,8 +23,18 @@ const useStyles = makeStyles(theme => ({
     borderColor: 'rgba(170,170,170,0.25)',
     boxShadow: '0 0 7px 0 rgba(0,0,0,0.04)',
     marginTop: 20,
-    marginBottom: 14,
-  }
+    marginBottom: 20,
+  },
+  buttonEd: {
+    width: "100%",
+    backgroundColor: 'rgba(0,117,250,0.08)',
+  },
+  buttonGr: {
+    width: "100%",
+    backgroundColor: 'rgba(149,149,149,0.08)',
+    marginBottom: 8,
+    color: 'grey'
+  },
 }));
 
 
@@ -49,8 +60,9 @@ const DecryptFormDialog = () => {
   return (
       <div>
         <Dialog open={dialog_id === 'dec_form'} onClose={handleClose} >
-          <DialogTitle>
-            <Typography variant={'h3'}>Enter your Decryption Key:</Typography>
+          <DialogTitle sx={{display: "flex", alignItems: "center", columnGap: "8px"}}>
+            <KeyRoundedIcon />
+            <Typography variant={'h3'}>Decrypt</Typography>
           </DialogTitle>
           <Divider />
           <DialogContent>
@@ -63,16 +75,18 @@ const DecryptFormDialog = () => {
               <InputBase
                   autoFocus
                   placeholder={"Decryption Key"}
+                  sx={{fontFamily: 'Menlo, monospace', fontSize: 16, letterSpacing: '-0.1px', fontWeight: 700}}
                   fullWidth
-                  sx={{ bgcolor: 'background.default' }}
                   onChange={(event) => { setKey(event.target.value) }}
               />
             </Card>
+            <Button className={classes.buttonGr} onClick={handleCancel}>Cancel</Button>
+            <Button className={classes.buttonEd} onClick={handleClose}>Decrypt</Button>
           </DialogContent>
-          <DialogActions>
-            <Button onClick={handleCancel}>Cancel</Button>
-            <Button onClick={handleClose}>Enter</Button>
-          </DialogActions>
+          {/*<DialogActions>*/}
+          {/*  <Button onClick={handleCancel}>Cancel</Button>*/}
+          {/*  <Button onClick={handleClose}>Enter</Button>*/}
+          {/*</DialogActions>*/}
         </Dialog>
       </div>
   );

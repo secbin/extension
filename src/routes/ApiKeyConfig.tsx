@@ -125,16 +125,19 @@ const EncryptionConfig = () => {
         setOpen(true);
     };
 
+    const handleSave = () => {
+        dispatch({type: Action.UPDATE_SETTINGS, payload: {...state.settings, api_key: apiKey} })
+        // goBack();
+    };
+
     const handleApiKeyTest = () => {
         isValidDevKey(apiKey).then((isValid) => {
             setValid(isValid)
+            handleSave()
         })
     }
 
-    const handleClose = () => {
-        dispatch({type: Action.UPDATE_SETTINGS, payload: {...state.settings, api_key: apiKey} })
-        goBack();
-    };
+
 
 
     useEffect(() => {
@@ -213,17 +216,6 @@ const EncryptionConfig = () => {
                                                 onClick={() => window.open("https://pastebin.com/doc_api")}>here</a>
                 </Typography>
             </DialogContent>
-            <Divider />
-            <DialogActions>
-                <Button sx={{
-                    width: '100%',
-                    backgroundColor: '#FAFCFE',
-                    borderRadius: '24px',
-                    padding: '10px 8px',
-                    margin: '14px 6px'
-                }} disabled={valid === false} disableElevation onClick={handleClose}>Save</Button>
-            </DialogActions>
-            {/*</Dialog>*/}
         </Box>
     );
 }

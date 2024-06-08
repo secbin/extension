@@ -162,8 +162,6 @@ const EncConfig = () => {
     return (
         <Box>
             <DialogContent sx={{overflowY: 'auto', WebkitOverflowScrolling: 'touch', willChange: 'scroll-position', scrollBehavior: 'smooth', transform: 'translateZ(0)'}}>
-                <Typography variant={'h2'}>Encryption</Typography>
-                <br />
                 <Typography variant={'h4'}>Encryption</Typography>
                 <SettingsItem
                     multilineSecondaryText={true}

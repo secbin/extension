@@ -1,20 +1,3 @@
-export const DEFAULT_SETTINGS = {
-    theme: false,
-    enc_mode: "AES-GCM",
-    key_length: 16,
-}
-
-export const DEFAULT_CONTEXT = {
-    theme: false,
-    api_key: "",
-    enc_mode: "AES-GCM",
-    encryption: false,
-    key_length: 16,
-    sync_theme: true,
-    settings: DEFAULT_SETTINGS,
-    history: []
-}
-
 export enum Storage {
     API_KEY = "api_key",
     ENC_MODE = "enc_mode",
@@ -26,10 +9,41 @@ export enum Storage {
     APP = 'app'
 }
 
+export const KEY_LENGTHS = [
+    {
+        name: "128",
+        value: 16,
+    },
+    {
+        name: "192",
+        value: 24,
+    },
+    {
+        name: "256",
+        value: 32,
+    }
+];
+
 export enum ENCRYPTION_TYPES {
     AES_CBC = "AES-CBC",
     AES_CTR = "AES-CTR",
     AES_GCM = "AES-GCM"
+}
+
+export const DEFAULT_SETTINGS = {
+    theme: false,
+    enc_mode: ENCRYPTION_TYPES.AES_GCM,
+    key_length: 16,
+}
+export const DEFAULT_CONTEXT = {
+    theme: false,
+    api_key: "",
+    enc_mode: ENCRYPTION_TYPES.AES_GCM,
+    encryption: false,
+    key_length: 16,
+    sync_theme: true,
+    settings: DEFAULT_SETTINGS,
+    history: []
 }
 
 export enum Action {
@@ -81,21 +95,6 @@ export const ENCRYPTION_METHODS = [
     {
         name: ENCRYPTION_TYPES.AES_GCM,
         value: ENCRYPTION_TYPES.AES_GCM,
-    }
-];
-
-export const KEY_LENGTHS = [
-    {
-        name: "128",
-        value: 16,
-    },
-    {
-        name: "192",
-        value: 24,
-    },
-    {
-        name: "256",
-        value: 32,
     }
 ];
 

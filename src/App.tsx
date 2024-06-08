@@ -75,8 +75,7 @@ export const App = () => {
 
             console.log("UPDATING SETTINGS", data[Storage.SETTINGS]);
 
-
-            dispatch({ type: Action.SET_SETTINGS, payload: JSON.parse(data[Storage.SETTINGS]) //|| DEFAULT_SETTINGS//
+            dispatch({ type: Action.SET_SETTINGS, payload: (data[Storage.SETTINGS] ? JSON.parse(data[Storage.SETTINGS]) : DEFAULT_SETTINGS)
          });
 
         });
@@ -245,7 +244,7 @@ export const App = () => {
                             <Route path="/history">
                                 <History/>
                             </Route>
-                            <Route path="/result">
+                            <Route path="/result/:id?">
                                 <Result/>
                             </Route>
                             <Route path="/">
