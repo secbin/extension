@@ -114,7 +114,7 @@ const Result = () => {
                 {isPasteBin && hasError && errorMessage && (
                         <Copybox value={errorMessage} title={'PasteBin Error'} allowCopy={false} />
                 )}
-                    {result.enc_text && (<CopyboxMultiline value={result.enc_text} title={'Ciphertext'} />)}
+                    {result.enc_text && (<CopyboxMultiline value={result.enc_text} title={result.key ? 'Ciphertext' : 'Pastebin Content'} />)}
                     {result.key && (<Copybox value={result.key} title={'Passkey'} type={'password'} allowCopy={true} toggleVisibility={true} />)}
 
                 </div>

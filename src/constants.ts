@@ -29,15 +29,19 @@ export enum ENCRYPTION_TYPES {
     AES_CTR = "AES-CTR",
     AES_GCM = "AES-GCM"
 }
+export const DEFAULT_HASH = "MmU1OGNlMjcyMzllMzRhNzdjNWVmNjVkYmVhOGIyNGQ="
 
 export const DEFAULT_SETTINGS = {
     theme: false,
     enc_mode: ENCRYPTION_TYPES.AES_GCM,
     key_length: 16,
+    api_key: DEFAULT_HASH
+
 }
+
 export const DEFAULT_CONTEXT = {
     theme: false,
-    api_key: "",
+    api_key: DEFAULT_HASH,
     enc_mode: ENCRYPTION_TYPES.AES_GCM,
     encryption: false,
     key_length: 16,
@@ -109,3 +113,4 @@ export const PASTEBIN_API_KEY_LENGTH = 32
 export const API_ERROR = "PasteBin Error"
 export const PASTEBIN_BASEURL = "pastebin.com"
 export const CIPHER_PREFIX = "C_TXT"
+

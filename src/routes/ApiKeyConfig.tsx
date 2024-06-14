@@ -1,12 +1,9 @@
 import React, {useContext, useEffect, useLayoutEffect} from "react";
 import {
     Box,
-    Button,
     Card,
-    Dialog, DialogActions,
     DialogContent,
-    DialogContentText,
-    DialogTitle, Divider,
+    Divider,
     InputBase, ListItem, ListItemIcon, ListItemText,
     Typography
 } from '@mui/material';
@@ -14,12 +11,8 @@ import { makeStyles } from "@mui/styles";
 import {AppContext, HistoryType} from "../contexts/AppContext";
 import { useHistory } from "react-router-dom";
 import {CheckCircle, ChevronLeft, ContentPasteRounded, Error} from "@mui/icons-material";
-import StatusIcon from "../components/editor/StatusIcon";
-import Copybox from "../components/common/Copybox";
-import SubHeader from "../components/common/SubHeader";
-import CopyboxMultiline from "../components/common/CopyboxMultiline";
 import {isValidDevKey} from "../chrome/utils/pastebin";
-import {Action, PASTEBIN_API_KEY_LENGTH} from "../constants";
+import {Action, DEFAULT_CONTEXT, PASTEBIN_API_KEY_LENGTH} from "../constants";
 import moment from "moment";
 import {copyTextClipboard} from "../chrome/utils";
 import clsx from "clsx";
@@ -111,12 +104,20 @@ export function StatusBanner(props: any) {
     )
 }
 
+export const checkDefaultApiKey = (apiKeyContext: string) => {
+    if(apiKeyContext === atob(DEFAULT_CONTEXT.api_key)) {
+        return "";
+    }
+
+    return apiKeyContext;
+}
+
 const EncryptionConfig = () => {
     const classes = useStyles();
     const [open, setOpen] = React.useState(false);
     const { state, dispatch } = React.useContext(AppContext);
     const { api_key, enc_mode, theme, key_length, encryption } = state.settings;
-    const [apiKey, setApiKey] = React.useState(api_key);
+    const [apiKey, setApiKey] = React.useState(checkDefaultApiKey(api_key));
     const [valid, setValid] = React.useState<null | boolean>(null);
     const [timeoutId, setTimeoutId] = React.useState<any>(null);
     let { goBack } = useHistory();
@@ -189,8 +190,8 @@ const EncryptionConfig = () => {
                 <Card className={classes.copybox}>
                     <InputBase
                         autoFocus
-                        defaultValue={api_key}
-                        placeholder={"2e58ce27239e34a77c5ef65dbea8b24d"}
+                        defaultValue={api_key !== atob(DEFAULT_CONTEXT.api_key) ? api_key : ""}
+                        placeholder={"5b6d1b053d850e4c095ff6707ba816fc"}
                         fullWidth
                         sx={{fontFamily: 'Menlo, monospace', fontSize: 16, letterSpacing: '-0.1px', fontWeight: 700}}
                         onChange={(event) => {

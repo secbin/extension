@@ -1,4 +1,4 @@
-import React, {useContext} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import {
   Button,
   Card,
@@ -14,6 +14,7 @@ import KeyRoundedIcon from '@mui/icons-material/KeyRounded';
 import { makeStyles } from "@mui/styles";
 import {AppContext} from "../../contexts/AppContext";
 import {Action} from "../../constants";
+import forge from 'node-forge';
 
 const useStyles = makeStyles(theme => ({
   copybox: {
@@ -53,14 +54,36 @@ const EncryptFormDialog = ({ title, value }: LCopyboxType) => {
     }} = state;
 
   const [key, setKey] = React.useState("");
+  const [placeholder, setPlaceholder] = React.useState("");
+
   const handleClose = () => {
     console.log("SETTING KEY", {key})
-    dispatch({ type: Action.SET_KEY, payload: { key } });
+    const passkey = key || placeholder;
+    dispatch({ type: Action.SET_KEY, payload: { key: passkey } });
   };
 
   const handleCancel = () => {
     dispatch({ type: Action.CLOSE_DIALOG })
   };
+
+
+  useEffect(() => {
+    const generateRandomPassword = (length: number) => {
+      const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+~|}{[]/=';
+      let newPassword = '';
+      for (let i = 0; i < length; i++) {
+        const randomByte = forge.random.getBytesSync(1);
+        const randomIndex = randomByte.charCodeAt(0) % charset.length;
+        newPassword += charset[randomIndex];
+      }
+      return newPassword;
+    };
+
+    const initialPassword = generateRandomPassword(16); // Specify the desired length of the password
+    setKey(initialPassword);
+    setPlaceholder(initialPassword);
+  }, []);
+
 
   return (
       <div>
@@ -80,7 +103,7 @@ const EncryptFormDialog = ({ title, value }: LCopyboxType) => {
               <InputBase
                   autoFocus
                   sx={{fontFamily: 'Menlo, monospace', fontSize: 16, letterSpacing: '-0.1px', fontWeight: 700}}
-                  placeholder={'Random passkey used by default'}
+                  placeholder={placeholder}
                   fullWidth
                   onChange={(event) => { setKey(event.target.value) }}
               />

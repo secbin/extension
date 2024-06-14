@@ -11,6 +11,7 @@ import SettingsItem from "../components/SettingsItem";
 import ButtonRedirect from "../components/dialog/ButtonRedirect";
 import WarningDialog from "../components/dialog/WarningDialog";
 import ResetWarningDialog from "../components/dialog/ResetWarningDialog";
+import {checkDefaultApiKey} from "./ApiKeyConfig";
 
 const useStyles = makeStyles(theme => ({
   card: {
@@ -89,7 +90,7 @@ export default function Settings() {
         <Typography variant={'h4'}>Pastebin API</Typography>
         <SettingsItem
             primary={'API Key'}
-            secondary={api_key ? 'Set' : "Not Set"}
+            secondary={checkDefaultApiKey(api_key) ? 'Set' : "Not Set"}
             children={(
                 <ButtonRedirect iconButton value={api_key ? "Change" : "Set Key"} url={'/apikey'}/>
             )}

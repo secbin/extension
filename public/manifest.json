@@ -1,8 +1,8 @@
 {
-  "name": "secureBin",
+  "name": "securebin: Powerful Pastebin Tool",
   "description" : "Securely encrypt your text on Pastebin.com",
-  "version": "1.0.2",
-  "manifest_version": 3,
+  "version": "1.1",
+  "manifest_version": 4,
   "action": {
     "default_popup": "index.html",
     "default_title": "Open the popup"
