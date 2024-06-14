@@ -20,7 +20,7 @@ export default function ButtonRedirect(props: any) {
 
     return (
         <div>
-            {props.external ? (
+            {(props.external || props.iconButton) ? (
                 <IconButton onClick={handleClickOpen}>
                     <ChevronRight />
                 </IconButton>

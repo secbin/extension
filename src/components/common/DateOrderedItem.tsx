@@ -6,6 +6,7 @@ import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import {HistoryType} from "../../contexts/AppContext";
+import {ChevronRight} from "@mui/icons-material";
 
 const useStyles = makeStyles(theme => ({
   card: {
@@ -36,8 +37,8 @@ const DateOrderedItem = ({ showDateHeading, id, primary, date, secondary, clickH
         <Card classes={{root: classes.card}}>
           <ListItem key={id ? id : primary}>
             <ListItemText primary={primary} secondary={secondary} />
-            <IconButton color="primary" aria-label="Unlock CipherText" onClick={(e) => clickHandler(payload)}>
-              <InfoOutlinedIcon />
+            <IconButton aria-label="More details" onClick={(e) => clickHandler(payload)}>
+              <ChevronRight />
             </IconButton>
           </ListItem>
         </Card>

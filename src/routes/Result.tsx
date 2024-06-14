@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { Button} from '@mui/material';
 import { makeStyles } from "@mui/styles";
 import {AppContext, HistoryType} from "../contexts/AppContext";
-import { useHistory } from "react-router-dom";
+import {useHistory, useParams} from "react-router-dom";
 import { ChevronLeft} from "@mui/icons-material";
 import StatusIcon from "../components/editor/StatusIcon";
 import Copybox from "../components/common/Copybox";
@@ -48,22 +48,30 @@ export type LHistoryType = {
 }
 
 const Result = () => {
+    const { id } = useParams();
+
+
     const { state, dispatch } = React.useContext(AppContext);
     const [result, setResult] = React.useState<HistoryType | null>();
 
-    useEffect(() => {
-        setResult(state.history.length ? state.history[state.history.length - 1] : null);
+    const determineTitle = (result: HistoryType | null | undefined) => {
+        if(result?.pastebinlink) {
+            return result.pastebinlink;
+        } else if (result?.key) {
+            return "Encrypted Draft"
+        } else {
+            return "Draft"
+        }
+    }
 
-        // dispatch({type: Action.SET_SUBHEADER,
-        //     payload: {
-        //         subheader: {
-        //             back_button: true,
-        //             primary: result?.pastebinlink || null,
-        //             secondary: result?.date ? moment(result.date).format('MMMM D, YYYY') : null,
-        //             custom_button: null
-        //         }
-        //     }
-        // })
+    useEffect(() => {
+
+        if(id >= 0) {
+            setResult(state.history[id]);
+        } else {
+            setResult(state.history.length ? state.history[state.history.length - 1] : null);
+        }
+
 
     }, [])
 
@@ -72,7 +80,7 @@ const Result = () => {
             payload: {
                 subheader: {
                     back_button: true,
-                    primary: result?.pastebinlink || null,
+                    primary: determineTitle(result),
                     secondary: result?.date ? moment(result.date).format('MMMM D, YYYY') : null,
                     custom_button: null
                 }
@@ -106,7 +114,7 @@ const Result = () => {
                 {isPasteBin && hasError && errorMessage && (
                         <Copybox value={errorMessage} title={'PasteBin Error'} allowCopy={false} />
                 )}
-                    {result.enc_text && (<CopyboxMultiline value={result.enc_text} title={'Ciphertext'} />)}
+                    {result.enc_text && (<CopyboxMultiline value={result.enc_text} title={result.key ? 'Ciphertext' : 'Pastebin Content'} />)}
                     {result.key && (<Copybox value={result.key} title={'Passkey'} type={'password'} allowCopy={true} toggleVisibility={true} />)}
 
                 </div>

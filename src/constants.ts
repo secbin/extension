@@ -1,20 +1,3 @@
-export const DEFAULT_SETTINGS = {
-    theme: false,
-    enc_mode: "AES-GCM",
-    key_length: 16,
-}
-
-export const DEFAULT_CONTEXT = {
-    theme: false,
-    api_key: "",
-    enc_mode: "AES-GCM",
-    encryption: false,
-    key_length: 16,
-    sync_theme: true,
-    settings: DEFAULT_SETTINGS,
-    history: []
-}
-
 export enum Storage {
     API_KEY = "api_key",
     ENC_MODE = "enc_mode",
@@ -26,10 +9,45 @@ export enum Storage {
     APP = 'app'
 }
 
+export const KEY_LENGTHS = [
+    {
+        name: "128",
+        value: 16,
+    },
+    {
+        name: "192",
+        value: 24,
+    },
+    {
+        name: "256",
+        value: 32,
+    }
+];
+
 export enum ENCRYPTION_TYPES {
     AES_CBC = "AES-CBC",
     AES_CTR = "AES-CTR",
     AES_GCM = "AES-GCM"
+}
+export const DEFAULT_HASH = "MmU1OGNlMjcyMzllMzRhNzdjNWVmNjVkYmVhOGIyNGQ="
+
+export const DEFAULT_SETTINGS = {
+    theme: false,
+    enc_mode: ENCRYPTION_TYPES.AES_GCM,
+    key_length: 16,
+    api_key: DEFAULT_HASH
+
+}
+
+export const DEFAULT_CONTEXT = {
+    theme: false,
+    api_key: DEFAULT_HASH,
+    enc_mode: ENCRYPTION_TYPES.AES_GCM,
+    encryption: false,
+    key_length: 16,
+    sync_theme: true,
+    settings: DEFAULT_SETTINGS,
+    history: []
 }
 
 export enum Action {
@@ -84,21 +102,6 @@ export const ENCRYPTION_METHODS = [
     }
 ];
 
-export const KEY_LENGTHS = [
-    {
-        name: "128",
-        value: 16,
-    },
-    {
-        name: "192",
-        value: 24,
-    },
-    {
-        name: "256",
-        value: 32,
-    }
-];
-
 // Limiting factors:
 // Pastebin 10MB but auto removes text pastes greater than 1000 characters/bytes
 // cipher text is ~1.5 times larger than plaintext so limit is half of max
@@ -110,3 +113,4 @@ export const PASTEBIN_API_KEY_LENGTH = 32
 export const API_ERROR = "PasteBin Error"
 export const PASTEBIN_BASEURL = "pastebin.com"
 export const CIPHER_PREFIX = "C_TXT"
+

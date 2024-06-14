@@ -296,13 +296,13 @@ export const settingsReducer = (state: SettingsType, action: AppActions | Settin
     switch (action.type) {
         case Action.SET_SETTINGS:
             // @ts-ignore
-            const { encryption, sync_theme } = action.payload || {};
+            const { encryption, sync_theme, api_key } = action.payload || {};
             const setEncryption = encryption !== undefined ? encryption : state.encryption;
             const setSyncTheme = sync_theme !== undefined ? sync_theme : state.sync_theme;
 
             return {
                 ...state,
-                api_key: action.payload?.api_key || state.api_key,
+                api_key: api_key ? atob(api_key) : state.api_key,
                 enc_mode: action.payload?.enc_mode || state.enc_mode,
                 encryption: setEncryption,
                 key_length: action.payload?.key_length || state.key_length,
@@ -335,13 +335,13 @@ export const settingsReducer = (state: SettingsType, action: AppActions | Settin
                 sync_theme:  testedSyncTheme,
 
             };
-            setSyncItem(Storage.SETTINGS, JSON.stringify(newState));
+            setSyncItem(Storage.SETTINGS, JSON.stringify({...newState, ...{api_key: btoa(newState.api_key)}}));
             return newState;
         case Action.RESET_SETTINGS:
             setSyncItem(Storage.SETTINGS, JSON.stringify(DEFAULT_CONTEXT));
             return {
                 ...state,
-                api_key: DEFAULT_CONTEXT.api_key,
+                api_key: atob(DEFAULT_CONTEXT.api_key),
                 enc_mode: DEFAULT_CONTEXT.enc_mode,
                 key_length: DEFAULT_CONTEXT.key_length,
                 theme: DEFAULT_CONTEXT.theme,

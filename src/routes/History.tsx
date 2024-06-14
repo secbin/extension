@@ -44,19 +44,19 @@ export default function History() {
     const { state, dispatch } = useContext(AppContext);
     const { history } = state;
 
-    const handleHistory = (item: HistoryType) => {
-        dispatch({type: Action.ADD_TO_HISTORY, payload: {
-                id: item.id,
-                pastebinlink: item.pastebinlink,
-                enc_mode: item.enc_mode,
-                key_length: item.key_length,
-                key: item.key,
-                enc_text: item.enc_text,
-                date: item.date,
-            }
-        })
+    const handleHistory = (index: number) => {
+        // dispatch({type: Action.ADD_TO_HISTORY, payload: {
+        //         id: item.id,
+        //         pastebinlink: item.pastebinlink,
+        //         enc_mode: item.enc_mode,
+        //         key_length: item.key_length,
+        //         key: item.key,
+        //         enc_text: item.enc_text,
+        //         date: item.date,
+        //     }
+        // })
 
-        push('/result');
+        push(`/result/${index}`);
     }
 
 const handleTitle = (item: HistoryType) => {
@@ -101,7 +101,7 @@ const handleTitle = (item: HistoryType) => {
                     return (
                         <DateOrderedItem
                             showDateHeading={showItem}
-                            clickHandler={handleHistory}
+                            clickHandler={() => handleHistory(history.length - index - 1)}
                             payload={item}
                             primary={handleTitle(item)}
                             secondary={printDateInCorrectFormat(item.date)}

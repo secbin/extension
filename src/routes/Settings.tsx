@@ -11,6 +11,7 @@ import SettingsItem from "../components/SettingsItem";
 import ButtonRedirect from "../components/dialog/ButtonRedirect";
 import WarningDialog from "../components/dialog/WarningDialog";
 import ResetWarningDialog from "../components/dialog/ResetWarningDialog";
+import {checkDefaultApiKey} from "./ApiKeyConfig";
 
 const useStyles = makeStyles(theme => ({
   card: {
@@ -79,19 +80,19 @@ export default function Settings() {
 
         <Typography variant={'h4'}>Encryption</Typography>
         <SettingsItem
-            primary={'Encryption Settings'}
+            primary={'Encryption'}
             secondary={encryption ? `Enabled with ${key_length * 8}-bit ${enc_mode} ` : 'Disabled'}
             children={(
-                <ButtonRedirect value={"Configure"} url={'/encconfig'}/>
+                <ButtonRedirect iconButton value={"Configure"} url={'/encconfig'}/>
             )}
         />
 
         <Typography variant={'h4'}>Pastebin API</Typography>
         <SettingsItem
             primary={'API Key'}
-            secondary={api_key ? api_key : "Not Set"}
+            secondary={checkDefaultApiKey(api_key) ? 'Set' : "Not Set"}
             children={(
-                <ButtonRedirect value={api_key ? "Change" : "Set Key"} url={'/apikey'}/>
+                <ButtonRedirect iconButton value={api_key ? "Change" : "Set Key"} url={'/apikey'}/>
             )}
         />
 
@@ -99,7 +100,7 @@ export default function Settings() {
         <SettingsItem
             primary={'Support'}
             children={(
-                <ButtonRedirect value={"Get Help"} url={'/support'}/>
+                <ButtonRedirect iconButton value={"Get Help"} url={'/support'}/>
             )}
         />
 

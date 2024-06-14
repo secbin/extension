@@ -163,8 +163,6 @@ const EncConfig = () => {
     return (
         <Box>
             <DialogContent sx={{overflowY: 'auto', WebkitOverflowScrolling: 'touch', willChange: 'scroll-position', scrollBehavior: 'smooth', transform: 'translateZ(0)'}}>
-                <Typography variant={'h2'}>Help</Typography>
-                <br />
                 <Typography variant={'h4'}>Support</Typography>
                 <SettingsItem
                     multilineSecondaryText={true}
