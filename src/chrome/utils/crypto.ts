@@ -25,7 +25,7 @@ function encryptText(text: string, mode: string, len: number, password?: string)
         salt = forge.random.getBytesSync(128);
         //function pbkdf2(password: string, salt: string, iterations: number, keySize: number):
         key = forge.pkcs5.pbkdf2(password, salt, 10000, len);
-    }else{
+    } else {
         key = forge.random.getBytesSync(len);
     }
 

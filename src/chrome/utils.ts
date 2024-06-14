@@ -1,5 +1,9 @@
 import moment from "moment";
 
+export const openLinkInNewWindow = (url: string) => {
+    window.open(url, '_blank', 'noopener,noreferrer');
+};
+
 export const getCurrentTabUrl = (callback: (url: string | undefined) => void): void => {
     const queryInfo = {active: true, lastFocusedWindow: true};
 
@@ -16,7 +20,7 @@ export const getCurrentTabUId = (callback: (url: number | undefined) => void): v
     });
 }
 
-export const printDateInCorrectFormat = (dateOfEvent: number) => {
+export const printDateInCorrectFormat = (dateOfEvent: number | Date) => {
     const now = new Date().getTime();
     let eventDate = new Date(dateOfEvent).getTime();
     if(Math.abs(now - eventDate ) < 170000000) {

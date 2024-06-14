@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 
 
-function usePasteBinSearchJS(query) {
+function usePasteBinSearch(query) {
   const [result, setResult] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
@@ -57,4 +57,4 @@ function usePasteBinSearchJS(query) {
 
   return [result, error];
 }
-export default usePasteBinSearchJS
+export default usePasteBinSearch

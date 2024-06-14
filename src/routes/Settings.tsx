@@ -1,13 +1,17 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import {
-  Button, Card, Checkbox, Divider, IconButton, List, ListItem, ListItemText,
-  MenuItem, Paper, Select, TextField, Typography
+  Button, Checkbox, List, MenuItem, Select, Typography
 } from "@mui/material";
-import { ChevronRight } from "@mui/icons-material";
-import { makeStyles, createStyles } from '@mui/styles';
-import { setSyncItem, getSyncItem, setLocalItem } from "../chrome/utils/storage";
-import { Storage, ENCRYPTION_METHODS, KEY_LENGTHS, DEFAULT_CONTEXT } from "../constants";
-import FormDialog from "./Dialog"
+import { makeStyles } from '@mui/styles';
+import { setLocalItem } from "../chrome/utils/storage";
+import { Storage, ENCRYPTION_METHODS, KEY_LENGTHS, Action } from "../constants";
+import FormDialog from "../components/dialog/ButtonRedirect"
+import { AppContext } from "../contexts/AppContext";
+import SettingsItem from "../components/SettingsItem";
+import ButtonRedirect from "../components/dialog/ButtonRedirect";
+import WarningDialog from "../components/dialog/WarningDialog";
+import ResetWarningDialog from "../components/dialog/ResetWarningDialog";
+import {checkDefaultApiKey} from "./ApiKeyConfig";
 
 const useStyles = makeStyles(theme => ({
   card: {
@@ -21,9 +25,6 @@ const useStyles = makeStyles(theme => ({
     paddingLeft: 20,
     paddingTop: 20,
     marginBottom: 10,
-  },
-  listItemText: {
-    fontSize: 14,
   },
   list: {
     padding: 20,
@@ -39,161 +40,85 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export const Settings = () => {
+export default function Settings() {
   const classes = useStyles();
-  const [APIKEY, setApiKey] = useState("");
-  const [ENC_MODE, setEncMode] = useState("");
-  const [THEME, setTheme] = useState(false);
-  const [KEY_LENGTH, setKeyLength] = useState("");
-
-  useEffect(() => {
-    getSettings();
-  }, []);
-
-  // Note: a key size of 16 bytes will use AES-128, 24 => AES-192, 32 => AES-256
-  function getSettings(): any {
-    getSyncItem(Storage.API_KEY, (data) => {
-      setApiKey(data[Storage.API_KEY]);
-      //console.log(APIKEY)
-    })
-
-    getSyncItem(Storage.ENC_MODE, (data) => {
-      setEncMode(data[Storage.ENC_MODE]);
-      //console.log(ENC_MODE)
-    })
-
-    getSyncItem(Storage.THEME, (data) => {
-      setTheme(data[Storage.THEME]);
-      //console.log("Getting theme", data[Storage.THEME])
-    })
-
-    getSyncItem(Storage.KEY_LENGTH, (data) => {
-      setKeyLength(data[Storage.KEY_LENGTH]);
-      //console.log(KEY_LENGTH)
-    })
-  }
-
-  const keyLengthHandler = (e: any) => {
-    setSyncItem(Storage.KEY_LENGTH, e.target.value)
-    setKeyLength(e.target.value);
-    //console.log(KEY_LENGTH)
-
-    getSyncItem(Storage.KEY_LENGTH, (data) => {
-      //console.log(KEY_LENGTH)
-    })
-  }
-
-  const encModeHandler = (e: any) => {
-    setSyncItem(Storage.ENC_MODE, e.target.value);
-    setEncMode(e.target.value);
-  }
+  const { state, dispatch } = useContext(AppContext);
+  const { api_key, enc_mode, theme, key_length, encryption } = state.settings;
+  // const [THEME, setTheme] = useState(state.settings.theme);
 
   const clearHistory = (e: any) => {
-    setLocalItem(Storage.HISTORY, []);
+    dispatch({ type: Action.OPEN_DIALOG, payload: { dialog_id: 'reset_history' } })
   }
 
   const themeHandler = (e: any) => {
-    setSyncItem(Storage.THEME, !THEME);
-    setTheme(!THEME);
+    const newTheme = {
+      ...state.settings,
+        theme: theme ? false : true,
+    }
+    dispatch({type: Action.UPDATE_THEME, payload: {theme: theme ? false : true}});
+
+    // setTheme(!THEME);
+    console.log("Theme", newTheme, state.settings.theme, {statemodified: !theme, stateoriginal: theme});
   }
+
 
   const resetSettings = (e: any) => {
-    const d = DEFAULT_CONTEXT;
-
-    setSyncItem(Storage.THEME, d.theme);
-    setSyncItem(Storage.API_KEY, d.api_key);
-    setSyncItem(Storage.ENC_MODE, d.enc_mode);
-    setSyncItem(Storage.KEY_LENGTH, d.key_length);
-
-    setEncMode(d.enc_mode);
-    setKeyLength(String(d.key_length));
-    setApiKey(d.api_key);
-    setTheme(d.theme);
-
-  }
-  const signUp = () => {
-    window.open("https://pastebin.com/doc_api")
+    dispatch({ type: Action.OPEN_DIALOG, payload: { dialog_id: 'reset_settings' } })
   }
 
   return (
     <div>
+      <WarningDialog />
+      <ResetWarningDialog />
       <Typography variant='h2' className={classes.pageHeading}>Settings</Typography>
       <List className={classes.list}>
         <Typography variant={'h4'}>Theme</Typography>
-        <Card classes={{ root: classes.card }}>
-          <ListItem>
-            <ListItemText
-              primary="Dark Mode" />
-            <Checkbox checked={THEME} onChange={themeHandler} />
-          </ListItem>
-        </Card>
+        <SettingsItem
+            primary={'Dark Mode'}
+            children={<Checkbox checked={theme} onChange={themeHandler} />}
+        />
 
         <Typography variant={'h4'}>Encryption</Typography>
-        <Card classes={{ root: classes.card }}>
-          <ListItem>
-            <ListItemText primary="Encryption Algorithm" />
-            <Select
-              className={classes.select}
-              value={ENC_MODE}
-              label={ENC_MODE}
-              onChange={encModeHandler}
-            >
-              {ENCRYPTION_METHODS.map((item) => (
-                <MenuItem classes={{ root: classes.menuItem }}
-                  key={item.value}
-                  value={item.value}>{item.prettyName}
-                </MenuItem>
-              ))}
-            </Select>
-          </ListItem>
-        </Card>
-
-        <Card classes={{ root: classes.card }}>
-          <ListItem>
-            <ListItemText primary="Key Length" />
-
-            {/* // Note: a key size of 16 bytes will use AES-128, 24 => AES-192, 32 => AES-256 */}
-            <Select
-              className={classes.select}
-              value={KEY_LENGTH}
-              onChange={keyLengthHandler}
-            >
-              {KEY_LENGTHS.map((item) => (
-                <MenuItem className={classes.menuItem}
-                  key={item.value}
-                  value={item.value}>{item.prettyName}
-                </MenuItem>
-              ))}
-            </Select>
-          </ListItem>
-        </Card>
+        <SettingsItem
+            primary={'Encryption'}
+            secondary={encryption ? `Enabled with ${key_length * 8}-bit ${enc_mode} ` : 'Disabled'}
+            children={(
+                <ButtonRedirect iconButton value={"Configure"} url={'/encconfig'}/>
+            )}
+        />
 
         <Typography variant={'h4'}>Pastebin API</Typography>
-        <Card classes={{ root: classes.card }}>
-          <ListItem>
-            <ListItemText primary="API Key" secondary={APIKEY ? APIKEY : "Not Set"} />
-            <FormDialog APIKEY={APIKEY}/>
-          </ListItem>
-        </Card>
+        <SettingsItem
+            primary={'API Key'}
+            secondary={checkDefaultApiKey(api_key) ? 'Set' : "Not Set"}
+            children={(
+                <ButtonRedirect iconButton value={api_key ? "Change" : "Set Key"} url={'/apikey'}/>
+            )}
+        />
+
+        <Typography variant={'h4'}>Help</Typography>
+        <SettingsItem
+            primary={'Support'}
+            children={(
+                <ButtonRedirect iconButton value={"Get Help"} url={'/support'}/>
+            )}
+        />
 
 
         <Typography variant={'h4'}>Reset</Typography>
-        <Card classes={{ root: classes.card }}>
-          <ListItem>
-            <ListItemText
-              primary="Clear History" />
-            <Button onClick={clearHistory}>Clear</Button>
-          </ListItem>
-        </Card>
+        <SettingsItem
+            primary={'Clear History'}
+            children={(
+                <Button onClick={clearHistory}>Clear</Button>
+            )}
+        />
 
-        <Card classes={{ root: classes.card }}>
-          <ListItem>
-            <ListItemText
-              primary="Reset Settings" />
-            <Button onClick={resetSettings}>Reset</Button>
-          </ListItem>
-        </Card>
-
+        <SettingsItem
+            primary={'Reset Settings'}
+            children={(
+                <Button onClick={resetSettings}>Reset</Button>
+            )}
+        />
       </List>
     </div>
   )

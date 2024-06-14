@@ -1,76 +1,39 @@
-import React, { useEffect } from "react";
-import clsx from "clsx";
-import { Button, Card, Divider, IconButton, InputAdornment, InputBase, Paper, TextField, Typography } from '@mui/material';
-import { makeStyles, createStyles } from "@mui/styles";
-import { AppContext, HistoryType } from "../AppContext";
-import { getLocalItem, getSyncItem } from "../chrome/utils/storage";
-import { Action, Storage } from "../constants"
-import { copyTextClipboard, printDateInCorrectFormat } from "../chrome/utils"
-import { useHistory } from "react-router-dom";
-import { ChevronLeft, ContentPaste, CheckCircle, Error } from "@mui/icons-material";
+import React from "react";
+import { useEffect } from "react";
+import { Button} from '@mui/material';
+import { makeStyles } from "@mui/styles";
+import {AppContext, HistoryType} from "../contexts/AppContext";
+import {useHistory, useParams} from "react-router-dom";
+import { ChevronLeft} from "@mui/icons-material";
+import StatusIcon from "../components/editor/StatusIcon";
+import Copybox from "../components/common/Copybox";
+import SubHeader from "../components/common/SubHeader";
+import CopyboxMultiline from "../components/common/CopyboxMultiline";
+import {Action} from "../constants";
+import moment from "moment/moment";
 
 const useStyles = makeStyles(theme => ({
-    icon: {
-        fontSize: 80,
-        width: '100%',
-        color: 'green',
-        margin: 20,
-    },
-    green: {
-        color: 'green',
-    },
-    red: {
-        color: 'red',
-    },
     center: {
         width: '100%',
+        margin: '20px 0',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
         textAlign: 'center',
         alignItems: 'center',
-    },
-    copybox: {
-        paddingLeft: 10,
-        borderRadius: 6,
-        border: '1px solid',
-        borderColor: 'rgba(170,170,170,0.25)',
-        boxShadow: '0 0 7px 0 rgba(0,0,0,0.04)',
-        marginBottom: 14,
-        width: 390,
-    },
-    copyboxLarge: {
-        paddingLeft: 10,
-        borderRadius: 6,
-        border: '1px solid',
-        borderColor: 'rgba(170,170,170,0.25)',
-        boxShadow: '0 0 7px 0 rgba(0,0,0,0.04)',
-        marginBottom: 14,
-        width: 390,
-    },
-    heading: {
-        width: '400px',
-    },
-    blue: {
-        color: 'cadetblue'
-    },
-    grey: {
-        color: 'grey',
+
     },
     left: {
         textAlign: 'left',
         marginLeft: 10,
         marginRight: 10,
     },
-    textArea: {
-        width: 350,
-    },
     bottomButton: {
         marginTop: 10,
         marginBottom: 15,
     },
-    buttonMarginBottom: {
-        marginBottom: 20,
+    topMargin: {
+        marginTop: 164,
     }
 }));
 
@@ -84,95 +47,84 @@ export type LHistoryType = {
     date: Date,
 }
 
-export default function Result(props: any) {
-    useEffect(() => {
-        getLocalItem(Storage.HISTORY, (data) => {
-            setHistory(data[Storage.HISTORY]);
-            setResult(state.history.pop() || data[Storage.HISTORY].pop());
-        })
-        return function cleanup () {
-            dispatch({type: Action.CLEAR_HISTORY});
+const Result = () => {
+    const { id } = useParams();
+
+
+    const { state, dispatch } = React.useContext(AppContext);
+    const [result, setResult] = React.useState<HistoryType | null>();
+
+    const determineTitle = (result: HistoryType | null | undefined) => {
+        if(result?.pastebinlink) {
+            return result.pastebinlink;
+        } else if (result?.key) {
+            return "Encrypted Draft"
+        } else {
+            return "Draft"
         }
+    }
+
+    useEffect(() => {
+
+        if(id >= 0) {
+            setResult(state.history[id]);
+        } else {
+            setResult(state.history.length ? state.history[state.history.length - 1] : null);
+        }
+
+
     }, [])
 
-    let {push, goBack} = useHistory();
-    const { state, dispatch } = React.useContext(AppContext);
+    useEffect(() => {
+        dispatch({type: Action.SET_SUBHEADER,
+            payload: {
+                subheader: {
+                    back_button: true,
+                    primary: determineTitle(result),
+                    secondary: result?.date ? moment(result.date).format('MMMM D, YYYY') : null,
+                    custom_button: null
+                }
+            }
+        })
+
+    }, [result])
+
+    let { goBack } = useHistory();
     const classes = useStyles();
-    const historyContext = state.history;
-    const [history, setHistory] = React.useState<LHistoryType[]>([]);
-    const [result, setResult] = React.useState<any>();
+
+
+    const isPasteBin = !!result?.pastebinlink;
+    const hasError = result?.pastebinlink.includes("PasteBin Error");
+    const errorMessage = result?.pastebinlink.replace('PasteBin Error', '');
 
     return (
         <div className={classes.center}>
             {result ? (
                 <>
-                {result?.pastebinlink && result?.pastebinlink.includes("Error") ? (
-                <>
-                <Error className={clsx(classes.icon, classes.red)} />
-                <Typography variant={'h2'}>Error posting to Pastebin</Typography>
-                </>
+                {isPasteBin && !hasError ? (
+                    <StatusIcon result={result} variant={'success'}/>
                 ) : (
-                <>
-                <CheckCircle className={clsx(classes.icon, classes.green)}/>
-                    {result?.pastebinlink && result?.pastebinlink.length ?
-                <Typography variant={'h2'}>Posted to Pastebin</Typography> :
-                <Typography variant={'h2'}>Encrypted Ciphertext</Typography>
-                }
-                <Typography variant={'h4'}>{printDateInCorrectFormat(result.date)} with {result.key_length * 8} {result.enc_mode}</Typography>
-                </>
+                    null //<StatusIcon result={result} variant={'success'} />
                 )}
                 <div className={classes.left}>
 
-                {result?.pastebinlink && !result?.pastebinlink.includes("Error") && (
-                    <>
-                        <Typography variant={'h4'}>Pastebin Link</Typography>
-                        <Card className={classes.copybox}>
-                            <InputBase
-                                className={classes.textArea}
-                                placeholder={result?.pastebinlink}
-                                value={result?.pastebinlink}
-                            />
-                            <IconButton onClick={() => copyTextClipboard(result?.pastebinlink)} disableRipple>
-                                <ContentPaste color="primary"
-                                />
-                            </IconButton>
-                        </Card>
-                    </>)}
+                    {result?.pastebinlink && !result?.pastebinlink.includes("PasteBin Error") && (
+                    <Copybox value={result?.pastebinlink} title={'Pastebin Link'} allowCopy openInNew />
+                )}
+                {isPasteBin && hasError && errorMessage && (
+                        <Copybox value={errorMessage} title={'PasteBin Error'} allowCopy={false} />
+                )}
+                    {result.enc_text && (<CopyboxMultiline value={result.enc_text} title={result.key ? 'Ciphertext' : 'Pastebin Content'} />)}
+                    {result.key && (<Copybox value={result.key} title={'Passkey'} type={'password'} allowCopy={true} toggleVisibility={true} />)}
 
-                <Typography variant={'h4'}>Passkey</Typography>
-                <Card className={classes.copybox}>
-                    <InputBase
-                        className={classes.textArea}
-                        placeholder={result.key}
-                        value={result.key}
-                    />
-                    <IconButton onClick={() => copyTextClipboard(result?.key)} disableRipple>
-                       <ContentPaste color="primary"/>
-                    </IconButton>
-                </Card>
-
-                <Typography variant={'h4'}>Ciphertext</Typography>
-                <Card className={classes.copyboxLarge}>
-                    <InputBase
-                        className={classes.textArea}
-                        placeholder={result.enc_text}
-                        value={result.enc_text}
-                    />
-                    <IconButton onClick={() => copyTextClipboard(result?.enc_text)} disableRipple>
-                        <ContentPaste color="primary"/>
-                    </IconButton>
-                </Card>
                 </div>
-                    <Button className={classes.bottomButton} startIcon={<ChevronLeft />} onClick={() => { goBack()}}>Back</Button>
                 </>
             ) : (
-                <>
-                    <ContentPaste className={clsx(classes.icon, classes.grey)} />
-                    <Typography variant={'h2'}>No Encryptions</Typography>
-                </>
+                <StatusIcon variant={'empty-clipboard'} />
             )
-
             }
         </div>
     );
 }
+
+export default Result;

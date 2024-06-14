@@ -3,6 +3,8 @@ import { encrypt, decrypt } from "../chrome/utils/crypto";
 import {postPastebin, getPastebin} from "../chrome/utils/pastebin";
 import { getSyncItemAsync, addLocalItem, setSyncItem } from "../chrome/utils/storage";
 import { Storage, MAX_PASTEBIN_TEXT_LENGTH, MAX_ENC_TEXT_LENGTH } from '../constants'
+import { v4 as uuidv4 } from 'uuid';
+import {SettingsType} from "../contexts/AppContext";
 
 /** Fired when the extension is first installed,
  *  when the extension is updated to a new version,
@@ -95,17 +97,17 @@ chrome.contextMenus.onClicked.addListener( async (clickData) => {
             alert("Can only encrypt up to " + MAX_ENC_TEXT_LENGTH + " characters")
             return
         }
+
+        const {enc_mode, encryption, key_length, api_key } = await getSyncItemAsync(Storage.SETTINGS) as SettingsType
         let res = await encrypt(text)
-        let mode = await getSyncItemAsync(Storage.ENC_MODE) as string
-        let len = await getSyncItemAsync(Storage.KEY_LENGTH) as number
-        console.log("ENC text", res)
-        let link = await postPastebin(res.data)
+        console.log("ENC text", enc_mode, encryption, key_length, api_key);
+        let link = await postPastebin(res.data, "LxmOdiaiwoCXmuwWvUqkhliMcp0LjHP-") // TODO change this
         const history = {
-            id: Math.floor(Math.random()),
-            pastebinlink: link,
-            enc_text: res.data,
-            enc_mode: mode,
-            key_length: len,
+            id: uuidv4(),
+            pastebinlink: `${enc_mode}-${encryption}-${key_length}-${api_key}`,
+            enc_text: `${enc_mode}-${encryption}-${key_length}-${api_key}`, //encryption ? res.data : text,
+            enc_mode: enc_mode,
+            key_length: key_length,
             date: Date(),
         }
         addLocalItem(Storage.HISTORY, history)
@@ -124,7 +126,7 @@ chrome.contextMenus.onClicked.addListener( async (clickData) => {
         //console.log("ENC text", res.data)
 
         const history = {
-            id: Math.floor(Math.random()),
+            id: uuidv4(),
             pastebinlink: "",
             enc_text: res.data,
             enc_mode: mode,
