@@ -5,13 +5,13 @@ import './styles/App.css';
 import {
   AppBar,
   Box,
-  createMuiTheme,
   Divider,
   IconButton,
   Theme,
   ThemeProvider,
   Toolbar,
 } from '@mui/material';
+import { createTheme } from '@mui/material/styles';
 import { makeStyles } from '@mui/styles';
 import {
   HistorySharp as HistoryIcon,
@@ -34,6 +34,7 @@ import Support from './routes/Support';
 export const App = () => {
   const { state, dispatch } = React.useContext(AppContext);
   const [darkmode, setDarkmode] = useState(state.settings.theme);
+  const [routeEntering, setRouteEntering] = useState(false);
 
   const useStyles = makeStyles((theme: Theme) => ({
     root: {
@@ -71,11 +72,22 @@ export const App = () => {
 
   useEffect(() => {
     getSyncItem(Storage.THEME, data => {
-      console.log('UPDATING THEME', data[Storage.THEME]);
-      dispatch({
-        type: Action.SET_THEME,
-        payload: { theme: JSON.parse(data[Storage.THEME]) },
-      });
+      const stored = data[Storage.THEME];
+      if (stored !== undefined && stored !== null) {
+        dispatch({
+          type: Action.SET_THEME,
+          payload: { theme: JSON.parse(stored) },
+        });
+      } else {
+        // No stored preference — use system setting (issue #47)
+        const prefersDark = window.matchMedia(
+          '(prefers-color-scheme: dark)'
+        ).matches;
+        dispatch({
+          type: Action.SET_THEME,
+          payload: { theme: prefersDark },
+        });
+      }
     });
 
     getSyncItem(Storage.DRAFT, data => {
@@ -128,7 +140,10 @@ export const App = () => {
 
   useEffect(() => {
     dispatch({ type: Action.UPDATE_NAVIGATION, payload: { location } });
-    // setSyncItem(Storage.APP, JSON.stringify({location, date: new Date().getTime()}));
+    // Trigger fade-in on route change (issue #48)
+    setRouteEntering(true);
+    const t = setTimeout(() => setRouteEntering(false), 200);
+    return () => clearTimeout(t);
   }, [dispatch, location]);
 
   useEffect(() => {}, [state.app.subheader]);
@@ -137,7 +152,7 @@ export const App = () => {
 
   // setTimeout(() => { setDarkmode(true) }, 4000);
 
-  const theme = createMuiTheme({
+  const theme = createTheme({
     palette: {
       mode: darkmode ? 'dark' : 'light',
       primary: {
@@ -292,6 +307,7 @@ export const App = () => {
             overflow: 'auto',
           }}
         >
+          <div className={routeEntering ? 'route-enter' : 'route-enter-active'}>
           <Switch>
             <Route path="/home">
               <Editor />
@@ -319,6 +335,7 @@ export const App = () => {
               <Editor />
             </Route>
           </Switch>
+          </div>
         </Box>
       </Box>
     </ThemeProvider>

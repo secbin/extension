@@ -18,112 +18,86 @@ import { SettingsType } from '../contexts/AppContext';
  *  when the extension is updated to a new version,
  *  and when Chrome is updated to a new version. */
 chrome.runtime.onInstalled.addListener(async details => {
-  console.log('onInstall, checking for settings, else set defaults', details);
   const mode = (await getSyncItemAsync(Storage.ENC_MODE)) as string;
   if (mode === undefined) {
-    console.log('Mode = ', 'AES-GCM');
     setSyncItem(Storage.ENC_MODE, 'AES-GCM');
   }
 
   const len = (await getSyncItemAsync(Storage.KEY_LENGTH)) as number;
   if (len === undefined) {
-    console.log('Key_Len = ', 128);
     setSyncItem(Storage.KEY_LENGTH, 16);
   }
 
   const theme = (await getSyncItemAsync(Storage.THEME)) as number;
   if (theme === undefined) {
-    console.log('Theme = ', 'Light');
     setSyncItem(Storage.THEME, false);
   }
-  //console.log(mode, len, theme);
+
+  // Fix #50: create context menus inside onInstalled so they are only created
+  // once. Calling create() at the service-worker top level causes duplicate-id
+  // errors on every subsequent SW restart, silently breaking the menus.
+  chrome.contextMenus.removeAll(() => {
+    chrome.contextMenus.create({
+      id: 'pasteBin',
+      title: 'Share via PasteBin',
+      contexts: ['selection'],
+    });
+    chrome.contextMenus.create({
+      id: 'clipboardMenuItem',
+      title: 'Encrypt to Clipboard',
+      contexts: ['selection'],
+    });
+    chrome.contextMenus.create({
+      id: 'decryptText',
+      title: 'Decrypt Text',
+      contexts: ['selection'],
+    });
+  });
 });
 
-chrome.runtime.onConnect.addListener(port => {
-  //console.log('[background.js] onConnect', port)
+chrome.runtime.onConnect.addListener(_port => {
+  // reserved for future use
 });
 
 chrome.runtime.onStartup.addListener(() => {
-  // console.log('[background.js] onStartup')
+  // reserved for future use
 });
 
-/**
- *  Sent to the event page just before it is unloaded.
- *  This gives the extension opportunity to do some clean up.
- *  Note that since the page is unloading,
- *  any asynchronous operations started while handling this event
- *  are not guaranteed to complete.
- *  If more activity for the event page occurs before it gets
- *  unloaded the onSuspendCanceled event will
- *  be sent and the page won't be unloaded. */
+/** Sent to the event page just before it is unloaded. */
 chrome.runtime.onSuspend.addListener(() => {
-  // console.log('[background.js] onSuspend')
+  // reserved for future use
 });
-
-// storage changed
-// chrome.storage.onChanged.addListener(function (changes, namespace) {
-//     for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
-//       console.log(
-//         `Storage key "${key}" in namespace "${namespace}" changed.`,
-//         `Old value was "${oldValue}", new value is "${newValue}".`
-//       );
-//     }
-//   });
-
-const pasteBinMenuItem = {
-  id: 'pasteBin',
-  title: 'Share via PasteBin',
-  contexts: ['selection'],
-};
-
-const clipboardMenuItem = {
-  id: 'clipboardMenuItem',
-  title: 'Encrypt to Clipboard',
-  contexts: ['selection'],
-};
-const decryptMenuItem = {
-  id: 'decryptText',
-  title: 'Decrypt Text',
-  contexts: ['selection'],
-};
-
-chrome.contextMenus.create(pasteBinMenuItem);
-chrome.contextMenus.create(clipboardMenuItem);
-chrome.contextMenus.create(decryptMenuItem);
 
 chrome.contextMenus.onClicked.addListener(async clickData => {
-  let text = clickData.selectionText;
-  if (text === undefined) {
+  const text = clickData.selectionText;
+  if (text === undefined || text === '') {
     alert('Please select some text');
     return;
   }
 
   if (clickData.menuItemId === 'pasteBin') {
     if (text.length > MAX_PASTEBIN_TEXT_LENGTH) {
-      alert('Can only encrypt up to ' + MAX_ENC_TEXT_LENGTH + ' characters');
+      alert(
+        'Can only post up to ' + MAX_PASTEBIN_TEXT_LENGTH + ' characters via right-click'
+      );
       return;
     }
 
-    const { enc_mode, encryption, key_length, api_key } =
-      (await getSyncItemAsync(Storage.SETTINGS)) as SettingsType;
+    const { api_key } = (await getSyncItemAsync(Storage.SETTINGS)) as SettingsType;
     const res = await encrypt(text);
-    console.log('ENC text', enc_mode, encryption, key_length, api_key);
-    const link = await postPastebin(
-      res.data,
-      'LxmOdiaiwoCXmuwWvUqkhliMcp0LjHP-'
-    ); // TODO change this
+    const link = await postPastebin(res.data, api_key);
     const history = {
       id: uuidv4(),
-      pastebinlink: `${enc_mode}-${encryption}-${key_length}-${api_key}`,
-      enc_text: `${enc_mode}-${encryption}-${key_length}-${api_key}`, //encryption ? res.data : text,
-      enc_mode: enc_mode,
-      key_length: key_length,
+      pastebinlink: link,
+      enc_text: res.data,
+      enc_mode: res.mode,
+      key_length: res.key_len,
       date: Date(),
     };
     addLocalItem(Storage.HISTORY, history);
 
-    alert('Key: ' + res.key + '\nLink:' + link);
-    copyTextClipboard('Key: ' + res.key + '\nLink:' + link);
+    alert('Key: ' + res.key + '\nLink: ' + link);
+    copyTextClipboard('Key: ' + res.key + '\nLink: ' + link);
   } else if (clickData.menuItemId === 'clipboardMenuItem') {
     if (text.length > MAX_ENC_TEXT_LENGTH) {
       alert('Can only encrypt up to ' + MAX_ENC_TEXT_LENGTH + ' characters');
@@ -132,7 +106,6 @@ chrome.contextMenus.onClicked.addListener(async clickData => {
     const res = await encrypt(text);
     const mode = (await getSyncItemAsync(Storage.ENC_MODE)) as string;
     const len = (await getSyncItemAsync(Storage.KEY_LENGTH)) as number;
-    //console.log("ENC text", res.data)
 
     const history = {
       id: uuidv4(),
@@ -143,36 +116,30 @@ chrome.contextMenus.onClicked.addListener(async clickData => {
       date: Date(),
     };
 
-    //console.log("ENC text", history)
     addLocalItem(Storage.HISTORY, history);
 
-    alert('Key: ' + res.key + '\nCiphertext:' + res.data);
-    copyTextClipboard('Key: ' + res.key + '\nCiphertext:' + res.data);
+    alert('Key: ' + res.key + '\nCiphertext: ' + res.data);
+    copyTextClipboard('Key: ' + res.key + '\nCiphertext: ' + res.data);
   } else if (clickData.menuItemId === 'decryptText') {
+    // Fix #50: do not block ciphertext > MAX_PASTEBIN_TEXT_LENGTH — encrypted
+    // text is legitimately larger than the plaintext limit.
     if (text.length > MAX_ENC_TEXT_LENGTH) {
       alert('Can only decrypt up to ' + MAX_ENC_TEXT_LENGTH + ' characters');
       return;
     }
 
-    if (text.length > MAX_PASTEBIN_TEXT_LENGTH) {
-      alert('PasteBin only supports up to 512 Characters of text');
-      return;
-    }
     const key = prompt('Please enter your key');
     if (key === null) {
       return;
     } else if (text.includes('C_TXT')) {
       const res = decrypt(text, key);
       alert('Decrypted text: \n' + res);
-      //console.log(res);
     } else if (text.includes('pastebin')) {
-      const link = text;
-      text = await getPastebin(link);
-      const res = decrypt(text, key);
+      const pasteText = await getPastebin(text);
+      const res = decrypt(pasteText, key);
       alert('Decrypted text: \n' + res);
-      //console.log(res);
     } else {
-      console.log('Invalid Text');
+      alert('Could not decrypt: text does not appear to be a ciphertext or Pastebin link');
     }
   }
 });

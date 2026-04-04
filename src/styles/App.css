@@ -37,3 +37,22 @@ h6 {
     transform: rotate(360deg);
   }
 }
+
+/* Route transition fade (issue #48) */
+.route-enter {
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+.route-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 180ms ease-out, transform 180ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route-enter,
+  .route-enter-active {
+    transition: none;
+  }
+}

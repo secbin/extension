@@ -41,10 +41,11 @@ const SmartButton = ({ setAnchorEl, open }: any) => {
 
   const createPost = useCreatePost();
 
+  // Maps plain actions → encrypted equivalents when encryption is enabled
+  // UNENCRYPT_PASTEBIN is intentionally excluded: it bypasses encryption even when enabled
   const encryptionMap: any = {
-    [Action.SEND_TO_PASTEBIN]: Action.ENCRYPT_PASTEBIN,
-    [Action.OPEN_PASTEBIN]: Action.DECRYPT_PASTEBIN,
     [Action.SAVE_DRAFT]: Action.ENCRYPT,
+    [Action.OPEN_PASTEBIN]: Action.DECRYPT_PASTEBIN,
   };
 
   const plainMap: any = {
