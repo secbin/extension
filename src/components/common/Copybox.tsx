@@ -132,7 +132,7 @@ const Copybox = ({
             value={value}
           />
         )}
-        {false && (
+        {toggleVisibility && (
           <IconButton
             size={'small'}
             onClick={() => toggleVisibilityHandler()}

@@ -78,7 +78,7 @@ export default function History() {
             }
             return (
               <DateOrderedItem
-                key={itemTime}
+                key={item.id ?? index}
                 showDateHeading={showItem}
                 clickHandler={() => handleHistory(history.length - index - 1)}
                 payload={item}

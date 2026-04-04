@@ -7,7 +7,6 @@ import {
   MAX_ENC_TEXT_LENGTH,
   PASTEBIN_BASEURL,
 } from '../../constants';
-import clsx from 'clsx';
 
 const TextEditor = () => {
   const { state, dispatch } = useContext(AppContext);
@@ -17,6 +16,15 @@ const TextEditor = () => {
   useEffect(() => {
     setTextBox(state.draft.plaintext);
   }, [state.draft.plaintext]);
+
+  useEffect(() => {
+    return () => {
+      if (timerId !== null) {
+        clearTimeout(timerId);
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const checkTypeOfText = (e: any) => {
     const textbox = e.target.value || '';
@@ -98,7 +106,7 @@ const TextEditor = () => {
               e.currentTarget.value.length
             )
           }
-          rows={clsx(textBox.length < 385 ? 13 : 20)}
+          rows={textBox.length < 385 ? 13 : 20}
           onChange={checkTypeOfText}
           defaultValue={state.draft.plaintext}
           value={textBox}

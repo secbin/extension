@@ -48,7 +48,6 @@ const DecryptFormDialog = () => {
 
   const [key, setKey] = React.useState('');
   const handleClose = () => {
-    console.log('SETTING KEY', { key });
     dispatch({ type: Action.SET_KEY, payload: { key } });
   };
 

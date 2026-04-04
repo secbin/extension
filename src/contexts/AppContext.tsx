@@ -35,11 +35,10 @@ export type DraftType = {
   enc_text: string;
   pastebinlink: string;
   key: string;
-  success: any;
 };
 
 export type HistoryType = {
-  id: number;
+  id: string;
   pastebinlink: string;
   enc_mode: string | null;
   key_length: number | null;
@@ -82,7 +81,6 @@ const initialState = {
     enc_text: '',
     pastebinlink: '',
     key: '',
-    success: '',
   } as DraftType,
   settings: {
     api_key: '',

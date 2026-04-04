@@ -100,11 +100,7 @@ export const App = () => {
       }
     });
 
-    console.log('getting SETTINGS');
-
     getSyncItem(Storage.SETTINGS, data => {
-      console.log('UPDATING SETTINGS', data[Storage.SETTINGS]);
-
       dispatch({
         type: Action.SET_SETTINGS,
         payload: data[Storage.SETTINGS]
@@ -114,7 +110,6 @@ export const App = () => {
     });
 
     getLocalItem(Storage.HISTORY, data => {
-      console.log('HISTORY FROM STORAGE', { history: data[Storage.HISTORY] });
       dispatch({
         type: Action.SET_HISTORY,
         payload: data[Storage.HISTORY] || [],
@@ -134,7 +129,6 @@ export const App = () => {
   }, []);
 
   useEffect(() => {
-    console.log('UPDATING THEME');
     setDarkmode(state.settings.theme);
   }, [state.settings.theme]);
 
@@ -145,8 +139,6 @@ export const App = () => {
     const t = setTimeout(() => setRouteEntering(false), 200);
     return () => clearTimeout(t);
   }, [dispatch, location]);
-
-  useEffect(() => {}, [state.app.subheader]);
 
   const classes = useStyles();
 

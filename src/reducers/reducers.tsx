@@ -22,7 +22,7 @@ type ActionMap<M extends { [index: string]: any }> = {
 type HistoryPayload = {
   [Action.SET_HISTORY]: [
     {
-      id: number;
+      id: string;
       pastebinlink: string;
       enc_mode: string | null;
       key_length: number | null;
@@ -32,7 +32,7 @@ type HistoryPayload = {
     },
   ];
   [Action.ADD_TO_HISTORY]: {
-    id: number;
+    id: string;
     pastebinlink: string;
     enc_mode: string | null;
     key_length: number | null;
@@ -42,7 +42,7 @@ type HistoryPayload = {
   };
   [Action.CLEAR_HISTORY]: undefined;
   [Action.REMOVE_ITEM_FROM_HISTORY]: {
-    id: number;
+    id: string;
   };
 };
 
@@ -155,7 +155,7 @@ type SettingsPayload = {
 
 type GlobalPayload = {
   [Action.CREATE_POST]: {
-    id: number;
+    id: string;
     pastebinlink: string;
     enc_mode: string | null;
     key_length: number | null;
@@ -209,23 +209,6 @@ export const historyReducer = (
   }
 };
 
-export const postReducer = (
-  state: HistoryType[],
-  action:
-    | AppActions
-    | SettingsActions
-    | DraftActions
-    | HistoryActions
-    | GlobalActions
-) => {
-  switch (action.type) {
-    case Action.CREATE_POST:
-      return state;
-    default:
-      return state;
-  }
-};
-
 export const appReducer = (
   state: AppType,
   action:
@@ -260,7 +243,6 @@ export const appReducer = (
         dialog_id: null,
       };
     case Action.SET_SUBHEADER:
-      console.log('RECEIEVED SUBHEADER', action.payload.subheader);
       return {
         ...state,
         subheader: action.payload.subheader,

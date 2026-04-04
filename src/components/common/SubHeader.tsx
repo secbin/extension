@@ -24,8 +24,6 @@ const SubHeader = () => {
   const { state } = useContext(AppContext);
   const { subheader } = state.app;
 
-  console.log('SUBHEADER IN COMPONENT HERE', { subheader });
-
   const classes = useStyles();
   const { goBack } = useHistory();
   //
