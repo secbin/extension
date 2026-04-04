@@ -27,7 +27,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const Result = () => {
-  const { id } = useParams();
+  const { id } = useParams<{ id?: string }>();
 
   const { state, dispatch } = React.useContext(AppContext);
   const [result, setResult] = React.useState<HistoryType | null>();
@@ -43,8 +43,9 @@ const Result = () => {
   };
 
   useEffect(() => {
-    if (id >= 0) {
-      setResult(state.history[id]);
+    const idx = id !== undefined ? parseInt(id, 10) : NaN;
+    if (!isNaN(idx) && idx >= 0) {
+      setResult(state.history[idx]);
     } else {
       setResult(
         state.history.length ? state.history[state.history.length - 1] : null
@@ -71,18 +72,16 @@ const Result = () => {
   const classes = useStyles();
 
   const isPasteBin = !!result?.pastebinlink;
-  const hasError = result?.pastebinlink.includes('PasteBin Error');
-  const errorMessage = result?.pastebinlink.replace('PasteBin Error', '');
+  const hasError = result?.pastebinlink?.includes('PasteBin Error') ?? false;
+  const errorMessage = result?.pastebinlink?.replace('PasteBin Error', '') ?? '';
 
   return (
     <div className={classes.center}>
       {result ? (
         <>
-          {/*{isPasteBin && !hasError ? (*/}
-          {/*    <StatusIcon result={result} variant={'success'}/>*/}
-          {/*) : (*/}
-          {/*    null //<StatusIcon result={result} variant={'success'} />*/}
-          {/*)}*/}
+          {isPasteBin && !hasError ? (
+            <StatusIcon result={result} variant={'success'} />
+          ) : null}
           <div className={classes.left}>
             {result?.pastebinlink &&
               !result?.pastebinlink.includes('PasteBin Error') && (
@@ -103,7 +102,13 @@ const Result = () => {
             {result.enc_text && (
               <CopyboxMultiline
                 value={result.enc_text}
-                title={result.key ? 'Ciphertext' : 'Plaintext'}
+                title={
+                  result.key
+                    ? 'Ciphertext'
+                    : result.pastebinlink
+                    ? 'Pastebin Content'
+                    : 'Plaintext'
+                }
               />
             )}
             {result.key && (

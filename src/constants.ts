@@ -35,6 +35,7 @@ export const DEFAULT_SETTINGS = {
   enc_mode: ENCRYPTION_TYPES.AES_GCM,
   key_length: 16,
 };
+
 export const DEFAULT_CONTEXT = {
   theme: false,
   api_key: '',
@@ -54,7 +55,8 @@ export enum Action {
   SAVE_DRAFT = 'Save Draft',
   ENCRYPT_PASTEBIN = 'Encrypt to Pastebin',
   SEND_TO_PASTEBIN = 'Post to Pastebin',
-  UNENCRYPT_PASTEBIN = 'Post to Pastebin',
+  // Fix #45: distinct value so encryptionMap in SmartButton does not remap this action
+  UNENCRYPT_PASTEBIN = 'Post Unencrypted',
   UPDATE_ENC_MENU = 'update_enc_options',
   SET_DRAFT = 'set_draft',
   RESET_DRAFT = 'reset_draft',

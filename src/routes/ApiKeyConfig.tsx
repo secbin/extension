@@ -44,7 +44,6 @@ export function StatusBanner(props: any) {
   const classes = useStyles();
 
   return (
-    // <Card classes={{ root: classes.card }}>
     <ListItem
       sx={{
         padding: 0,
@@ -72,7 +71,6 @@ export function StatusBanner(props: any) {
         }
       />
     </ListItem>
-    // </Card>
   );
 }
 
@@ -107,7 +105,6 @@ const EncryptionConfig = () => {
     }
 
     const id = setTimeout(() => {
-      // Execute your command here
       if (apiKey.length === PASTEBIN_API_KEY_LENGTH) {
         handleApiKeyTest();
       }
@@ -115,9 +112,9 @@ const EncryptionConfig = () => {
 
     setTimeoutId(id);
 
-    // Cleanup function to clear the timeout if the component unmounts
     return () => clearTimeout(id);
-  }, [apiKey, handleApiKeyTest, timeoutId, valid]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [apiKey]);
 
   useLayoutEffect(() => {
     dispatch({

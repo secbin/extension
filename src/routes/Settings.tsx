@@ -32,18 +32,9 @@ export default function Settings() {
   };
 
   const themeHandler = () => {
-    const newTheme = {
-      ...state.settings,
-      theme: !theme,
-    };
     dispatch({
       type: Action.UPDATE_THEME,
       payload: { theme: !theme },
-    });
-
-    console.log('Theme', newTheme, state.settings.theme, {
-      statemodified: !theme,
-      stateoriginal: theme,
     });
   };
 
