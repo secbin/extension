@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react'
-
+import React, { useState, useEffect } from 'react';
 
 function usePasteBinSearch(query) {
   const [result, setResult] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
-  const array = query.split("/");
+  const array = query.split('/');
   if (array[3]) {
     query = array[3];
   } else {
@@ -24,18 +23,16 @@ function usePasteBinSearch(query) {
           `https://cors.securebin.workers.dev/?https://pastebin.com/raw/${query}`,
           {
             signal: controller.signal,
-
           }
         );
         responseBody = await response.text();
       } catch (e) {
         if (e instanceof DOMException) {
-          console.log("== HTTP request cancelled")
+          console.log('== HTTP request cancelled');
         } else {
           setError(true);
           throw e;
         }
-
       }
 
       if (!ignore) {
@@ -47,14 +44,14 @@ function usePasteBinSearch(query) {
     }
 
     if (query) {
-      fetchSearchResults()
+      fetchSearchResults();
     }
     return () => {
       controller.abort();
       ignore = true;
-    }
+    };
   }, [query]);
 
   return [result, error];
 }
-export default usePasteBinSearch
+export default usePasteBinSearch;

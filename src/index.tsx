@@ -6,19 +6,19 @@ import { App } from './App';
 import reportWebVitals from './reportWebVitals';
 import { BrowserRouter } from 'react-router-dom';
 import { StyledEngineProvider } from '@mui/material';
-import {AppProvider} from "./contexts/AppContext";
+import { AppProvider } from './contexts/AppContext';
 
 ReactDOM.render(
-    <React.StrictMode>
-        <AppProvider>
-            <StyledEngineProvider injectFirst>
-                <BrowserRouter>
-                    <App/>
-                </BrowserRouter>
-            </StyledEngineProvider>
-        </AppProvider>
-    </React.StrictMode>,
-    document.getElementById('root')
+  <React.StrictMode>
+    <AppProvider>
+      <StyledEngineProvider injectFirst>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </StyledEngineProvider>
+    </AppProvider>
+  </React.StrictMode>,
+  document.getElementById('root')
 );
 
 // If you want to start measuring performance in your app, pass a function

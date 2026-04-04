@@ -1,115 +1,94 @@
-import React, {useContext } from "react";
+import React, { useContext } from 'react';
 import List from '@mui/material/List';
 import { Typography } from '@mui/material';
 import { makeStyles } from '@mui/styles';
-import { Action } from '../constants'
-import moment from "moment";
-import { AppContext, HistoryType } from "../contexts/AppContext";
-import { useHistory } from "react-router-dom";
-import { printDateInCorrectFormat } from "../chrome/utils";
-import DateOrderedItem from "../components/common/DateOrderedItem";
-import StatusIcon from "../components/editor/StatusIcon";
+import moment from 'moment';
+import { AppContext, HistoryType } from '../contexts/AppContext';
+import { useHistory } from 'react-router-dom';
+import { printDateInCorrectFormat } from '../chrome/utils';
+import DateOrderedItem from '../components/common/DateOrderedItem';
+import StatusIcon from '../components/editor/StatusIcon';
 
-
-const useStyles = makeStyles(theme => ({
-    pageHeading: {
-        paddingLeft: 20,
-        paddingTop: 20,
-        marginBottom: 10,
-    },
-    list: {
-        padding: 20,
-    },
-    icon: {
-        fontSize: 80,
-        width: '100%',
-        color: 'green',
-        margin: 20,
-    },
-    grey: {
-        color: 'grey',
-    },
-    center: {
-        width: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        textAlign: 'center',
-        alignItems: 'center',
-    }
+const useStyles = makeStyles(() => ({
+  pageHeading: {
+    paddingLeft: 20,
+    paddingTop: 20,
+    marginBottom: 10,
+  },
+  list: {
+    padding: 20,
+  },
+  center: {
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    textAlign: 'center',
+    alignItems: 'center',
+  },
 }));
 
 export default function History() {
-    let { push } = useHistory();
-    const { state, dispatch } = useContext(AppContext);
-    const { history } = state;
+  const { push } = useHistory();
+  const { state } = useContext(AppContext);
+  const { history } = state;
 
-    const handleHistory = (index: number) => {
-        // dispatch({type: Action.ADD_TO_HISTORY, payload: {
-        //         id: item.id,
-        //         pastebinlink: item.pastebinlink,
-        //         enc_mode: item.enc_mode,
-        //         key_length: item.key_length,
-        //         key: item.key,
-        //         enc_text: item.enc_text,
-        //         date: item.date,
-        //     }
-        // })
+  const handleHistory = (index: number) => {
+    push(`/result/${index}`);
+  };
 
-        push(`/result/${index}`);
-    }
-
-const handleTitle = (item: HistoryType) => {
-    let title = "";
-
-    if(item?.pastebinlink) {
-        return item.pastebinlink;
+  const handleTitle = (item: HistoryType) => {
+    if (item?.pastebinlink) {
+      return item.pastebinlink;
     } else {
-        if(!!item?.key_length && !!item.enc_mode) {
-            return `${item.key_length * 8} ${item.enc_mode} Encrypted Draft`
-        } else {
-            return "Draft"
-        }
+      if (!!item?.key_length && !!item.enc_mode) {
+        return `${item.key_length * 8} ${item.enc_mode} Encrypted Draft`;
+      } else {
+        return 'Draft';
+      }
     }
-}
-    
-    const classes = useStyles();
-    let lastLastDate = '';
+  };
 
-    return (
+  const classes = useStyles();
+  let lastLastDate = '';
+
+  return (
+    <>
+      {history && history?.length ? (
+        <Typography variant="h2" className={classes.pageHeading}>
+          History
+        </Typography>
+      ) : (
         <>
-            {/* @ts-ignore */}
-            {history && history?.length ? (
-                    <Typography variant='h2' className={classes.pageHeading}>History</Typography>
-            ) :
-                (
-                    <>
-                        <div className={classes.center}>
-                            <StatusIcon variant={'empty-history'} />
-                        </div>
-                    </>
-                )
-            }
-            <List className={classes.list} >
-                {history?.slice().reverse().map((item: any, index: number) => {
-                    let showItem = false;
-                    const itemTime = moment(item.date).format('MMMM D, YYYY');
-                    if(itemTime !== lastLastDate) {
-                        lastLastDate = itemTime;
-                        showItem = true;
-                    }
-                    return (
-                        <DateOrderedItem
-                            showDateHeading={showItem}
-                            clickHandler={() => handleHistory(history.length - index - 1)}
-                            payload={item}
-                            primary={handleTitle(item)}
-                            secondary={printDateInCorrectFormat(item.date)}
-                            date={item.date}
-                        />
-                )
-                })}
-        </List>
+          <div className={classes.center}>
+            <StatusIcon variant={'empty-history'} />
+          </div>
         </>
-    );
+      )}
+      <List className={classes.list}>
+        {history
+          ?.slice()
+          .reverse()
+          .map((item: HistoryType, index: number) => {
+            let showItem = false;
+            const itemTime = moment(item.date).format('MMMM D, YYYY');
+            if (itemTime !== lastLastDate) {
+              lastLastDate = itemTime;
+              showItem = true;
+            }
+            return (
+              <DateOrderedItem
+                key={item.id ?? index}
+                showDateHeading={showItem}
+                clickHandler={() => handleHistory(history.length - index - 1)}
+                payload={item}
+                primary={handleTitle(item)}
+                secondary={printDateInCorrectFormat(item.date)}
+                date={item.date}
+              />
+            );
+          })}
+      </List>
+    </>
+  );
 }

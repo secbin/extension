@@ -1,14 +1,13 @@
-import React from "react";
+import React from 'react';
 import { Card, IconButton, Typography } from '@mui/material';
-import { makeStyles } from "@mui/styles";
-import moment from "moment";
-import ListItem from "@mui/material/ListItem";
-import ListItemText from "@mui/material/ListItemText";
-import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import {HistoryType} from "../../contexts/AppContext";
-import {ChevronRight} from "@mui/icons-material";
+import { makeStyles } from '@mui/styles';
+import moment from 'moment';
+import ListItem from '@mui/material/ListItem';
+import ListItemText from '@mui/material/ListItemText';
+import { HistoryType } from '../../contexts/AppContext';
+import { ChevronRight } from '@mui/icons-material';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles(() => ({
   card: {
     borderRadius: 6,
     border: '1px solid',
@@ -19,32 +18,46 @@ const useStyles = makeStyles(theme => ({
 }));
 
 export type LDateOrderedItemType = {
-  showDateHeading?: boolean,
-  id?: string,
-  date: Date,
-  primary: string,
-  secondary?: string,
-  clickHandler: (item: HistoryType) => void,
-  payload: HistoryType,
-}
+  showDateHeading?: boolean;
+  id?: string;
+  date: number;
+  primary: string;
+  secondary?: string;
+  clickHandler: (item: HistoryType) => void;
+  payload: HistoryType;
+};
 
-const DateOrderedItem = ({ showDateHeading, id, primary, date, secondary, clickHandler, payload }: LDateOrderedItemType) => {
+const DateOrderedItem = ({
+  showDateHeading,
+  id,
+  primary,
+  date,
+  secondary,
+  clickHandler,
+  payload,
+}: LDateOrderedItemType) => {
   const classes = useStyles();
 
   return (
-      <>
-        {showDateHeading && (<Typography variant='h4'>{moment(date).format('MMMM D, YYYY')}</Typography>)}
-        <Card classes={{root: classes.card}}>
-          <ListItem key={id ? id : primary}>
-            <ListItemText primary={primary} secondary={secondary} />
-            <IconButton aria-label="More details" onClick={(e) => clickHandler(payload)}>
-              <ChevronRight />
-            </IconButton>
-          </ListItem>
-        </Card>
-      </>
-  )
-
-}
+    <>
+      {showDateHeading && (
+        <Typography variant="h4">
+          {moment(date).format('MMMM D, YYYY')}
+        </Typography>
+      )}
+      <Card classes={{ root: classes.card }}>
+        <ListItem key={id ? id : primary}>
+          <ListItemText primary={primary} secondary={secondary} />
+          <IconButton
+            aria-label="More details"
+            onClick={() => clickHandler(payload)}
+          >
+            <ChevronRight />
+          </IconButton>
+        </ListItem>
+      </Card>
+    </>
+  );
+};
 
 export default DateOrderedItem;

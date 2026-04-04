@@ -1,8 +1,8 @@
 {
   "name": "securebin: Powerful Pastebin Tool",
-  "description" : "Securely encrypt your text on Pastebin.com",
-  "version": "1.1",
-  "manifest_version": 4,
+  "description": "Securely encrypt your text on Pastebin.com",
+  "version": "1.2",
+  "manifest_version": 3,
   "action": {
     "default_popup": "index.html",
     "default_title": "Open the popup"
@@ -15,12 +15,6 @@
   "background": {
     "service_worker": "./static/js/background.js"
   },
-  "permissions": [
-    "storage",
-    "contextMenus",
-    "clipboardWrite"
-  ],
-  "optional_permissions": [
-    "<all_urls>"
-  ]
+  "permissions": ["storage", "contextMenus", "clipboardWrite"],
+  "optional_host_permissions": ["<all_urls>"]
 }

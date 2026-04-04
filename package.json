@@ -39,7 +39,9 @@
     "build": "INLINE_RUNTIME_CHUNK=false craco build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "lint": "eslint --fix --ext .js,.ts,.jsx,.tsx ."
+    "lint": "eslint --fix --ext .js,.ts,.jsx,.tsx .",
+    "lint-staged": "prettier --write .",
+    "prepare": "husky"
   },
   "eslintConfig": {},
   "browserslist": {
@@ -54,13 +56,20 @@
       "last 1 safari version"
     ]
   },
+  "resolutions": {
+    "@types/react": "^16.14.0"
+  },
   "devDependencies": {
     "@types/chrome": "^0.0.126",
     "@types/node-forge": "^1.0.0",
     "@types/react-router-dom": "^5.1.6",
     "@types/uuid": "^9.0.7",
     "babel-eslint": "^10.1.0",
+    "eslint-config-prettier": "^9.1.0",
     "eslint-config-react": "^1.1.7",
-    "eslint-config-react-app": "^7.0.1"
+    "eslint-config-react-app": "^7.0.1",
+    "eslint-plugin-prettier": "^5.2.1",
+    "husky": "^9.1.6",
+    "prettier": "^3.3.3"
   }
 }

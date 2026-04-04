@@ -1,25 +1,25 @@
-const express = require('express'); //Line 1
-const app = express(); //Line 2
-const port = process.env.PORT || 8080; //Line 3
-var host = process.env.HOST || '0.0.0.0';
+import express from 'express';
+import cors_proxy from 'cors-anywhere';
 
+const port = process.env.PORT || 8080;
+const host = process.env.HOST || '0.0.0.0';
+const app = express(); // Initialize express app
 
-// // This displays message that the server running and listening to specified port
-// app.listen(port, () => console.log(`Listening on port ${port}`)); //Line 6
+// This displays a message that the server is running and listening to the specified port
+app.listen(port, () => console.log(`Listening on port ${port}`));
 
-// // create a GET route
-// app.get('/express_backend', (req, res) => { //Line 9
-//   res.send({ express: 'YOUR EXPRESS BACKEND IS CONNECTED TO REACT' }); //Line 10
-// }); //Line 11
+// create a GET route
+app.get('/express_backend', (req, res) => {
+  res.send({ express: 'YOUR EXPRESS BACKEND IS CONNECTED TO REACT' });
+});
 
-
-
-
-var cors_proxy = require('cors-anywhere');
-cors_proxy.createServer({
+// Set up the CORS Anywhere server
+cors_proxy
+  .createServer({
     originWhitelist: [], // Allow all origins
     requireHeader: ['origin', 'x-requested-with'],
-    removeHeaders: ['cookie', 'cookie2']
-}).listen(port, host, function() {
+    removeHeaders: ['cookie', 'cookie2'],
+  })
+  .listen(port, host, function () {
     console.log('Running CORS Anywhere on ' + host + ':' + port);
-});
+  });
