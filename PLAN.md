@@ -1,6 +1,6 @@
 # SecureBin Extension – Cleanup & Bug Fix Plan
 
-## Status: In Progress
+## Status: Complete ✓
 
 ---
 
@@ -8,16 +8,16 @@
 
 Merge main branch into 1.2.0. Conflicts in 8 files with the following resolutions:
 
-| File | Resolution |
-|---|---|
-| `public/manifest.json` | Take main's updated name/version; keep `manifest_version: 3` (v4 doesn't exist) |
-| `src/chrome/utils/crypto.ts` | Take HEAD (identical logic, better 2-space indentation) |
-| `src/components/dialog/EncDialog.tsx` | Take main (adds random passkey generation UX improvement) |
-| `src/constants.ts` | Take HEAD — do NOT include embedded `DEFAULT_HASH` API key from main |
-| `src/reducers/reducers.tsx` | Take HEAD — avoid `btoa`/`atob` API key obfuscation machinery |
-| `src/routes/ApiKeyConfig.tsx` | Take HEAD — no hardcoded default API key check |
-| `src/routes/Result.tsx` | Merge: add `StatusIcon` success variant from main, keep HEAD code style |
-| `src/routes/Settings.tsx` | Take HEAD (cleaner imports, no embedded key check) |
+| File                                  | Resolution                                                                      |
+| ------------------------------------- | ------------------------------------------------------------------------------- |
+| `public/manifest.json`                | Take main's updated name/version; keep `manifest_version: 3` (v4 doesn't exist) |
+| `src/chrome/utils/crypto.ts`          | Take HEAD (identical logic, better 2-space indentation)                         |
+| `src/components/dialog/EncDialog.tsx` | Take main (adds random passkey generation UX improvement)                       |
+| `src/constants.ts`                    | Take HEAD — do NOT include embedded `DEFAULT_HASH` API key from main            |
+| `src/reducers/reducers.tsx`           | Take HEAD — avoid `btoa`/`atob` API key obfuscation machinery                   |
+| `src/routes/ApiKeyConfig.tsx`         | Take HEAD — no hardcoded default API key check                                  |
+| `src/routes/Result.tsx`               | Merge: add `StatusIcon` success variant from main, keep HEAD code style         |
+| `src/routes/Settings.tsx`             | Take HEAD (cleaner imports, no embedded key check)                              |
 
 ---
 
@@ -31,6 +31,7 @@ a user explicitly selects "Post to Pastebin (unencrypted)" from the menu with en
 **Files**: `src/constants.ts`, `src/components/editor/SmartButton.tsx`
 
 **Fix**:
+
 1. Change `Action.UNENCRYPT_PASTEBIN = 'Post Unencrypted'` (distinct value).
 2. Remove `Action.SEND_TO_PASTEBIN` from `encryptionMap` in SmartButton — it was colliding with `UNENCRYPT_PASTEBIN` and is only needed for the `plainMap` direction.
 3. Update `actionWrapper` comparison to handle the new string.
@@ -45,6 +46,7 @@ a user explicitly selects "Post to Pastebin (unencrypted)" from the menu with en
 **Files**: `src/App.tsx`, `src/reducers/reducers.tsx`
 
 **Fix**:
+
 1. In `App.tsx` `useEffect` on mount: after loading stored theme, if no stored theme exists
    (fresh install), detect `window.matchMedia('(prefers-color-scheme: dark)').matches` and apply it.
 2. Add a `prefers-color-scheme` media query listener so the UI reacts to OS-level changes while
@@ -60,6 +62,7 @@ a user explicitly selects "Post to Pastebin (unencrypted)" from the menu with en
 **Files**: `src/App.tsx`, `src/styles/App.css`
 
 **Fix**:
+
 1. Wrap the route content area in a keyed container that reacts to `location.pathname` changes.
 2. Add CSS fade-in/fade-out transition (`opacity` + `transform: translateY`) in `App.css`.
 3. Use `useLocation` hook and a `useState` flag to drive the transition class, triggering the
@@ -89,6 +92,7 @@ a user explicitly selects "Post to Pastebin (unencrypted)" from the menu with en
 **Files**: `src/chrome/background.ts`
 
 **Fix**:
+
 1. Move all `chrome.contextMenus.create()` calls inside `chrome.runtime.onInstalled.addListener`.
    Before creating, call `chrome.contextMenus.removeAll()` to ensure idempotency.
 2. Remove the erroneous `MAX_PASTEBIN_TEXT_LENGTH` check from the decrypt handler
@@ -102,6 +106,7 @@ a user explicitly selects "Post to Pastebin (unencrypted)" from the menu with en
 **Framework**: Jest + `@testing-library/react` (already installed)
 
 **Files to create**:
+
 - `src/chrome/utils/crypto.test.ts` — encrypt/decrypt round-trips for AES-CBC, AES-CTR, AES-GCM;
   password-based PBKDF2 path; error handling for malformed ciphertext
 - `src/reducers/reducers.test.ts` — each reducer (history, app, draft, settings) with all action
@@ -117,15 +122,19 @@ global stubs for storage, runtime, contextMenus, and tabs APIs.
 ## Step 6: Code Quality & Dependency Fixes
 
 ### 6a. Fix MUI v5 API deprecation
+
 - `App.tsx`: Replace `createMuiTheme` → `createTheme` (import from `@mui/material/styles`)
 - This is a deprecation warning in MUI v5 that was renamed in 5.x
 
 ### 6b. Remove hardcoded API key
+
 - `background.ts` line 113: Remove hardcoded `'LxmOdiaiwoCXmuwWvUqkhliMcp0LjHP-'` and use
   the user's stored `api_key` from settings.
 
 ### 6c. Dependency updates (conservative — avoid major breaking changes)
+
 Update patch/minor versions in `package.json`:
+
 - `node-forge`: `1.2.1` → `1.3.x`
 - `moment`: Keep (not worth migrating to dayjs in this pass)
 - `@types/chrome`: Update to latest minor
@@ -134,6 +143,7 @@ Update patch/minor versions in `package.json`:
 - Keep @craco/craco 5 (compatible with current react-scripts setup)
 
 ### 6d. TypeScript strict fixes
+
 - `Result.tsx`: `id >= 0` comparison with `string` from `useParams` — fix type
 - `background.ts`: Remove debug `console.log` with hardcoded TODO comment
 
