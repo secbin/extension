@@ -9,7 +9,7 @@ import CopyboxMultiline from '../components/common/CopyboxMultiline';
 import { Action } from '../constants';
 import moment from 'moment/moment';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles(() => ({
   center: {
     width: '100%',
     margin: '20px 0',

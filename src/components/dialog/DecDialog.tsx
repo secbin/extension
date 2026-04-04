@@ -3,7 +3,6 @@ import {
   Button,
   Card,
   Dialog,
-  DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
@@ -16,7 +15,7 @@ import { AppContext } from '../../contexts/AppContext';
 import { Action } from '../../constants';
 import KeyRoundedIcon from '@mui/icons-material/KeyRounded';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles(() => ({
   copybox: {
     paddingLeft: 10,
     paddingRight: 10,

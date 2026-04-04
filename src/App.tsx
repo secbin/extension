@@ -7,7 +7,6 @@ import {
   Box,
   Divider,
   IconButton,
-  Theme,
   ThemeProvider,
   Toolbar,
 } from '@mui/material';
@@ -16,7 +15,6 @@ import { makeStyles } from '@mui/styles';
 import {
   HistorySharp as HistoryIcon,
   SettingsSharp as SettingsIcon,
-  ContentPasteSharp as ContentPaste,
   EditSharp as EditIcon,
 } from '@mui/icons-material';
 import { AppContext } from './contexts/AppContext';
@@ -25,7 +23,7 @@ import Settings from './routes/Settings';
 import History from './routes/History';
 import Result from './routes/Result';
 import Editor from './routes/Editor';
-import { getLocalItem, getSyncItem, setSyncItem } from './chrome/utils/storage';
+import { getLocalItem, getSyncItem } from './chrome/utils/storage';
 import SubHeader from './components/common/SubHeader';
 import ApiKeyConfig from './routes/ApiKeyConfig';
 import EncConfig from './routes/EncConfig';
@@ -36,7 +34,7 @@ export const App = () => {
   const [darkmode, setDarkmode] = useState(state.settings.theme);
   const [routeEntering, setRouteEntering] = useState(false);
 
-  const useStyles = makeStyles((theme: Theme) => ({
+  const useStyles = makeStyles(() => ({
     root: {
       boxShadow: 'none',
     },
@@ -90,23 +88,24 @@ export const App = () => {
       }
     });
 
-    getSyncItem(Storage.DRAFT, data => {
-      // Only update draft if there is content
-      if (data[Storage.DRAFT]?.plaintext?.length) {
-        dispatch({
-          type: Action.SET_DRAFT,
-          payload: JSON.parse(data[Storage.DRAFT]),
-        });
-      }
-    });
+    // Load settings and draft together so we can apply the draft timeout
+    getSyncItem([Storage.SETTINGS, Storage.DRAFT], data => {
+      const settings = data[Storage.SETTINGS]
+        ? JSON.parse(data[Storage.SETTINGS])
+        : DEFAULT_SETTINGS;
+      dispatch({ type: Action.SET_SETTINGS, payload: settings });
 
-    getSyncItem(Storage.SETTINGS, data => {
-      dispatch({
-        type: Action.SET_SETTINGS,
-        payload: data[Storage.SETTINGS]
-          ? JSON.parse(data[Storage.SETTINGS])
-          : DEFAULT_SETTINGS,
-      });
+      const rawDraft = data[Storage.DRAFT];
+      if (rawDraft) {
+        const draft = JSON.parse(rawDraft);
+        const draftTimeout: number = settings.draft_timeout ?? 30;
+        if (draftTimeout > 0 && draft.plaintext?.length) {
+          const savedAt: number = draft.savedAt ?? 0;
+          if (Date.now() - savedAt <= draftTimeout * 1000) {
+            dispatch({ type: Action.SET_DRAFT, payload: draft });
+          }
+        }
+      }
     });
 
     getLocalItem(Storage.HISTORY, data => {
@@ -126,6 +125,7 @@ export const App = () => {
         }
       }
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -246,6 +246,8 @@ export const App = () => {
                   darkmode ? '/securebinlogo_dark.svg' : '/securebinlogo.svg'
                 }
                 alt="logo"
+                style={{ cursor: 'pointer' }}
+                onClick={() => push('/home')}
               />
               <div style={{ marginLeft: 'auto' }}>
                 {

@@ -10,7 +10,15 @@ import LinkIcon from '@mui/icons-material/Link';
 import { alpha, styled } from '@mui/material/styles';
 import AddIcon from '@mui/icons-material/Add';
 
-const DropDown = ({ anchorEl, setAnchorEl, open }: any) => {
+const DropDown = ({
+  anchorEl,
+  setAnchorEl,
+  open,
+}: {
+  anchorEl: HTMLElement | null;
+  setAnchorEl: (el: HTMLElement | null) => void;
+  open: boolean;
+}) => {
   const { state, dispatch } = useContext(AppContext);
   const {
     draft: { buttonEnabled, action: menu },
@@ -67,6 +75,7 @@ const DropDown = ({ anchorEl, setAnchorEl, open }: any) => {
       | Action.DECRYPT
       | Action.DECRYPT_PASTEBIN
       | Action.ENCRYPT_PASTEBIN
+      | Action.SEND_TO_PASTEBIN
       | Action.UNENCRYPT_PASTEBIN
       | Action.OPEN_PASTEBIN
       | Action.SAVE_DRAFT
@@ -82,7 +91,7 @@ const DropDown = ({ anchorEl, setAnchorEl, open }: any) => {
     return (
       <div>
         <StyledMenu
-          // @ts-ignore
+          // @ts-expect-error -- StyledMenu props not fully typed
           anchorEl={anchorEl}
           open={open}
           onClose={() => handleClose(menu)}
@@ -148,7 +157,7 @@ const DropDown = ({ anchorEl, setAnchorEl, open }: any) => {
     return (
       <div>
         <StyledMenu
-          // @ts-ignore
+          // @ts-expect-error -- StyledMenu props not fully typed
           anchorEl={anchorEl}
           open={open}
           onClose={() => handleClose(menu)}
@@ -162,7 +171,7 @@ const DropDown = ({ anchorEl, setAnchorEl, open }: any) => {
             Select Action
           </MenuItem>
           <MenuItem
-            onClick={e => handleClose(Action.SAVE_DRAFT)}
+            onClick={() => handleClose(Action.SAVE_DRAFT)}
             dense
             disableRipple
           >
@@ -171,7 +180,7 @@ const DropDown = ({ anchorEl, setAnchorEl, open }: any) => {
           </MenuItem>
           <MenuItem
             disabled={!apiKey}
-            onClick={e => handleClose(Action.UNENCRYPT_PASTEBIN)}
+            onClick={() => handleClose(Action.UNENCRYPT_PASTEBIN)}
             dense
             disableRipple
           >
@@ -181,7 +190,7 @@ const DropDown = ({ anchorEl, setAnchorEl, open }: any) => {
           <Divider sx={{ my: 0.5 }} />
           <MenuItem
             disabled={!apiKey}
-            onClick={e => handleClose(Action.OPEN_PASTEBIN)}
+            onClick={() => handleClose(Action.OPEN_PASTEBIN)}
             dense
             disableRipple
           >

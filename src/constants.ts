@@ -34,6 +34,7 @@ export const DEFAULT_SETTINGS = {
   theme: false,
   enc_mode: ENCRYPTION_TYPES.AES_GCM,
   key_length: 16,
+  draft_timeout: 30,
 };
 
 export const DEFAULT_CONTEXT = {
@@ -43,9 +44,17 @@ export const DEFAULT_CONTEXT = {
   encryption: false,
   key_length: 16,
   sync_theme: true,
+  draft_timeout: 30,
   settings: DEFAULT_SETTINGS,
   history: [],
 };
+
+export const DRAFT_TIMEOUT_OPTIONS = [
+  { name: 'Off', value: 0 },
+  { name: '30 seconds', value: 30 },
+  { name: '1 minute', value: 60 },
+  { name: '5 minutes', value: 300 },
+];
 
 export enum Action {
   DECRYPT = 'Decrypt Plaintext',

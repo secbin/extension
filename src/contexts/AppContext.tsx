@@ -19,6 +19,7 @@ export type SettingsType = {
   theme: boolean;
   encryption: boolean;
   sync_theme: boolean;
+  draft_timeout: number;
 };
 
 export type DraftType = {
@@ -27,6 +28,7 @@ export type DraftType = {
     | Action.DECRYPT_PASTEBIN
     | Action.ENCRYPT
     | Action.ENCRYPT_PASTEBIN
+    | Action.SEND_TO_PASTEBIN
     | Action.UNENCRYPT_PASTEBIN
     | Action.OPEN_PASTEBIN
     | Action.SAVE_DRAFT;
@@ -44,7 +46,7 @@ export type HistoryType = {
   key_length: number | null;
   key: string | null;
   enc_text: string | null;
-  date: Date;
+  date: number;
 };
 
 export type SubHeaderType = {
@@ -89,6 +91,7 @@ const initialState = {
     theme: false,
     sync_theme: true,
     encryption: false,
+    draft_timeout: 30,
   },
 };
 

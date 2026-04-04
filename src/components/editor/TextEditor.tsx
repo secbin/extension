@@ -26,7 +26,7 @@ const TextEditor = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const checkTypeOfText = (e: any) => {
+  const checkTypeOfText = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const textbox = e.target.value || '';
     const length = textbox.length;
     let buttonEnabled = false;

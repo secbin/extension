@@ -12,12 +12,12 @@ import {
   MAX_ENC_TEXT_LENGTH,
 } from '../constants';
 import { v4 as uuidv4 } from 'uuid';
-import { SettingsType } from '../contexts/AppContext';
+import { SettingsType, HistoryType } from '../contexts/AppContext';
 
 /** Fired when the extension is first installed,
  *  when the extension is updated to a new version,
  *  and when Chrome is updated to a new version. */
-chrome.runtime.onInstalled.addListener(async details => {
+chrome.runtime.onInstalled.addListener(async () => {
   const mode = (await getSyncItemAsync(Storage.ENC_MODE)) as string;
   if (mode === undefined) {
     setSyncItem(Storage.ENC_MODE, 'AES-GCM');
@@ -28,7 +28,7 @@ chrome.runtime.onInstalled.addListener(async details => {
     setSyncItem(Storage.KEY_LENGTH, 16);
   }
 
-  const theme = (await getSyncItemAsync(Storage.THEME)) as number;
+  const theme = (await getSyncItemAsync(Storage.THEME)) as boolean;
   if (theme === undefined) {
     setSyncItem(Storage.THEME, false);
   }
@@ -55,7 +55,7 @@ chrome.runtime.onInstalled.addListener(async details => {
   });
 });
 
-chrome.runtime.onConnect.addListener(_port => {
+chrome.runtime.onConnect.addListener(() => {
   // reserved for future use
 });
 
@@ -89,19 +89,19 @@ chrome.contextMenus.onClicked.addListener(async clickData => {
       Storage.SETTINGS
     )) as SettingsType;
     const res = await encrypt(text);
-    const link = await postPastebin(res.data, api_key);
-    const history = {
+    const history: HistoryType = {
       id: uuidv4(),
-      pastebinlink: link,
+      pastebinlink: await postPastebin(res.data, api_key),
       enc_text: res.data,
       enc_mode: res.mode,
       key_length: res.key_len,
-      date: Date(),
+      key: res.key,
+      date: new Date().getTime(),
     };
     addLocalItem(Storage.HISTORY, history);
 
-    alert('Key: ' + res.key + '\nLink: ' + link);
-    copyTextClipboard('Key: ' + res.key + '\nLink: ' + link);
+    alert('Key: ' + res.key + '\nLink: ' + history.pastebinlink);
+    copyTextClipboard('Key: ' + res.key + '\nLink: ' + history.pastebinlink);
   } else if (clickData.menuItemId === 'clipboardMenuItem') {
     if (text.length > MAX_ENC_TEXT_LENGTH) {
       alert('Can only encrypt up to ' + MAX_ENC_TEXT_LENGTH + ' characters');
@@ -111,13 +111,14 @@ chrome.contextMenus.onClicked.addListener(async clickData => {
     const mode = (await getSyncItemAsync(Storage.ENC_MODE)) as string;
     const len = (await getSyncItemAsync(Storage.KEY_LENGTH)) as number;
 
-    const history = {
+    const history: HistoryType = {
       id: uuidv4(),
       pastebinlink: '',
       enc_text: res.data,
       enc_mode: mode,
       key_length: len,
-      date: Date(),
+      key: res.key,
+      date: new Date().getTime(),
     };
 
     addLocalItem(Storage.HISTORY, history);

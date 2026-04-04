@@ -133,6 +133,7 @@ describe('draftReducer', () => {
     action: Action.ENCRYPT,
     plaintext: '',
     enc_text: '',
+    pastebinlink: '',
     key: '',
     buttonEnabled: false,
   };
@@ -202,6 +203,7 @@ describe('settingsReducer', () => {
     key_length: 16,
     theme: false,
     sync_theme: true,
+    draft_timeout: 30,
   };
 
   it('UPDATE_THEME toggles theme and persists', () => {

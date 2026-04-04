@@ -1,14 +1,22 @@
 import React, { useContext } from 'react';
-import { Button, Checkbox, List, Typography } from '@mui/material';
+import {
+  Button,
+  Checkbox,
+  List,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+  Typography,
+} from '@mui/material';
 import { makeStyles } from '@mui/styles';
-import { Action } from '../constants';
+import { Action, DRAFT_TIMEOUT_OPTIONS } from '../constants';
 import { AppContext } from '../contexts/AppContext';
 import SettingsItem from '../components/SettingsItem';
 import ButtonRedirect from '../components/dialog/ButtonRedirect';
 import WarningDialog from '../components/dialog/WarningDialog';
 import ResetWarningDialog from '../components/dialog/ResetWarningDialog';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles(() => ({
   pageHeading: {
     paddingLeft: 20,
     paddingTop: 20,
@@ -22,7 +30,8 @@ const useStyles = makeStyles(theme => ({
 export default function Settings() {
   const classes = useStyles();
   const { state, dispatch } = useContext(AppContext);
-  const { api_key, enc_mode, theme, key_length, encryption } = state.settings;
+  const { api_key, enc_mode, theme, key_length, encryption, draft_timeout } =
+    state.settings;
 
   const clearHistory = () => {
     dispatch({
@@ -85,6 +94,30 @@ export default function Settings() {
         <Typography variant={'h4'}>Help</Typography>
         <SettingsItem primary={'Support'}>
           <ButtonRedirect iconButton value={'Get Help'} url={'/support'} />
+        </SettingsItem>
+
+        <Typography variant={'h4'}>Draft</Typography>
+        <SettingsItem
+          primary={'Keep draft for'}
+          secondary={'Text is restored when you reopen the extension'}
+        >
+          <Select
+            value={draft_timeout}
+            onChange={(e: SelectChangeEvent<number>) => {
+              dispatch({
+                type: Action.UPDATE_SETTINGS,
+                payload: { draft_timeout: Number(e.target.value) },
+              });
+            }}
+            sx={{ height: 32 }}
+            size="small"
+          >
+            {DRAFT_TIMEOUT_OPTIONS.map(opt => (
+              <MenuItem key={opt.value} value={opt.value}>
+                {opt.name}
+              </MenuItem>
+            ))}
+          </Select>
         </SettingsItem>
 
         <Typography variant={'h4'}>Reset</Typography>

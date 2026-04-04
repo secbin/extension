@@ -1,7 +1,8 @@
 html,
 body {
   width: 440px;
-  height: fit-content;
+  height: 600px;
+  overflow: hidden;
   margin: 0;
   font-family:
     'Helvetica Neue',
@@ -19,10 +20,10 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/*#root {*/
-/*  overflow-y: auto;*/
-/*  max-height: 100vh;*/
-/*}*/
+#root {
+  height: 600px;
+  overflow: hidden;
+}
 
 code {
   font-family: Roboto, source-code-pro, Menlo, Monaco, Consolas, 'Courier New',

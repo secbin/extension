@@ -1,12 +1,12 @@
 import React from 'react';
 import clsx from 'clsx';
-import { Box, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { HistoryType } from '../../contexts/AppContext';
 import { printDateInCorrectFormat } from '../../chrome/utils';
 import { ContentPaste, CheckCircle, Error, History } from '@mui/icons-material';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles(() => ({
   icon: {
     fontSize: 80,
     width: '100%',

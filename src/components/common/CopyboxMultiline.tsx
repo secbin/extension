@@ -1,17 +1,10 @@
 import React from 'react';
-import {
-  Box,
-  Button,
-  Card,
-  IconButton,
-  InputBase,
-  Typography,
-} from '@mui/material';
+import { Box, Button, Card, InputBase, Typography } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 import { copyTextClipboard } from '../../chrome/utils';
-import { ContentPaste, ContentPasteRounded } from '@mui/icons-material';
+import { ContentPasteRounded } from '@mui/icons-material';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles(() => ({
   copybox: {
     borderRadius: 6,
     border: '1px solid',

@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, ListItem, ListItemText } from '@mui/material';
 import { makeStyles } from '@mui/styles';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles(() => ({
   card: {
     borderRadius: 6,
     border: '1px solid',
@@ -15,7 +15,7 @@ const useStyles = makeStyles(theme => ({
 export type LSettingsItemType = {
   primary: string;
   secondary?: string;
-  children: any;
+  children: React.ReactNode;
   multilineSecondaryText?: boolean;
 };
 

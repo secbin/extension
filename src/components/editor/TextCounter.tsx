@@ -9,7 +9,7 @@ import {
 import ErrorIcon from '@mui/icons-material/Error';
 import clsx from 'clsx';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles(() => ({
   counterContainer: {
     margin: '15px',
     display: 'inline-flex',

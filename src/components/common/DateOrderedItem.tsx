@@ -4,11 +4,10 @@ import { makeStyles } from '@mui/styles';
 import moment from 'moment';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { HistoryType } from '../../contexts/AppContext';
 import { ChevronRight } from '@mui/icons-material';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles(() => ({
   card: {
     borderRadius: 6,
     border: '1px solid',
@@ -21,7 +20,7 @@ const useStyles = makeStyles(theme => ({
 export type LDateOrderedItemType = {
   showDateHeading?: boolean;
   id?: string;
-  date: Date;
+  date: number;
   primary: string;
   secondary?: string;
   clickHandler: (item: HistoryType) => void;
@@ -51,7 +50,7 @@ const DateOrderedItem = ({
           <ListItemText primary={primary} secondary={secondary} />
           <IconButton
             aria-label="More details"
-            onClick={e => clickHandler(payload)}
+            onClick={() => clickHandler(payload)}
           >
             <ChevronRight />
           </IconButton>

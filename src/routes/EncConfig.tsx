@@ -5,6 +5,7 @@ import {
   DialogContent,
   MenuItem,
   Select,
+  SelectChangeEvent,
   Typography,
 } from '@mui/material';
 import { makeStyles } from '@mui/styles';
@@ -12,7 +13,7 @@ import { AppContext } from '../contexts/AppContext';
 import { Action, ENCRYPTION_METHODS, KEY_LENGTHS } from '../constants';
 import SettingsItem from '../components/SettingsItem';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles(() => ({
   menuItem: {
     height: 10,
     boxShadow: 'none',
@@ -29,28 +30,26 @@ const EncConfig = () => {
   const { state, dispatch } = React.useContext(AppContext);
   const { enc_mode, key_length, encryption } = state.settings;
 
-  const keyLengthHandler = e => {
+  const keyLengthHandler = (e: SelectChangeEvent<number>) => {
     dispatch({
       type: Action.UPDATE_SETTINGS,
-      payload: { ...state.settings, key_length: e.target.value },
+      payload: { ...state.settings, key_length: Number(e.target.value) },
     });
   };
 
-  const encModeHandler = e => {
+  const encModeHandler = (e: SelectChangeEvent<string>) => {
     dispatch({
       type: Action.UPDATE_SETTINGS,
       payload: { ...state.settings, enc_mode: e.target.value },
     });
   };
 
-  const encryptionHandler = e => {
+  const encryptionHandler = () => {
     const newEncryption = {
       ...state.settings,
       encryption: !encryption,
     };
     dispatch({ type: Action.UPDATE_SETTINGS, payload: newEncryption });
-
-    console.log('UPDATING ENCRYPTION', { encryption, newEncryption });
   };
 
   useLayoutEffect(() => {

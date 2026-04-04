@@ -16,7 +16,7 @@ import { AppContext } from '../../contexts/AppContext';
 import { Action } from '../../constants';
 import forge from 'node-forge';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles(() => ({
   copybox: {
     paddingLeft: 10,
     paddingRight: 10,

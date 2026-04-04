@@ -11,7 +11,7 @@ import { ChevronLeft } from '@mui/icons-material';
 import { useHistory } from 'react-router-dom';
 import { AppContext } from '../../contexts/AppContext';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles(() => ({
   subHeader: {
     borderRadius: 0,
     borderBottom: '1px solid rgba(170,170,170,0.25)',

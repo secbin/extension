@@ -29,7 +29,7 @@ const useStyles = makeStyles(() => ({
 export default function Editor() {
   const classes = useStyles();
   const { state, dispatch } = useContext(AppContext);
-  const [anchorEl, setAnchorEl] = React.useState(null);
+  const [anchorEl, setAnchorEl] = React.useState<HTMLElement | null>(null);
   const open = Boolean(anchorEl);
   const {
     draft: { action: menu, key: passkey },
@@ -43,6 +43,7 @@ export default function Editor() {
       dispatch({ type: Action.CLOSE_DIALOG });
       createPost();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [passkey, dialog_id]);
 
   return (

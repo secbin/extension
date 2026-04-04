@@ -10,14 +10,13 @@ import {
 import { makeStyles } from '@mui/styles';
 import { copyTextClipboard, openLinkInNewWindow } from '../../chrome/utils';
 import {
-  ContentPaste,
   ContentPasteRounded,
   VisibilityOffOutlined,
   VisibilityOutlined,
   OpenInNewRounded,
 } from '@mui/icons-material';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles(() => ({
   copybox: {
     padding: '5px 0 5px 10px',
     borderRadius: 6,
@@ -58,16 +57,14 @@ export type LCopyboxType = {
 const Copybox = ({
   title,
   value,
-  type = 'text',
+  type = 'text' as string,
   allowCopy = false,
   toggleVisibility = false,
   large = true,
   openInNew = false,
 }: LCopyboxType) => {
   const classes = useStyles();
-  const [show, setShow] = React.useState(
-    toggleVisibility ? 'password' : 'text'
-  );
+  const [show, setShow] = React.useState(type);
 
   const toggleVisibilityHandler = () => {
     setShow(show === 'password' ? 'text' : 'password');

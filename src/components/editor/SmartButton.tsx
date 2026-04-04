@@ -6,7 +6,7 @@ import { Action } from '../../constants';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { useCreatePost } from '../../hooks/useCreatePost';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles(() => ({
   copybox: {
     paddingLeft: 10,
     paddingRight: 10,
@@ -31,7 +31,13 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-const SmartButton = ({ setAnchorEl, open }: any) => {
+const SmartButton = ({
+  setAnchorEl,
+  open,
+}: {
+  setAnchorEl: (el: HTMLElement | null) => void;
+  open: boolean;
+}) => {
   const classes = useStyles();
   const { state, dispatch } = useContext(AppContext);
   const {
@@ -43,12 +49,12 @@ const SmartButton = ({ setAnchorEl, open }: any) => {
 
   // Maps plain actions → encrypted equivalents when encryption is enabled
   // UNENCRYPT_PASTEBIN is intentionally excluded: it bypasses encryption even when enabled
-  const encryptionMap: any = {
+  const encryptionMap: Record<string, Action> = {
     [Action.SAVE_DRAFT]: Action.ENCRYPT,
     [Action.OPEN_PASTEBIN]: Action.DECRYPT_PASTEBIN,
   };
 
-  const plainMap: any = {
+  const plainMap: Record<string, Action> = {
     [Action.ENCRYPT_PASTEBIN]: Action.SEND_TO_PASTEBIN,
     [Action.DECRYPT_PASTEBIN]: Action.OPEN_PASTEBIN,
     [Action.ENCRYPT]: Action.SAVE_DRAFT,
@@ -66,15 +72,16 @@ const SmartButton = ({ setAnchorEl, open }: any) => {
     return menu;
   };
 
-  const handleClick = (event: any) => {
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
-  const actionWrapper = async (e: any) => {
-    const buttonText = e.target.innerText || '';
+  const actionWrapper = async (e: React.MouseEvent<HTMLElement>) => {
+    const buttonText = (e.target as HTMLElement).innerText || '';
     dispatch({
       type: Action.SET_ACTION,
-      payload: { action: buttonText || getButtonText() },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      payload: { action: (buttonText || getButtonText()) as any },
     });
     if (
       buttonText === Action.DECRYPT_PASTEBIN ||

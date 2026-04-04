@@ -56,6 +56,9 @@
       "last 1 safari version"
     ]
   },
+  "resolutions": {
+    "@types/react": "^16.14.0"
+  },
   "devDependencies": {
     "@types/chrome": "^0.0.126",
     "@types/node-forge": "^1.0.0",

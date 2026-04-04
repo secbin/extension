@@ -9,7 +9,7 @@ import { printDateInCorrectFormat } from '../chrome/utils';
 import DateOrderedItem from '../components/common/DateOrderedItem';
 import StatusIcon from '../components/editor/StatusIcon';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles(() => ({
   pageHeading: {
     paddingLeft: 20,
     paddingTop: 20,
@@ -69,7 +69,7 @@ export default function History() {
         {history
           ?.slice()
           .reverse()
-          .map((item: any, index: number) => {
+          .map((item: HistoryType, index: number) => {
             let showItem = false;
             const itemTime = moment(item.date).format('MMMM D, YYYY');
             if (itemTime !== lastLastDate) {

@@ -8,6 +8,7 @@ import {
 import { setSyncItem, deleteSyncItem } from '../chrome/utils/storage';
 import { Storage, Action, DEFAULT_CONTEXT } from '../constants';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ActionMap<M extends { [index: string]: any }> = {
   [Key in keyof M]: M[Key] extends undefined
     ? {
@@ -28,7 +29,7 @@ type HistoryPayload = {
       key_length: number | null;
       key: string | null;
       enc_text: string | null;
-      date: Date;
+      date: number;
     },
   ];
   [Action.ADD_TO_HISTORY]: {
@@ -38,7 +39,7 @@ type HistoryPayload = {
     key_length: number | null;
     key: string | null;
     enc_text: string | null;
-    date: Date;
+    date: number;
   };
   [Action.CLEAR_HISTORY]: undefined;
   [Action.REMOVE_ITEM_FROM_HISTORY]: {
@@ -84,6 +85,7 @@ type DraftPayload = {
       | Action.DECRYPT_PASTEBIN
       | Action.ENCRYPT
       | Action.ENCRYPT_PASTEBIN
+      | Action.SEND_TO_PASTEBIN
       | Action.UNENCRYPT_PASTEBIN
       | Action.OPEN_PASTEBIN
       | Action.SAVE_DRAFT;
@@ -95,6 +97,7 @@ type DraftPayload = {
       | Action.DECRYPT_PASTEBIN
       | Action.ENCRYPT
       | Action.ENCRYPT_PASTEBIN
+      | Action.SEND_TO_PASTEBIN
       | Action.UNENCRYPT_PASTEBIN
       | Action.OPEN_PASTEBIN
       | Action.SAVE_DRAFT;
@@ -107,6 +110,7 @@ type DraftPayload = {
       | Action.DECRYPT_PASTEBIN
       | Action.ENCRYPT
       | Action.ENCRYPT_PASTEBIN
+      | Action.SEND_TO_PASTEBIN
       | Action.UNENCRYPT_PASTEBIN
       | Action.OPEN_PASTEBIN
       | Action.SAVE_DRAFT;
@@ -120,6 +124,7 @@ type DraftPayload = {
       | Action.DECRYPT_PASTEBIN
       | Action.ENCRYPT
       | Action.ENCRYPT_PASTEBIN
+      | Action.SEND_TO_PASTEBIN
       | Action.UNENCRYPT_PASTEBIN
       | Action.OPEN_PASTEBIN
       | Action.SAVE_DRAFT;
@@ -135,6 +140,7 @@ type SettingsPayload = {
     key_length?: number;
     theme?: boolean;
     sync_theme?: boolean;
+    draft_timeout?: number;
   };
   [Action.SET_SETTINGS]: {
     api_key?: string;
@@ -143,6 +149,7 @@ type SettingsPayload = {
     key_length?: number;
     theme?: boolean;
     sync_theme?: boolean;
+    draft_timeout?: number;
   };
   [Action.UPDATE_THEME]: {
     theme: boolean;
@@ -161,7 +168,7 @@ type GlobalPayload = {
     key_length: number | null;
     key: string | null;
     enc_text: string | null;
-    date: Date;
+    date: number;
   };
 };
 
@@ -286,7 +293,10 @@ export const draftReducer = (
         action: action.payload.action,
         buttonEnabled: action.payload.buttonEnabled,
       };
-      setSyncItem(Storage.DRAFT, JSON.stringify(updatedPlaintext));
+      setSyncItem(
+        Storage.DRAFT,
+        JSON.stringify({ ...updatedPlaintext, savedAt: Date.now() })
+      );
       return updatedPlaintext;
     }
     case Action.UPDATE_ENC_MENU:
@@ -350,6 +360,7 @@ export const settingsReducer = (
         encryption: setEncryption,
         key_length: action.payload?.key_length || state.key_length,
         sync_theme: setSyncTheme,
+        draft_timeout: action.payload?.draft_timeout ?? state.draft_timeout,
       };
     }
     case Action.SET_THEME:
@@ -374,6 +385,7 @@ export const settingsReducer = (
         encryption: enc !== undefined ? enc : state.encryption,
         key_length: action.payload?.key_length || state.key_length,
         sync_theme: sync !== undefined ? sync : state.sync_theme,
+        draft_timeout: action.payload?.draft_timeout ?? state.draft_timeout,
       };
       setSyncItem(Storage.SETTINGS, JSON.stringify(newState));
       return newState;

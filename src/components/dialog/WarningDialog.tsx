@@ -15,7 +15,7 @@ import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded';
 import clsx from 'clsx';
 import { setLocalItem } from '../../chrome/utils/storage';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles(() => ({
   buttonEd: {
     width: '100%',
     backgroundColor: 'rgba(0,117,250,0.08)',

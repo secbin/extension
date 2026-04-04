@@ -4,7 +4,14 @@ import { Button, IconButton } from '@mui/material';
 import { useHistory } from 'react-router-dom';
 import { ChevronRight } from '@mui/icons-material';
 
-export default function ButtonRedirect(props: any) {
+interface ButtonRedirectProps {
+  external?: boolean;
+  url: string;
+  iconButton?: boolean;
+  value?: string;
+}
+
+export default function ButtonRedirect(props: ButtonRedirectProps) {
   const { push } = useHistory();
 
   const handleClickOpen = () => {

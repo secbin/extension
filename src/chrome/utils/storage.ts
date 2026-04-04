@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /////////////////////////  SYNC STORAGE //////////////////////////////
 // Chrome sync storage limit of 8,192 bytes per item, 102,400 Bytes total storage
 export const setSyncItem = (key: string, value: any, callback?: () => void) => {
@@ -22,7 +23,6 @@ export const getSyncItemAsync = async (key: string) => {
   return new Promise(resolve => {
     chrome.storage.sync.get([key], function (result) {
       if (result[key] === undefined) {
-        console.log(`${key} not found in storage`);
         resolve(undefined);
       } else {
         resolve(result[key]);
@@ -67,11 +67,7 @@ export const deleteLocalItem = (
   return chrome.storage.local.remove(key, callback);
 };
 
-export const addLocalItem = (
-  key: string,
-  value: any,
-  callback?: () => void
-) => {
+export const addLocalItem = (key: string, value: any) => {
   getLocalItem(key, data => {
     //console.log("DATA FROM ADD", data);
     let result = data[key];
@@ -85,11 +81,7 @@ export const addLocalItem = (
   });
 };
 
-export const getItemAtIndex = (
-  key: string,
-  index: number,
-  callback: (items: { [key: string]: any }) => void
-) => {
+export const getItemAtIndex = (key: string, index: number) => {
   getLocalItem(key, data => {
     const result = data[key];
     if (result && result.length > index) {

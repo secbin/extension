@@ -16,5 +16,5 @@
     "service_worker": "./static/js/background.js"
   },
   "permissions": ["storage", "contextMenus", "clipboardWrite"],
-  "optional_permissions": ["<all_urls>"]
+  "optional_host_permissions": ["<all_urls>"]
 }

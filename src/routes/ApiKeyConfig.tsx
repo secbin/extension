@@ -17,7 +17,7 @@ import { isValidDevKey } from '../chrome/utils/pastebin';
 import { Action, PASTEBIN_API_KEY_LENGTH } from '../constants';
 import clsx from 'clsx';
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles(() => ({
   copybox: {
     padding: '7px 0 7px 10px',
     borderRadius: 6,
@@ -40,7 +40,7 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export function StatusBanner(props: any) {
+export function StatusBanner(props: { success: boolean }) {
   const classes = useStyles();
 
   return (
