@@ -5,7 +5,12 @@ import {
   draftReducer,
   settingsReducer,
 } from './reducers';
-import { AppType, DraftType, HistoryType, SettingsType } from '../contexts/AppContext';
+import {
+  AppType,
+  DraftType,
+  HistoryType,
+  SettingsType,
+} from '../contexts/AppContext';
 
 // Mock Chrome storage so reducers that call setSyncItem/deleteSyncItem don't throw
 jest.mock('../chrome/utils/storage', () => ({
@@ -106,7 +111,15 @@ describe('appReducer', () => {
 
   it('UPDATE_NAVIGATION clears subheader', () => {
     const result = appReducer(
-      { ...initialState, subheader: { back_button: true, primary: 'X', secondary: null, custom_button: null } },
+      {
+        ...initialState,
+        subheader: {
+          back_button: true,
+          primary: 'X',
+          secondary: null,
+          custom_button: null,
+        },
+      },
       { type: Action.UPDATE_NAVIGATION, payload: { location: '/home' } as any }
     );
     expect(result.subheader).toBeNull();

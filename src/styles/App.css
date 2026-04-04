@@ -47,7 +47,9 @@ h6 {
 .route-enter-active {
   opacity: 1;
   transform: translateY(0);
-  transition: opacity 180ms ease-out, transform 180ms ease-out;
+  transition:
+    opacity 180ms ease-out,
+    transform 180ms ease-out;
 }
 
 @media (prefers-reduced-motion: reduce) {

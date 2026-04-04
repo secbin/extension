@@ -1,4 +1,8 @@
-import { openLinkInNewWindow, printDateInCorrectFormat, copyTextClipboard } from './utils';
+import {
+  openLinkInNewWindow,
+  printDateInCorrectFormat,
+  copyTextClipboard,
+} from './utils';
 
 describe('openLinkInNewWindow', () => {
   it('calls window.open with the given URL', () => {

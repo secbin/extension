@@ -308,33 +308,33 @@ export const App = () => {
           }}
         >
           <div className={routeEntering ? 'route-enter' : 'route-enter-active'}>
-          <Switch>
-            <Route path="/home">
-              <Editor />
-            </Route>
-            <Route path="/settings">
-              <Settings />
-            </Route>
-            {/*Sub heading routes*/}
-            <Route path="/apikey">
-              <ApiKeyConfig />
-            </Route>
-            <Route path="/encconfig">
-              <EncConfig />
-            </Route>
-            <Route path="/support">
-              <Support />
-            </Route>
-            <Route path="/history">
-              <History />
-            </Route>
-            <Route path="/result/:id?">
-              <Result />
-            </Route>
-            <Route path="/">
-              <Editor />
-            </Route>
-          </Switch>
+            <Switch>
+              <Route path="/home">
+                <Editor />
+              </Route>
+              <Route path="/settings">
+                <Settings />
+              </Route>
+              {/*Sub heading routes*/}
+              <Route path="/apikey">
+                <ApiKeyConfig />
+              </Route>
+              <Route path="/encconfig">
+                <EncConfig />
+              </Route>
+              <Route path="/support">
+                <Support />
+              </Route>
+              <Route path="/history">
+                <History />
+              </Route>
+              <Route path="/result/:id?">
+                <Result />
+              </Route>
+              <Route path="/">
+                <Editor />
+              </Route>
+            </Switch>
           </div>
         </Box>
       </Box>

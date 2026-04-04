@@ -78,12 +78,16 @@ chrome.contextMenus.onClicked.addListener(async clickData => {
   if (clickData.menuItemId === 'pasteBin') {
     if (text.length > MAX_PASTEBIN_TEXT_LENGTH) {
       alert(
-        'Can only post up to ' + MAX_PASTEBIN_TEXT_LENGTH + ' characters via right-click'
+        'Can only post up to ' +
+          MAX_PASTEBIN_TEXT_LENGTH +
+          ' characters via right-click'
       );
       return;
     }
 
-    const { api_key } = (await getSyncItemAsync(Storage.SETTINGS)) as SettingsType;
+    const { api_key } = (await getSyncItemAsync(
+      Storage.SETTINGS
+    )) as SettingsType;
     const res = await encrypt(text);
     const link = await postPastebin(res.data, api_key);
     const history = {
@@ -139,7 +143,9 @@ chrome.contextMenus.onClicked.addListener(async clickData => {
       const res = decrypt(pasteText, key);
       alert('Decrypted text: \n' + res);
     } else {
-      alert('Could not decrypt: text does not appear to be a ciphertext or Pastebin link');
+      alert(
+        'Could not decrypt: text does not appear to be a ciphertext or Pastebin link'
+      );
     }
   }
 });

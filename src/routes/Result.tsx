@@ -73,7 +73,8 @@ const Result = () => {
 
   const isPasteBin = !!result?.pastebinlink;
   const hasError = result?.pastebinlink?.includes('PasteBin Error') ?? false;
-  const errorMessage = result?.pastebinlink?.replace('PasteBin Error', '') ?? '';
+  const errorMessage =
+    result?.pastebinlink?.replace('PasteBin Error', '') ?? '';
 
   return (
     <div className={classes.center}>
@@ -106,8 +107,8 @@ const Result = () => {
                   result.key
                     ? 'Ciphertext'
                     : result.pastebinlink
-                    ? 'Pastebin Content'
-                    : 'Plaintext'
+                      ? 'Pastebin Content'
+                      : 'Plaintext'
                 }
               />
             )}
