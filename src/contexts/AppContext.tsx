@@ -9,7 +9,6 @@ import {
   DraftActions,
   SettingsActions,
   AppActions,
-  GlobalActions,
 } from '../reducers/reducers';
 
 export type SettingsType = {
@@ -21,31 +20,33 @@ export type SettingsType = {
   sync_theme: boolean;
 };
 
+export type DraftActionValue =
+  | Action.DECRYPT
+  | Action.DECRYPT_PASTEBIN
+  | Action.ENCRYPT
+  | Action.ENCRYPT_PASTEBIN
+  | Action.UNENCRYPT_PASTEBIN
+  | Action.OPEN_PASTEBIN
+  | Action.SAVE_DRAFT
+  | Action.SEND_TO_PASTEBIN;
+
 export type DraftType = {
-  action:
-    | Action.DECRYPT
-    | Action.DECRYPT_PASTEBIN
-    | Action.ENCRYPT
-    | Action.ENCRYPT_PASTEBIN
-    | Action.UNENCRYPT_PASTEBIN
-    | Action.OPEN_PASTEBIN
-    | Action.SAVE_DRAFT;
+  action: DraftActionValue;
   plaintext: string;
   buttonEnabled: boolean;
   enc_text: string;
   pastebinlink: string;
   key: string;
-  success: any;
 };
 
 export type HistoryType = {
-  id: number;
+  id: string;
   pastebinlink: string;
   enc_mode: string | null;
   key_length: number | null;
   key: string | null;
   enc_text: string | null;
-  date: Date;
+  date: number;
 };
 
 export type SubHeaderType = {
@@ -82,7 +83,6 @@ const initialState = {
     enc_text: '',
     pastebinlink: '',
     key: '',
-    success: '',
   } as DraftType,
   settings: {
     api_key: '',
@@ -94,12 +94,7 @@ const initialState = {
   },
 };
 
-type Actions =
-  | AppActions
-  | HistoryActions
-  | DraftActions
-  | SettingsActions
-  | GlobalActions;
+type Actions = AppActions | HistoryActions | DraftActions | SettingsActions;
 const AppContext = createContext<{
   state: InitialStateType;
   dispatch: Dispatch<Actions>;
@@ -110,19 +105,6 @@ const AppContext = createContext<{
 
 const mainReducer = (state: InitialStateType, action: Actions) => {
   const { app, history, draft, settings } = state;
-  // Directly handle specific actions
-  switch (action.type) {
-    case Action.CREATE_POST:
-      // Process the action and modify the state as needed
-
-      return {
-        ...state, // Spread the existing state
-        // Update specific parts of the state based on the action
-      };
-    // Add more cases as needed
-  }
-
-  // If the action isn't handled above, delegate to sub-reducers
   return {
     app: appReducer(app, action),
     history: historyReducer(history, action),
@@ -131,7 +113,7 @@ const mainReducer = (state: InitialStateType, action: Actions) => {
   };
 };
 
-const AppProvider: React.FC = ({ children }) => {
+const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(mainReducer, initialState);
 
   return (

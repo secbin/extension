@@ -1,6 +1,5 @@
 import React from 'react';
 import { useEffect } from 'react';
-import { makeStyles } from '@mui/styles';
 import { AppContext, HistoryType } from '../contexts/AppContext';
 import { useParams } from 'react-router-dom';
 import StatusIcon from '../components/editor/StatusIcon';
@@ -9,25 +8,8 @@ import CopyboxMultiline from '../components/common/CopyboxMultiline';
 import { Action } from '../constants';
 import moment from 'moment/moment';
 
-const useStyles = makeStyles(theme => ({
-  center: {
-    width: '100%',
-    margin: '20px 0',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    textAlign: 'center',
-    alignItems: 'center',
-  },
-  left: {
-    textAlign: 'left',
-    marginLeft: 10,
-    marginRight: 10,
-  },
-}));
-
 const Result = () => {
-  const { id } = useParams();
+  const { id } = useParams<{ id?: string }>();
 
   const { state, dispatch } = React.useContext(AppContext);
   const [result, setResult] = React.useState<HistoryType | null>();
@@ -43,8 +25,9 @@ const Result = () => {
   };
 
   useEffect(() => {
-    if (id >= 0) {
-      setResult(state.history[id]);
+    const index = id !== undefined ? parseInt(id, 10) : NaN;
+    if (!isNaN(index)) {
+      setResult(state.history[index]);
     } else {
       setResult(
         state.history.length ? state.history[state.history.length - 1] : null
@@ -68,22 +51,25 @@ const Result = () => {
     });
   }, [dispatch, result]);
 
-  const classes = useStyles();
-
   const isPasteBin = !!result?.pastebinlink;
   const hasError = result?.pastebinlink.includes('PasteBin Error');
   const errorMessage = result?.pastebinlink.replace('PasteBin Error', '');
 
   return (
-    <div className={classes.center}>
+    <div
+      style={{
+        width: '100%',
+        margin: '20px 0',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        textAlign: 'center',
+        alignItems: 'center',
+      }}
+    >
       {result ? (
         <>
-          {/*{isPasteBin && !hasError ? (*/}
-          {/*    <StatusIcon result={result} variant={'success'}/>*/}
-          {/*) : (*/}
-          {/*    null //<StatusIcon result={result} variant={'success'} />*/}
-          {/*)}*/}
-          <div className={classes.left}>
+          <div style={{ textAlign: 'left', marginLeft: 10, marginRight: 10 }}>
             {result?.pastebinlink &&
               !result?.pastebinlink.includes('PasteBin Error') && (
                 <Copybox
@@ -110,7 +96,6 @@ const Result = () => {
               <Copybox
                 value={result.key}
                 title={'Passkey'}
-                type={'password'}
                 allowCopy={true}
                 toggleVisibility={true}
               />

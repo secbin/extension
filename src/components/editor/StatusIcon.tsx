@@ -1,30 +1,14 @@
 import React from 'react';
-import clsx from 'clsx';
-import { Box, Typography } from '@mui/material';
-import { makeStyles } from '@mui/styles';
+import { Typography } from '@mui/material';
 import { HistoryType } from '../../contexts/AppContext';
 import { printDateInCorrectFormat } from '../../chrome/utils';
 import { ContentPaste, CheckCircle, Error, History } from '@mui/icons-material';
 
-const useStyles = makeStyles(theme => ({
-  icon: {
-    fontSize: 80,
-    width: '100%',
-    margin: '20px 0',
-  },
-  green: {
-    color: 'green',
-  },
-  red: {
-    color: 'red',
-  },
-  grey: {
-    color: '#b6b6b6',
-  },
-  topMargin: {
-    marginTop: 164,
-  },
-}));
+const iconSx = {
+  fontSize: 80,
+  width: '100%',
+  margin: '20px 0',
+};
 
 export type LStatusType = {
   variant: 'error' | 'success' | 'empty-history' | 'empty-clipboard';
@@ -32,18 +16,15 @@ export type LStatusType = {
 };
 
 const StatusIcon = ({ variant, result }: LStatusType) => {
-  const classes = useStyles();
-
   if (variant === 'success') {
     return (
       <>
-        <CheckCircle className={clsx(classes.icon, classes.green)} />
+        <CheckCircle sx={{ ...iconSx, color: 'green' }} />
         {result?.pastebinlink && result?.pastebinlink.length ? (
           <Typography variant={'h2'}>Posted to Pastebin</Typography>
         ) : (
           <Typography variant={'h2'}>Encrypted Ciphertext</Typography>
         )}
-
         {result && (
           <Typography variant={'h4'}>
             {printDateInCorrectFormat(result?.date)}
@@ -57,24 +38,24 @@ const StatusIcon = ({ variant, result }: LStatusType) => {
   } else if (variant === 'error') {
     return (
       <>
-        <Error className={clsx(classes.icon, classes.red)} />
+        <Error sx={{ ...iconSx, color: 'red' }} />
         <Typography variant={'h2'}>Error posting to Pastebin</Typography>
       </>
     );
   } else if (variant === 'empty-clipboard') {
     return (
-      <div className={classes.topMargin}>
-        <ContentPaste className={clsx(classes.icon, classes.grey)} />
-        <Typography className={classes.grey} variant={'h2'}>
+      <div style={{ marginTop: 164 }}>
+        <ContentPaste sx={{ ...iconSx, color: '#b6b6b6' }} />
+        <Typography sx={{ color: '#b6b6b6' }} variant={'h2'}>
           No Encryptions
         </Typography>
       </div>
     );
   } else {
     return (
-      <div className={classes.topMargin}>
-        <History className={clsx(classes.icon, classes.grey)} />
-        <Typography className={classes.grey} variant={'h2'}>
+      <div style={{ marginTop: 164 }}>
+        <History sx={{ ...iconSx, color: '#b6b6b6' }} />
+        <Typography sx={{ color: '#b6b6b6' }} variant={'h2'}>
           No History
         </Typography>
       </div>

@@ -6,45 +6,33 @@ import {
   ListItem,
   ListItemText,
 } from '@mui/material';
-import { makeStyles } from '@mui/styles';
 import { ChevronLeft } from '@mui/icons-material';
 import { useHistory } from 'react-router-dom';
 import { AppContext } from '../../contexts/AppContext';
-
-const useStyles = makeStyles(theme => ({
-  subHeader: {
-    borderRadius: 0,
-    borderBottom: '1px solid rgba(170,170,170,0.25)',
-    boxShadow: '0 0 20px 0 rgba(0,0,0,0.07)',
-    width: '100vw',
-  },
-}));
 
 const SubHeader = () => {
   const { state } = useContext(AppContext);
   const { subheader } = state.app;
 
-  console.log('SUBHEADER IN COMPONENT HERE', { subheader });
-
-  const classes = useStyles();
   const { goBack } = useHistory();
-  //
-  // useEffect(() => {
-  //     // Rerender
-  // }, [location])
 
   if (subheader) {
     return (
       <>
-        <Card className={classes.subHeader}>
+        <Card
+          sx={{
+            borderRadius: 0,
+            borderBottom: '1px solid rgba(170,170,170,0.25)',
+            boxShadow: '0 0 20px 0 rgba(0,0,0,0.07)',
+            width: '100%',
+          }}
+        >
           <ListItem sx={{ padding: '8px 6px' }}>
             {subheader?.back_button && (
               <Fragment>
                 <IconButton
                   sx={{ borderRadius: '4px' }}
-                  onClick={() => {
-                    goBack();
-                  }}
+                  onClick={() => goBack()}
                 >
                   <ChevronLeft color="secondary" />
                 </IconButton>

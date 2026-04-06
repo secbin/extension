@@ -1,38 +1,34 @@
 import React, { useContext } from 'react';
-import { Card, IconButton, ListItemButton, ListItemText } from '@mui/material';
-import { makeStyles } from '@mui/styles';
-import { AppContext } from '../../contexts/AppContext';
+import {
+  Box,
+  Card,
+  IconButton,
+  ListItemButton,
+  ListItemText,
+} from '@mui/material';
+import { AppContext, DraftActionValue } from '../../contexts/AppContext';
 import { Action } from '../../constants';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import { useCreatePost } from '../../hooks/useCreatePost';
 
-const useStyles = makeStyles(theme => ({
-  copybox: {
-    paddingLeft: 10,
-    paddingRight: 10,
-    borderRadius: 6,
-    border: '1px solid',
-    borderColor: 'rgba(170,170,170,0.25)',
-    boxShadow: '0 0 7px 0 rgba(0,0,0,0.04)',
-    marginTop: 20,
-    marginBottom: 14,
-  },
-  textArea: {
-    width: 350,
-  },
-  bottomSection: {
-    display: 'flex',
-  },
-  animated: {
-    transition: 'all 0.25s',
-  },
-  muted: {
-    color: 'rgba(0,0,0,0.3)',
-  },
-}));
+type SmartButtonProps = {
+  setAnchorEl: (el: HTMLElement | null) => void;
+  open: boolean;
+};
 
-const SmartButton = ({ setAnchorEl, open }: any) => {
-  const classes = useStyles();
+const encryptionMap: Partial<Record<Action, Action>> = {
+  [Action.SEND_TO_PASTEBIN]: Action.ENCRYPT_PASTEBIN,
+  [Action.OPEN_PASTEBIN]: Action.DECRYPT_PASTEBIN,
+  [Action.SAVE_DRAFT]: Action.ENCRYPT,
+};
+
+const plainMap: Partial<Record<Action, Action>> = {
+  [Action.ENCRYPT_PASTEBIN]: Action.SEND_TO_PASTEBIN,
+  [Action.DECRYPT_PASTEBIN]: Action.OPEN_PASTEBIN,
+  [Action.ENCRYPT]: Action.SAVE_DRAFT,
+};
+
+const SmartButton = ({ setAnchorEl, open }: SmartButtonProps) => {
   const { state, dispatch } = useContext(AppContext);
   const {
     draft: { buttonEnabled, action: menu },
@@ -41,39 +37,31 @@ const SmartButton = ({ setAnchorEl, open }: any) => {
 
   const createPost = useCreatePost();
 
-  const encryptionMap: any = {
-    [Action.SEND_TO_PASTEBIN]: Action.ENCRYPT_PASTEBIN,
-    [Action.OPEN_PASTEBIN]: Action.DECRYPT_PASTEBIN,
-    [Action.SAVE_DRAFT]: Action.ENCRYPT,
-  };
-
-  const plainMap: any = {
-    [Action.ENCRYPT_PASTEBIN]: Action.SEND_TO_PASTEBIN,
-    [Action.DECRYPT_PASTEBIN]: Action.OPEN_PASTEBIN,
-    [Action.ENCRYPT]: Action.SAVE_DRAFT,
-  };
-
-  const getButtonText = () => {
+  const getButtonText = (): Action => {
     if (Object.prototype.hasOwnProperty.call(plainMap, menu) && !encryption) {
-      return plainMap[menu];
+      return plainMap[menu] ?? menu;
     } else if (
       Object.prototype.hasOwnProperty.call(encryptionMap, menu) &&
       encryption
     ) {
-      return encryptionMap[menu];
+      return encryptionMap[menu] ?? menu;
     }
     return menu;
   };
 
-  const handleClick = (event: any) => {
+  // TODO(rewrite): stopPropagation prevents the opening click from bubbling to document
+  // where MUI's ClickAwayListener would see it and immediately close the menu.
+  // Verify this holds in injected mode (shadow DOM composed path may differ). See README § Known issues.
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.stopPropagation();
     setAnchorEl(event.currentTarget);
   };
 
-  const actionWrapper = async (e: any) => {
-    const buttonText = e.target.innerText || '';
+  const actionWrapper = async (e: React.MouseEvent<HTMLElement>) => {
+    const buttonText = (e.target as HTMLElement).innerText || '';
     dispatch({
       type: Action.SET_ACTION,
-      payload: { action: buttonText || getButtonText() },
+      payload: { action: (buttonText as DraftActionValue) || getButtonText() },
     });
     if (
       buttonText === Action.DECRYPT_PASTEBIN ||
@@ -102,7 +90,7 @@ const SmartButton = ({ setAnchorEl, open }: any) => {
 
   return (
     <Card
-      className={classes.animated}
+      sx={{ transition: 'all 0.25s' }}
       style={{
         minWidth: 100,
         textAlign: 'center',
@@ -113,34 +101,35 @@ const SmartButton = ({ setAnchorEl, open }: any) => {
         marginLeft: 'auto',
       }}
     >
-      <ListItemButton
-        sx={{
-          ml: 1,
-          flex: 1,
-          height: 40,
-          textAlign: 'center',
-          fontWeight: 800,
-          transition: 'all 0.10s',
-        }}
-        onClick={actionWrapper}
-        aria-controls={open ? 'Select type of action' : undefined}
-        aria-haspopup="true"
-        disabled={!buttonEnabled}
-        aria-expanded={open ? 'true' : undefined}
-      >
-        <ListItemText className={classes.animated}>
-          {getButtonText()}
-        </ListItemText>
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <ListItemButton
+          sx={{
+            ml: 1,
+            flex: 1,
+            height: 40,
+            textAlign: 'center',
+            fontWeight: 800,
+            transition: 'all 0.10s',
+          }}
+          onClick={actionWrapper}
+          aria-controls={open ? 'Select type of action' : undefined}
+          aria-haspopup="true"
+          disabled={!buttonEnabled}
+          aria-expanded={open ? 'true' : undefined}
+        >
+          <ListItemText sx={{ transition: 'all 0.25s' }}>
+            {getButtonText()}
+          </ListItemText>
+        </ListItemButton>
         <IconButton
-          sx={{ p: '10px', opacity: 0.85 }}
-          color="inherit"
+          sx={{ p: '10px', opacity: 0.85, color: '#fff' }}
           onClick={handleClick}
           disableRipple
           aria-label="encryption/decryption options"
         >
           <KeyboardArrowDownIcon />
         </IconButton>
-      </ListItemButton>
+      </Box>
     </Card>
   );
 };

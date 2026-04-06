@@ -1,27 +1,22 @@
 import React from 'react';
 import { Card, IconButton, Typography } from '@mui/material';
-import { makeStyles } from '@mui/styles';
 import moment from 'moment';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import { HistoryType } from '../../contexts/AppContext';
 import { ChevronRight } from '@mui/icons-material';
 
-const useStyles = makeStyles(theme => ({
-  card: {
-    borderRadius: 6,
-    border: '1px solid',
-    borderColor: 'rgba(170,170,170,0.25)',
-    boxShadow: '0 0 7px 0 rgba(0,0,0,0.04)',
-    marginBottom: 14,
-  },
-}));
+const cardSx = {
+  borderRadius: '6px',
+  border: '1px solid rgba(170,170,170,0.25)',
+  boxShadow: '0 0 7px 0 rgba(0,0,0,0.04)',
+  marginBottom: '14px',
+};
 
 export type LDateOrderedItemType = {
   showDateHeading?: boolean;
   id?: string;
-  date: Date;
+  date: number;
   primary: string;
   secondary?: string;
   clickHandler: (item: HistoryType) => void;
@@ -37,8 +32,6 @@ const DateOrderedItem = ({
   clickHandler,
   payload,
 }: LDateOrderedItemType) => {
-  const classes = useStyles();
-
   return (
     <>
       {showDateHeading && (
@@ -46,12 +39,12 @@ const DateOrderedItem = ({
           {moment(date).format('MMMM D, YYYY')}
         </Typography>
       )}
-      <Card classes={{ root: classes.card }}>
-        <ListItem key={id ? id : primary}>
+      <Card sx={cardSx}>
+        <ListItem key={id ?? primary}>
           <ListItemText primary={primary} secondary={secondary} />
           <IconButton
             aria-label="More details"
-            onClick={e => clickHandler(payload)}
+            onClick={() => clickHandler(payload)}
           >
             <ChevronRight />
           </IconButton>

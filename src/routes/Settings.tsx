@@ -1,6 +1,5 @@
 import React, { useContext } from 'react';
 import { Button, Checkbox, List, Typography } from '@mui/material';
-import { makeStyles } from '@mui/styles';
 import { Action } from '../constants';
 import { AppContext } from '../contexts/AppContext';
 import SettingsItem from '../components/SettingsItem';
@@ -8,19 +7,7 @@ import ButtonRedirect from '../components/dialog/ButtonRedirect';
 import WarningDialog from '../components/dialog/WarningDialog';
 import ResetWarningDialog from '../components/dialog/ResetWarningDialog';
 
-const useStyles = makeStyles(theme => ({
-  pageHeading: {
-    paddingLeft: 20,
-    paddingTop: 20,
-    marginBottom: 10,
-  },
-  list: {
-    padding: 20,
-  },
-}));
-
 export default function Settings() {
-  const classes = useStyles();
   const { state, dispatch } = useContext(AppContext);
   const { api_key, enc_mode, theme, key_length, encryption } = state.settings;
 
@@ -32,18 +19,9 @@ export default function Settings() {
   };
 
   const themeHandler = () => {
-    const newTheme = {
-      ...state.settings,
-      theme: !theme,
-    };
     dispatch({
       type: Action.UPDATE_THEME,
       payload: { theme: !theme },
-    });
-
-    console.log('Theme', newTheme, state.settings.theme, {
-      statemodified: !theme,
-      stateoriginal: theme,
     });
   };
 
@@ -58,10 +36,13 @@ export default function Settings() {
     <div>
       <WarningDialog />
       <ResetWarningDialog />
-      <Typography variant="h2" className={classes.pageHeading}>
+      <Typography
+        variant="h2"
+        sx={{ paddingLeft: '20px', paddingTop: '20px', marginBottom: '10px' }}
+      >
         Settings
       </Typography>
-      <List className={classes.list}>
+      <List sx={{ padding: '20px' }}>
         <Typography variant={'h4'}>Theme</Typography>
         <SettingsItem primary={'Dark Mode'}>
           <Checkbox checked={theme} onChange={themeHandler} />

@@ -5,52 +5,37 @@ import {
   DialogContent,
   MenuItem,
   Select,
+  SelectChangeEvent,
   Typography,
 } from '@mui/material';
-import { makeStyles } from '@mui/styles';
 import { AppContext } from '../contexts/AppContext';
 import { Action, ENCRYPTION_METHODS, KEY_LENGTHS } from '../constants';
 import SettingsItem from '../components/SettingsItem';
 
-const useStyles = makeStyles(theme => ({
-  menuItem: {
-    height: 10,
-    boxShadow: 'none',
-  },
-  select: {
-    height: 32,
-    marginBottom: 8,
-    marginTop: 8,
-  },
-}));
-
 const EncConfig = () => {
-  const classes = useStyles();
   const { state, dispatch } = React.useContext(AppContext);
   const { enc_mode, key_length, encryption } = state.settings;
 
-  const keyLengthHandler = e => {
+  const keyLengthHandler = (e: SelectChangeEvent<number>) => {
     dispatch({
       type: Action.UPDATE_SETTINGS,
-      payload: { ...state.settings, key_length: e.target.value },
+      payload: { ...state.settings, key_length: e.target.value as number },
     });
   };
 
-  const encModeHandler = e => {
+  const encModeHandler = (e: SelectChangeEvent<string>) => {
     dispatch({
       type: Action.UPDATE_SETTINGS,
       payload: { ...state.settings, enc_mode: e.target.value },
     });
   };
 
-  const encryptionHandler = e => {
+  const encryptionHandler = () => {
     const newEncryption = {
       ...state.settings,
       encryption: !encryption,
     };
     dispatch({ type: Action.UPDATE_SETTINGS, payload: newEncryption });
-
-    console.log('UPDATING ENCRYPTION', { encryption, newEncryption });
   };
 
   useLayoutEffect(() => {
@@ -94,14 +79,14 @@ const EncConfig = () => {
         <Typography variant={'h4'}>Advanced</Typography>
         <SettingsItem primary={'Encryption Algorithm'}>
           <Select
-            className={classes.select}
+            sx={{ height: 32, marginBottom: 1, marginTop: 1 }}
             value={enc_mode}
             disabled={!encryption}
             onChange={encModeHandler}
           >
             {ENCRYPTION_METHODS.map(item => (
               <MenuItem
-                classes={{ root: classes.menuItem }}
+                sx={{ height: 10, boxShadow: 'none' }}
                 key={item.value}
                 value={item.value}
               >
@@ -113,14 +98,14 @@ const EncConfig = () => {
 
         <SettingsItem primary={'Key Length'}>
           <Select
-            className={classes.select}
+            sx={{ height: 32, marginBottom: 1, marginTop: 1 }}
             value={key_length}
             onChange={keyLengthHandler}
             disabled={!encryption}
           >
             {KEY_LENGTHS.map(item => (
               <MenuItem
-                className={classes.menuItem}
+                sx={{ height: 10, boxShadow: 'none' }}
                 key={item.value}
                 value={item.value}
               >

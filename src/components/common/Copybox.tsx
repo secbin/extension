@@ -7,64 +7,40 @@ import {
   InputBase,
   Typography,
 } from '@mui/material';
-import { makeStyles } from '@mui/styles';
 import { copyTextClipboard, openLinkInNewWindow } from '../../chrome/utils';
 import {
-  ContentPaste,
   ContentPasteRounded,
   VisibilityOffOutlined,
   VisibilityOutlined,
   OpenInNewRounded,
 } from '@mui/icons-material';
 
-const useStyles = makeStyles(theme => ({
-  copybox: {
-    padding: '5px 0 5px 10px',
-    borderRadius: 6,
-    border: '1px solid',
-    borderColor: 'rgba(170,170,170,0.25)',
-    boxShadow: '0 0 7px 0 rgba(0,0,0,0.04)',
-    marginBottom: 14,
-    width: 390,
-  },
-  copyboxLarge: {
-    padding: '7px 0 7px 10px',
-    borderRadius: 6,
-    border: '1px solid',
-    borderColor: 'rgba(170,170,170,0.25)',
-    boxShadow: '0 0 7px 0 rgba(0,0,0,0.04)',
-    marginBottom: 14,
-    width: 390,
-  },
-  textArea: {
-    width: 350,
-  },
-}));
+const cardSx = {
+  padding: '7px 0 7px 10px',
+  borderRadius: '6px',
+  border: '1px solid rgba(170,170,170,0.25)',
+  boxShadow: '0 0 7px 0 rgba(0,0,0,0.04)',
+  marginBottom: '14px',
+  width: 390,
+};
 
 export type LCopyboxType = {
   title?: string;
   value: string;
-  type?: string;
   allowCopy?: boolean;
   toggleVisibility?: boolean;
   large?: boolean;
   openInNew?: boolean;
 };
 
-// <IconButton onClick={() => copyTextClipboard(value)} disableRipple>
-//   <ContentPasteRounded color="primary" sx={{fontSize: '16px'}}/>
-// </IconButton>
-
 const Copybox = ({
   title,
   value,
-  type = 'text',
   allowCopy = false,
   toggleVisibility = false,
   large = true,
   openInNew = false,
 }: LCopyboxType) => {
-  const classes = useStyles();
   const [show, setShow] = React.useState(
     toggleVisibility ? 'password' : 'text'
   );
@@ -88,7 +64,6 @@ const Copybox = ({
               marginRight: '3px',
               minWidth: 0,
               '& .MuiButton-startIcon': {
-                // Target the startIcon specifically
                 marginRight: '4px',
                 fontSize: '12px',
                 '& svg': {
@@ -105,34 +80,34 @@ const Copybox = ({
           </Button>
         )}
       </Box>
-      <Card className={classes.copyboxLarge}>
+      <Card sx={cardSx}>
         {large ? (
           <InputBase
-            className={classes.textArea}
-            placeholder={value}
-            type={show}
             sx={{
+              width: 350,
               fontFamily: 'Menlo, monospace',
               fontSize: 18,
               letterSpacing: '-0.1px',
               fontWeight: 700,
             }}
+            placeholder={value}
+            type={show}
             value={value}
           />
         ) : (
           <InputBase
-            className={classes.textArea}
-            placeholder={value}
-            type={show}
             sx={{
+              width: 350,
               fontFamily: 'Menlo, monospace',
               fontSize: 14,
               letterSpacing: '-0.1px',
             }}
+            placeholder={value}
+            type={show}
             value={value}
           />
         )}
-        {false && (
+        {toggleVisibility && (
           <IconButton
             size={'small'}
             onClick={() => toggleVisibilityHandler()}
@@ -151,7 +126,7 @@ const Copybox = ({
             onClick={() => openLinkInNewWindow(value)}
             disableRipple
           >
-            {<OpenInNewRounded color="primary" />}
+            <OpenInNewRounded color="primary" />
           </IconButton>
         )}
       </Card>

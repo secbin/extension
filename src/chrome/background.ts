@@ -1,4 +1,3 @@
-import { copyTextClipboard } from '../chrome/utils';
 import { encrypt, decrypt } from '../chrome/utils/crypto';
 import { postPastebin, getPastebin } from '../chrome/utils/pastebin';
 import {
@@ -12,7 +11,7 @@ import {
   MAX_ENC_TEXT_LENGTH,
 } from '../constants';
 import { v4 as uuidv4 } from 'uuid';
-import { SettingsType } from '../contexts/AppContext';
+import { SettingsType, HistoryType } from '../contexts/AppContext';
 
 /** Fired when the extension is first installed,
  *  when the extension is updated to a new version,
@@ -21,67 +20,92 @@ chrome.runtime.onInstalled.addListener(async details => {
   console.log('onInstall, checking for settings, else set defaults', details);
   const mode = (await getSyncItemAsync(Storage.ENC_MODE)) as string;
   if (mode === undefined) {
-    console.log('Mode = ', 'AES-GCM');
     setSyncItem(Storage.ENC_MODE, 'AES-GCM');
   }
 
   const len = (await getSyncItemAsync(Storage.KEY_LENGTH)) as number;
   if (len === undefined) {
-    console.log('Key_Len = ', 128);
     setSyncItem(Storage.KEY_LENGTH, 16);
   }
 
   const theme = (await getSyncItemAsync(Storage.THEME)) as number;
   if (theme === undefined) {
-    console.log('Theme = ', 'Light');
     setSyncItem(Storage.THEME, false);
   }
-  //console.log(mode, len, theme);
 });
 
-chrome.runtime.onConnect.addListener(port => {
-  //console.log('[background.js] onConnect', port)
+chrome.runtime.onConnect.addListener(() => {
+  // connection established
 });
 
 chrome.runtime.onStartup.addListener(() => {
-  // console.log('[background.js] onStartup')
+  // startup
 });
 
-/**
- *  Sent to the event page just before it is unloaded.
- *  This gives the extension opportunity to do some clean up.
- *  Note that since the page is unloading,
- *  any asynchronous operations started while handling this event
- *  are not guaranteed to complete.
- *  If more activity for the event page occurs before it gets
- *  unloaded the onSuspendCanceled event will
- *  be sent and the page won't be unloaded. */
 chrome.runtime.onSuspend.addListener(() => {
-  // console.log('[background.js] onSuspend')
+  // cleanup
 });
 
-// storage changed
-// chrome.storage.onChanged.addListener(function (changes, namespace) {
-//     for (let [key, { oldValue, newValue }] of Object.entries(changes)) {
-//       console.log(
-//         `Storage key "${key}" in namespace "${namespace}" changed.`,
-//         `Old value was "${oldValue}", new value is "${newValue}".`
-//       );
-//     }
-//   });
+// On restricted pages (chrome://, extension pages, etc.) the content script
+// cannot inject, so fall back to the traditional popup for those tabs.
+function isRestrictedUrl(url: string | undefined): boolean {
+  if (!url) return true;
+  return !url.startsWith('http://') && !url.startsWith('https://');
+}
 
-const pasteBinMenuItem = {
+async function syncActionPopup(tabId: number, url?: string): Promise<void> {
+  const popup = isRestrictedUrl(url) ? 'index.html' : '';
+  await chrome.action.setPopup({ tabId, popup }).catch(() => {});
+}
+
+chrome.tabs.onActivated.addListener(async ({ tabId }) => {
+  const tab = await chrome.tabs.get(tabId).catch(() => null);
+  await syncActionPopup(tabId, tab?.url);
+});
+
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+  if (changeInfo.url !== undefined || changeInfo.status === 'complete') {
+    await syncActionPopup(tabId, tab.url);
+  }
+});
+
+// Toggle the injected panel when the extension icon is clicked (normal pages only)
+chrome.action.onClicked.addListener(async tab => {
+  if (tab.id !== undefined) {
+    await chrome.tabs
+      .sendMessage(tab.id, { type: 'SB_TOGGLE' })
+      .catch(() => {});
+  }
+});
+
+async function getActiveTabId(): Promise<number | undefined> {
+  const [tab] = await chrome.tabs.query({
+    active: true,
+    lastFocusedWindow: true,
+  });
+  return tab?.id;
+}
+
+/** Send a history item to the injected panel and navigate to the result page. */
+async function showResult(tabId: number, item: HistoryType): Promise<void> {
+  await chrome.tabs
+    .sendMessage(tabId, { type: 'SB_SHOW_RESULT', item })
+    .catch(err => console.error('[SecureBin] showResult failed:', err));
+}
+
+const pasteBinMenuItem: chrome.contextMenus.CreateProperties = {
   id: 'pasteBin',
   title: 'Share via PasteBin',
   contexts: ['selection'],
 };
 
-const clipboardMenuItem = {
+const clipboardMenuItem: chrome.contextMenus.CreateProperties = {
   id: 'clipboardMenuItem',
   title: 'Encrypt to Clipboard',
   contexts: ['selection'],
 };
-const decryptMenuItem = {
+
+const decryptMenuItem: chrome.contextMenus.CreateProperties = {
   id: 'decryptText',
   title: 'Decrypt Text',
   contexts: ['selection'],
@@ -93,86 +117,117 @@ chrome.contextMenus.create(decryptMenuItem);
 
 chrome.contextMenus.onClicked.addListener(async clickData => {
   let text = clickData.selectionText;
+  const tabId = await getActiveTabId();
+
   if (text === undefined) {
-    alert('Please select some text');
     return;
   }
 
   if (clickData.menuItemId === 'pasteBin') {
     if (text.length > MAX_PASTEBIN_TEXT_LENGTH) {
-      alert('Can only encrypt up to ' + MAX_ENC_TEXT_LENGTH + ' characters');
       return;
     }
 
-    const { enc_mode, encryption, key_length, api_key } =
-      (await getSyncItemAsync(Storage.SETTINGS)) as SettingsType;
-    const res = await encrypt(text);
-    console.log('ENC text', enc_mode, encryption, key_length, api_key);
-    const link = await postPastebin(
-      res.data,
-      'LxmOdiaiwoCXmuwWvUqkhliMcp0LjHP-'
-    ); // TODO change this
-    const history = {
-      id: uuidv4(),
-      pastebinlink: `${enc_mode}-${encryption}-${key_length}-${api_key}`,
-      enc_text: `${enc_mode}-${encryption}-${key_length}-${api_key}`, //encryption ? res.data : text,
-      enc_mode: enc_mode,
-      key_length: key_length,
-      date: Date(),
-    };
-    addLocalItem(Storage.HISTORY, history);
+    const raw = (await getSyncItemAsync(Storage.SETTINGS)) as string;
+    const settings: SettingsType | null = raw ? JSON.parse(raw) : null;
+    const api_key = settings?.api_key ?? '';
+    const encryption = settings?.encryption ?? true;
 
-    alert('Key: ' + res.key + '\nLink:' + link);
-    copyTextClipboard('Key: ' + res.key + '\nLink:' + link);
+    if (encryption) {
+      const res = await encrypt(text);
+      const link = await postPastebin(res.data, api_key);
+      const history: HistoryType = {
+        id: uuidv4(),
+        pastebinlink: link,
+        key: res.key,
+        enc_text: res.data,
+        enc_mode: res.mode,
+        key_length: res.key_len,
+        date: new Date().getTime(),
+      };
+      addLocalItem(Storage.HISTORY, history);
+      if (tabId !== undefined) {
+        await showResult(tabId, history);
+      }
+    } else {
+      const link = await postPastebin(text, api_key);
+      const history: HistoryType = {
+        id: uuidv4(),
+        pastebinlink: link,
+        key: null,
+        enc_text: text,
+        enc_mode: null,
+        key_length: null,
+        date: new Date().getTime(),
+      };
+      addLocalItem(Storage.HISTORY, history);
+      if (tabId !== undefined) {
+        await showResult(tabId, history);
+      }
+    }
   } else if (clickData.menuItemId === 'clipboardMenuItem') {
     if (text.length > MAX_ENC_TEXT_LENGTH) {
-      alert('Can only encrypt up to ' + MAX_ENC_TEXT_LENGTH + ' characters');
       return;
     }
-    const res = await encrypt(text);
-    const mode = (await getSyncItemAsync(Storage.ENC_MODE)) as string;
-    const len = (await getSyncItemAsync(Storage.KEY_LENGTH)) as number;
-    //console.log("ENC text", res.data)
 
-    const history = {
+    const res = await encrypt(text);
+
+    // Copy to clipboard via scripting
+    if (tabId !== undefined) {
+      const copyText = `Key: ${res.key}\nCiphertext: ${res.data}`;
+      await chrome.scripting
+        .executeScript({
+          target: { tabId },
+          func: (t: string) => {
+            navigator.clipboard.writeText(t).catch(() => {});
+          },
+          args: [copyText],
+        })
+        .catch(() => {});
+    }
+
+    const history: HistoryType = {
       id: uuidv4(),
       pastebinlink: '',
+      key: res.key,
       enc_text: res.data,
-      enc_mode: mode,
-      key_length: len,
-      date: Date(),
+      enc_mode: res.mode,
+      key_length: res.key_len,
+      date: new Date().getTime(),
     };
-
-    //console.log("ENC text", history)
     addLocalItem(Storage.HISTORY, history);
-
-    alert('Key: ' + res.key + '\nCiphertext:' + res.data);
-    copyTextClipboard('Key: ' + res.key + '\nCiphertext:' + res.data);
+    if (tabId !== undefined) {
+      await showResult(tabId, history);
+    }
   } else if (clickData.menuItemId === 'decryptText') {
     if (text.length > MAX_ENC_TEXT_LENGTH) {
-      alert('Can only decrypt up to ' + MAX_ENC_TEXT_LENGTH + ' characters');
       return;
     }
 
-    if (text.length > MAX_PASTEBIN_TEXT_LENGTH) {
-      alert('PasteBin only supports up to 512 Characters of text');
-      return;
-    }
-    const key = prompt('Please enter your key');
-    if (key === null) {
-      return;
-    } else if (text.includes('C_TXT')) {
-      const res = decrypt(text, key);
-      alert('Decrypted text: \n' + res);
-      //console.log(res);
-    } else if (text.includes('pastebin')) {
+    if (text.includes('pastebin')) {
       const link = text;
       text = await getPastebin(link);
-      const res = decrypt(text, key);
-      alert('Decrypted text: \n' + res);
-      //console.log(res);
-    } else {
-      console.log('Invalid Text');
+      const res = decrypt(text, '');
+      const history: HistoryType = {
+        id: uuidv4(),
+        pastebinlink: link,
+        key: null,
+        enc_text: res,
+        enc_mode: null,
+        key_length: null,
+        date: new Date().getTime(),
+      };
+      addLocalItem(Storage.HISTORY, history);
+      if (tabId !== undefined) {
+        await showResult(tabId, history);
+      }
+    } else if (text.includes('C_TXT')) {
+      // Ciphertext requires a key — open the panel so user can decrypt in the editor
+      if (tabId !== undefined) {
+        await chrome.tabs
+          .sendMessage(tabId, { type: 'SB_TOGGLE' })
+          .catch(() => {});
+      }
     }
   }
 });

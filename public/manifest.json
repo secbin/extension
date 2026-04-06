@@ -4,8 +4,7 @@
   "version": "1.0.2",
   "manifest_version": 3,
   "action": {
-    "default_popup": "index.html",
-    "default_title": "Open the popup"
+    "default_title": "Open SecureBin"
   },
   "icons": {
     "16": "logo48.png",
@@ -15,6 +14,32 @@
   "background": {
     "service_worker": "./static/js/background.js"
   },
-  "permissions": ["storage", "contextMenus", "clipboardWrite"],
-  "optional_permissions": ["<all_urls>"]
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["static/js/content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "static/js/content.js",
+        "securebinlogo.svg",
+        "securebinlogo_dark.svg",
+        "logo48.png",
+        "logo128.png"
+      ],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "permissions": [
+    "storage",
+    "contextMenus",
+    "clipboardWrite",
+    "scripting",
+    "activeTab",
+    "tabs"
+  ],
+  "host_permissions": ["<all_urls>"]
 }

@@ -1,38 +1,14 @@
 import React from 'react';
-import {
-  Box,
-  Button,
-  Card,
-  IconButton,
-  InputBase,
-  Typography,
-} from '@mui/material';
-import { makeStyles } from '@mui/styles';
+import { Box, Button, Card, InputBase, Typography } from '@mui/material';
 import { copyTextClipboard } from '../../chrome/utils';
-import { ContentPaste, ContentPasteRounded } from '@mui/icons-material';
+import { ContentPasteRounded } from '@mui/icons-material';
 
-const useStyles = makeStyles(theme => ({
-  copybox: {
-    borderRadius: 6,
-    border: '1px solid',
-    borderColor: 'rgba(170,170,170,0.25)',
-    boxShadow: '0 0 7px 0 rgba(0,0,0,0.04)',
-    marginBottom: 14,
-    // width: 390,
-  },
-  copyboxLarge: {
-    padding: '0px 0px 0px 0px',
-    borderRadius: 6,
-    border: '1px solid',
-    borderColor: 'rgba(170,170,170,0.25)',
-    boxShadow: '0 0 7px 0 rgba(0,0,0,0.04)',
-    marginBottom: 14,
-    // width: 390,
-  },
-  textArea: {
-    width: 400,
-  },
-}));
+const cardSx = {
+  borderRadius: '6px',
+  border: '1px solid rgba(170,170,170,0.25)',
+  boxShadow: '0 0 7px 0 rgba(0,0,0,0.04)',
+  marginBottom: '14px',
+};
 
 export type LCopyboxType = {
   title?: string;
@@ -41,8 +17,6 @@ export type LCopyboxType = {
 };
 
 const CopyboxMultiline = ({ title, value, allowCopy = true }: LCopyboxType) => {
-  const classes = useStyles();
-
   return (
     <>
       <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -58,7 +32,6 @@ const CopyboxMultiline = ({ title, value, allowCopy = true }: LCopyboxType) => {
               marginRight: '3px',
               minWidth: 0,
               '& .MuiButton-startIcon': {
-                // Target the startIcon specifically
                 marginRight: '4px',
                 fontSize: '12px',
                 '& svg': {
@@ -75,13 +48,10 @@ const CopyboxMultiline = ({ title, value, allowCopy = true }: LCopyboxType) => {
           </Button>
         )}
       </Box>
-      <Card className={classes.copyboxLarge}>
+      <Card sx={cardSx}>
         <InputBase
-          className={classes.textArea}
-          placeholder={value}
-          value={value}
-          multiline
           sx={{
+            width: 400,
             fontFamily: 'Menlo, monospace',
             fontSize: 14,
             letterSpacing: '-1px',
@@ -93,11 +63,11 @@ const CopyboxMultiline = ({ title, value, allowCopy = true }: LCopyboxType) => {
             textAlign: 'left',
             padding: '0px',
           }}
+          placeholder={value}
+          value={value}
+          multiline
           rows={9}
         />
-        {/*<IconButton sx={{position: 'absolute'}} onClick={() => copyTextClipboard(value)} disableRipple>*/}
-        {/*  <ContentPaste color="primary"/>*/}
-        {/*</IconButton>*/}
       </Card>
     </>
   );

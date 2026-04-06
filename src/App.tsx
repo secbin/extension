@@ -5,139 +5,127 @@ import './styles/App.css';
 import {
   AppBar,
   Box,
-  createMuiTheme,
+  createTheme,
   Divider,
   IconButton,
-  Theme,
   ThemeProvider,
   Toolbar,
 } from '@mui/material';
-import { makeStyles } from '@mui/styles';
 import {
   HistorySharp as HistoryIcon,
   SettingsSharp as SettingsIcon,
-  ContentPasteSharp as ContentPaste,
   EditSharp as EditIcon,
+  CloseSharp as CloseIcon,
 } from '@mui/icons-material';
-import { AppContext } from './contexts/AppContext';
+import { AppContext, HistoryType } from './contexts/AppContext';
 import { Action, DEFAULT_SETTINGS, Storage } from './constants';
 import Settings from './routes/Settings';
 import History from './routes/History';
 import Result from './routes/Result';
 import Editor from './routes/Editor';
-import { getLocalItem, getSyncItem, setSyncItem } from './chrome/utils/storage';
+import { getLocalItem, getSyncItem } from './chrome/utils/storage';
 import SubHeader from './components/common/SubHeader';
+import SecurebinLogo from './components/common/SecurebinLogo';
 import ApiKeyConfig from './routes/ApiKeyConfig';
 import EncConfig from './routes/EncConfig';
 import Support from './routes/Support';
 
+const isInjected =
+  (window as Window & { __SECUREBIN_INJECTED__?: boolean })
+    .__SECUREBIN_INJECTED__ === true;
+
 export const App = () => {
+  // Read at render time (not module level) so content/index.tsx has already
+  // set window.__SECUREBIN_PORTAL__ before this runs.
+  const portalContainer = isInjected
+    ? (window as Window & { __SECUREBIN_PORTAL__?: HTMLElement })
+        .__SECUREBIN_PORTAL__
+    : undefined;
   const { state, dispatch } = React.useContext(AppContext);
   const [darkmode, setDarkmode] = useState(state.settings.theme);
-
-  const useStyles = makeStyles((theme: Theme) => ({
-    root: {
-      boxShadow: 'none',
-    },
-    container: {
-      display: 'flex',
-      flexDirection: 'column',
-      height: '600px',
-    },
-    content: {
-      flexGrow: 1,
-      willChange: 'scroll-position',
-      scrollBehavior: 'smooth',
-    },
-    hoverStyle: {
-      fontSize: '0.9em',
-      '&:hover': {
-        transition: '0.10s',
-        color: darkmode ? '#d5d5d5' : '#4b4b4b',
-      },
-      '&:active': {
-        transition: '0.08s',
-        color: '#4b4b4b',
-      },
-      transition: '0.15s',
-    },
-    background: {
-      bgColor: 'background.default',
-    },
-  }));
 
   const { push } = useHistory();
   const location = useLocation();
 
+  // Register dispatch with the content script so it can push history items
+  useEffect(() => {
+    if (isInjected) {
+      window.dispatchEvent(
+        new CustomEvent('securebin:register-dispatch', { detail: dispatch })
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Navigation bridge — content script dispatches this to change route
+  useEffect(() => {
+    if (!isInjected) return;
+    const handler = (e: Event) => push((e as CustomEvent<string>).detail);
+    window.addEventListener('securebin:navigate', handler);
+    return () => window.removeEventListener('securebin:navigate', handler);
+  }, [push]);
+
   useEffect(() => {
     getSyncItem(Storage.THEME, data => {
-      console.log('UPDATING THEME', data[Storage.THEME]);
-      dispatch({
-        type: Action.SET_THEME,
-        payload: { theme: JSON.parse(data[Storage.THEME]) },
-      });
-    });
-
-    getSyncItem(Storage.DRAFT, data => {
-      // Only update draft if there is content
-      if (data[Storage.DRAFT]?.plaintext?.length) {
+      const raw = data[Storage.THEME];
+      if (typeof raw === 'string') {
         dispatch({
-          type: Action.SET_DRAFT,
-          payload: JSON.parse(data[Storage.DRAFT]),
+          type: Action.SET_THEME,
+          payload: { theme: JSON.parse(raw) },
         });
       }
     });
 
-    console.log('getting SETTINGS');
+    getSyncItem(Storage.DRAFT, data => {
+      const raw = data[Storage.DRAFT];
+      if (typeof raw === 'string') {
+        const parsed = JSON.parse(raw);
+        if (parsed?.plaintext?.length) {
+          dispatch({ type: Action.SET_DRAFT, payload: parsed });
+        }
+      }
+    });
 
     getSyncItem(Storage.SETTINGS, data => {
-      console.log('UPDATING SETTINGS', data[Storage.SETTINGS]);
-
+      const raw = data[Storage.SETTINGS];
       dispatch({
         type: Action.SET_SETTINGS,
-        payload: data[Storage.SETTINGS]
-          ? JSON.parse(data[Storage.SETTINGS])
-          : DEFAULT_SETTINGS,
+        payload: typeof raw === 'string' ? JSON.parse(raw) : DEFAULT_SETTINGS,
       });
     });
 
     getLocalItem(Storage.HISTORY, data => {
-      console.log('HISTORY FROM STORAGE', { history: data[Storage.HISTORY] });
       dispatch({
         type: Action.SET_HISTORY,
-        payload: data[Storage.HISTORY] || [],
+        payload: (data[Storage.HISTORY] as HistoryType[]) || [],
       });
     });
 
-    // Preserve app state for 10 seconds
-    getSyncItem(Storage.APP, data => {
-      const TEN_SECONDS = 10 * 1000;
-      if (data[Storage.APP]) {
-        const { location, date } = JSON.parse(data[Storage.APP]);
-        if (date + TEN_SECONDS > new Date().getTime()) {
-          push(location);
+    // Only restore saved location in popup mode
+    if (!isInjected) {
+      getSyncItem(Storage.APP, data => {
+        const TEN_SECONDS = 10 * 1000;
+        const raw = data[Storage.APP];
+        if (typeof raw === 'string') {
+          const { location: savedLocation, date } = JSON.parse(raw);
+          if (date + TEN_SECONDS > new Date().getTime()) {
+            push(savedLocation);
+          }
         }
-      }
-    });
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    console.log('UPDATING THEME');
     setDarkmode(state.settings.theme);
   }, [state.settings.theme]);
 
   useEffect(() => {
     dispatch({ type: Action.UPDATE_NAVIGATION, payload: { location } });
-    // setSyncItem(Storage.APP, JSON.stringify({location, date: new Date().getTime()}));
   }, [dispatch, location]);
 
-  useEffect(() => {}, [state.app.subheader]);
-
-  const classes = useStyles();
-
-  // setTimeout(() => { setDarkmode(true) }, 4000);
-
-  const theme = createMuiTheme({
+  const theme = createTheme({
     palette: {
       mode: darkmode ? 'dark' : 'light',
       primary: {
@@ -189,6 +177,10 @@ export const App = () => {
       },
     },
     components: {
+      ...(portalContainer && {
+        MuiModal: { defaultProps: { container: portalContainer } },
+        MuiPopover: { defaultProps: { container: portalContainer } },
+      }),
       MuiButtonBase: {
         defaultProps: {
           disableRipple: true,
@@ -196,9 +188,7 @@ export const App = () => {
       },
       MuiButton: {
         styleOverrides: {
-          root: {
-            // padding: '10px 16px',
-          },
+          root: {},
         },
       },
       MuiMenu: {
@@ -220,76 +210,92 @@ export const App = () => {
     },
   });
 
+  const iconButtonSx = {
+    fontSize: '0.9em',
+    transition: '0.15s',
+    '&:hover': {
+      transition: '0.10s',
+      color: darkmode ? '#d5d5d5' : '#4b4b4b',
+    },
+    '&:active': {
+      transition: '0.08s',
+      color: '#4b4b4b',
+    },
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <Box
-        className={classes.container}
-        sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%',
+          bgcolor: 'background.default',
+        }}
       >
-        <div className={classes.background}>
-          <AppBar
-            sx={{ bgcolor: 'background.default' }}
-            className={classes.root}
-            position="relative"
-            enableColorOnDark
+        <AppBar
+          sx={{ bgcolor: 'background.default', boxShadow: 'none' }}
+          position="relative"
+          enableColorOnDark
+        >
+          <Toolbar
+            sx={{
+              bgcolor: 'background.default',
+              pr: '12px',
+              ...(isInjected && { pl: '20px' }),
+            }}
           >
-            <Toolbar sx={{ bgcolor: 'background.default' }}>
-              <img
-                src={
-                  darkmode ? '/securebinlogo_dark.svg' : '/securebinlogo.svg'
-                }
-                alt="logo"
-              />
-              <div style={{ marginLeft: 'auto' }}>
-                {
-                  <IconButton
-                    className={classes.hoverStyle}
-                    aria-label="Latest paste"
-                    sx={{ mr: 1 }}
-                    disableRipple
-                    onClick={() => {
-                      push('/home');
-                    }}
-                  >
-                    <EditIcon />
-                  </IconButton>
-                }
-                {/*{<IconButton className={classes.hoverStyle} aria-label="Latest paste" sx={{ mr: 1 }} disableRipple onClick={() => { push('/result')}}>*/}
-                {/*<ContentPaste />*/}
-                {/*</IconButton>}*/}
+            <SecurebinLogo darkmode={darkmode} />
+            <div style={{ marginLeft: 'auto' }}>
+              <IconButton
+                sx={{ ...iconButtonSx, mr: 1 }}
+                aria-label="Latest paste"
+                disableRipple
+                onClick={() => push('/home')}
+              >
+                <EditIcon />
+              </IconButton>
+              <IconButton
+                sx={{ ...iconButtonSx, mr: 1 }}
+                aria-label="History"
+                disableRipple
+                onClick={() => push('/history')}
+              >
+                <HistoryIcon />
+              </IconButton>
+              <IconButton
+                sx={iconButtonSx}
+                aria-label="Settings"
+                disableRipple
+                onClick={() => push('/settings')}
+              >
+                <SettingsIcon />
+              </IconButton>
+              {isInjected && (
                 <IconButton
-                  className={classes.hoverStyle}
-                  aria-label="History"
-                  sx={{ mr: 1 }}
+                  sx={{ ...iconButtonSx, ml: 1 }}
+                  aria-label="Close"
                   disableRipple
-                  onClick={() => {
-                    push('/history');
-                  }}
+                  onClick={() =>
+                    window.dispatchEvent(new CustomEvent('securebin:close'))
+                  }
                 >
-                  <HistoryIcon />
+                  <CloseIcon />
                 </IconButton>
-                <IconButton
-                  className={classes.hoverStyle}
-                  aria-label="Settings"
-                  disableRipple
-                  onClick={() => {
-                    push('/settings');
-                  }}
-                >
-                  <SettingsIcon />
-                </IconButton>
-              </div>
-            </Toolbar>
-            <Divider />
-            {!!state.app.subheader && <SubHeader />}
-          </AppBar>
-        </div>
+              )}
+            </div>
+          </Toolbar>
+          <Divider />
+          {!!state.app.subheader && <SubHeader />}
+        </AppBar>
         <Box
-          className={classes.content}
           sx={{
+            flexGrow: 1,
             bgcolor: 'background.default',
             color: 'text.primary',
             overflow: 'auto',
+            willChange: 'scroll-position',
+            scrollBehavior: 'smooth',
           }}
         >
           <Switch>
@@ -299,7 +305,6 @@ export const App = () => {
             <Route path="/settings">
               <Settings />
             </Route>
-            {/*Sub heading routes*/}
             <Route path="/apikey">
               <ApiKeyConfig />
             </Route>

@@ -8,7 +8,7 @@ import {
 import { setSyncItem, deleteSyncItem } from '../chrome/utils/storage';
 import { Storage, Action, DEFAULT_CONTEXT } from '../constants';
 
-type ActionMap<M extends { [index: string]: any }> = {
+type ActionMap<M extends { [index: string]: unknown }> = {
   [Key in keyof M]: M[Key] extends undefined
     ? {
         type: Key;
@@ -20,29 +20,11 @@ type ActionMap<M extends { [index: string]: any }> = {
 };
 
 type HistoryPayload = {
-  [Action.SET_HISTORY]: [
-    {
-      id: number;
-      pastebinlink: string;
-      enc_mode: string | null;
-      key_length: number | null;
-      key: string | null;
-      enc_text: string | null;
-      date: Date;
-    },
-  ];
-  [Action.ADD_TO_HISTORY]: {
-    id: number;
-    pastebinlink: string;
-    enc_mode: string | null;
-    key_length: number | null;
-    key: string | null;
-    enc_text: string | null;
-    date: Date;
-  };
+  [Action.SET_HISTORY]: HistoryType[];
+  [Action.ADD_TO_HISTORY]: HistoryType;
   [Action.CLEAR_HISTORY]: undefined;
   [Action.REMOVE_ITEM_FROM_HISTORY]: {
-    id: number;
+    id: string;
   };
 };
 
@@ -62,6 +44,16 @@ type AppPayload = {
   };
 };
 
+type DraftActionValue =
+  | Action.DECRYPT
+  | Action.DECRYPT_PASTEBIN
+  | Action.ENCRYPT
+  | Action.ENCRYPT_PASTEBIN
+  | Action.UNENCRYPT_PASTEBIN
+  | Action.OPEN_PASTEBIN
+  | Action.SAVE_DRAFT
+  | Action.SEND_TO_PASTEBIN;
+
 type DraftPayload = {
   [Action.ENCRYPT]: {
     action: Action.ENCRYPT;
@@ -79,50 +71,22 @@ type DraftPayload = {
   [Action.UPDATE_PLAINTEXT]: {
     plaintext: string;
     buttonEnabled: boolean;
-    action:
-      | Action.DECRYPT
-      | Action.DECRYPT_PASTEBIN
-      | Action.ENCRYPT
-      | Action.ENCRYPT_PASTEBIN
-      | Action.UNENCRYPT_PASTEBIN
-      | Action.OPEN_PASTEBIN
-      | Action.SAVE_DRAFT;
+    action: DraftActionValue;
   };
   [Action.UPDATE_ENC_MENU]: {
     buttonEnabled: boolean;
-    action:
-      | Action.DECRYPT
-      | Action.DECRYPT_PASTEBIN
-      | Action.ENCRYPT
-      | Action.ENCRYPT_PASTEBIN
-      | Action.UNENCRYPT_PASTEBIN
-      | Action.OPEN_PASTEBIN
-      | Action.SAVE_DRAFT;
+    action: DraftActionValue;
   };
   [Action.SET_DRAFT]: {
     plaintext: string;
     buttonEnabled: boolean;
-    action:
-      | Action.DECRYPT
-      | Action.DECRYPT_PASTEBIN
-      | Action.ENCRYPT
-      | Action.ENCRYPT_PASTEBIN
-      | Action.UNENCRYPT_PASTEBIN
-      | Action.OPEN_PASTEBIN
-      | Action.SAVE_DRAFT;
+    action: DraftActionValue;
   };
   [Action.SET_KEY]: {
     key: string;
   };
   [Action.SET_ACTION]: {
-    action:
-      | Action.DECRYPT
-      | Action.DECRYPT_PASTEBIN
-      | Action.ENCRYPT
-      | Action.ENCRYPT_PASTEBIN
-      | Action.UNENCRYPT_PASTEBIN
-      | Action.OPEN_PASTEBIN
-      | Action.SAVE_DRAFT;
+    action: DraftActionValue;
   };
   [Action.RESET_DRAFT]: null | undefined;
 };
@@ -153,18 +117,6 @@ type SettingsPayload = {
   [Action.RESET_SETTINGS]: undefined | null;
 };
 
-type GlobalPayload = {
-  [Action.CREATE_POST]: {
-    id: number;
-    pastebinlink: string;
-    enc_mode: string | null;
-    key_length: number | null;
-    key: string | null;
-    enc_text: string | null;
-    date: Date;
-  };
-};
-
 export type DraftActions =
   ActionMap<DraftPayload>[keyof ActionMap<DraftPayload>];
 export type AppActions = ActionMap<AppPayload>[keyof ActionMap<AppPayload>];
@@ -172,17 +124,10 @@ export type SettingsActions =
   ActionMap<SettingsPayload>[keyof ActionMap<SettingsPayload>];
 export type HistoryActions =
   ActionMap<HistoryPayload>[keyof ActionMap<HistoryPayload>];
-export type GlobalActions =
-  ActionMap<GlobalPayload>[keyof ActionMap<GlobalPayload>];
 
 export const historyReducer = (
   state: HistoryType[],
-  action:
-    | AppActions
-    | SettingsActions
-    | DraftActions
-    | HistoryActions
-    | GlobalActions
+  action: AppActions | SettingsActions | DraftActions | HistoryActions
 ) => {
   switch (action.type) {
     case Action.SET_HISTORY:
@@ -209,31 +154,9 @@ export const historyReducer = (
   }
 };
 
-export const postReducer = (
-  state: HistoryType[],
-  action:
-    | AppActions
-    | SettingsActions
-    | DraftActions
-    | HistoryActions
-    | GlobalActions
-) => {
-  switch (action.type) {
-    case Action.CREATE_POST:
-      return state;
-    default:
-      return state;
-  }
-};
-
 export const appReducer = (
   state: AppType,
-  action:
-    | AppActions
-    | SettingsActions
-    | DraftActions
-    | HistoryActions
-    | GlobalActions
+  action: AppActions | SettingsActions | DraftActions | HistoryActions
 ) => {
   switch (action.type) {
     case Action.UPDATE_NAVIGATION:
@@ -260,7 +183,6 @@ export const appReducer = (
         dialog_id: null,
       };
     case Action.SET_SUBHEADER:
-      console.log('RECEIEVED SUBHEADER', action.payload.subheader);
       return {
         ...state,
         subheader: action.payload.subheader,
@@ -272,12 +194,7 @@ export const appReducer = (
 
 export const draftReducer = (
   state: DraftType,
-  action:
-    | AppActions
-    | SettingsActions
-    | DraftActions
-    | HistoryActions
-    | GlobalActions
+  action: AppActions | SettingsActions | DraftActions | HistoryActions
 ) => {
   switch (action.type) {
     case Action.ENCRYPT:
@@ -297,6 +214,8 @@ export const draftReducer = (
         // key: action.payload.key,
         pastebinlink: action.payload.pastebinlink,
       };
+    // TODO(rewrite): draft is written after 250ms debounce; if popup closes before debounce
+    // fires, the last few keystrokes are lost. Fix: flush draft synchronously onBlur/beforeunload.
     case Action.UPDATE_PLAINTEXT: {
       const updatedPlaintext = {
         ...state,
@@ -346,12 +265,7 @@ export const draftReducer = (
 
 export const settingsReducer = (
   state: SettingsType,
-  action:
-    | AppActions
-    | SettingsActions
-    | DraftActions
-    | HistoryActions
-    | GlobalActions
+  action: AppActions | SettingsActions | DraftActions | HistoryActions
 ) => {
   switch (action.type) {
     case Action.SET_SETTINGS: {

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 import { Box, InputBase } from '@mui/material';
 import { AppContext } from '../../contexts/AppContext';
 import {
@@ -7,18 +7,24 @@ import {
   MAX_ENC_TEXT_LENGTH,
   PASTEBIN_BASEURL,
 } from '../../constants';
-import clsx from 'clsx';
 
 const TextEditor = () => {
   const { state, dispatch } = useContext(AppContext);
   const [textBox, setTextBox] = React.useState(state.draft.plaintext);
-  const [timerId, setTimerId] = useState<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setTextBox(state.draft.plaintext);
   }, [state.draft.plaintext]);
 
-  const checkTypeOfText = (e: any) => {
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
+  const checkTypeOfText = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const textbox = e.target.value || '';
     const length = textbox.length;
     let buttonEnabled = false;
@@ -36,11 +42,11 @@ const TextEditor = () => {
       : Action.SEND_TO_PASTEBIN;
     setTextBox(textbox);
 
-    if (timerId !== null) {
-      clearTimeout(timerId);
+    if (timerRef.current !== null) {
+      clearTimeout(timerRef.current);
     }
 
-    const newTimerId = setTimeout(() => {
+    timerRef.current = setTimeout(() => {
       if (length <= MAX_ENC_TEXT_LENGTH && textbox.includes(PASTEBIN_BASEURL)) {
         buttonText = encryptionEnabled
           ? Action.DECRYPT_PASTEBIN
@@ -66,8 +72,6 @@ const TextEditor = () => {
         },
       });
     }, 250);
-
-    setTimerId(newTimerId);
   };
 
   const fontSize = (length: number) => {
@@ -76,41 +80,29 @@ const TextEditor = () => {
   };
 
   return (
-    <div>
-      <Box sx={{ height: '470px', overflow: 'hidden' }}>
-        <InputBase
-          sx={{
-            '& .MuiInputBase-inputMultiline': {
-              padding: '5px 10px',
-              overflowX: 'hidden',
-            },
-            width: '100vw',
-            overflow: 'hidden',
-            fontSize: fontSize(textBox.length),
-            textAlign: 'left',
-            padding: '0px',
-          }}
-          multiline
-          autoFocus
-          onFocus={e =>
-            e.currentTarget.setSelectionRange(
-              e.currentTarget.value.length,
-              e.currentTarget.value.length
-            )
-          }
-          rows={clsx(textBox.length < 385 ? 13 : 20)}
-          onChange={checkTypeOfText}
-          defaultValue={state.draft.plaintext}
-          value={textBox}
-          placeholder="Type or paste (⌘ + V) text you want to encrypt or a Pastebin.com link or ciphertext you want to decrypt here..."
-          inputProps={{
-            'aria-label': 'text to encrypt or decrypt',
-            height: '300px',
-            padding: '6px',
-          }}
-        />
-      </Box>
-    </div>
+    <Box sx={{ flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'hidden' }}>
+      <InputBase
+        sx={{
+          '& .MuiInputBase-inputMultiline': {
+            padding: '5px 10px',
+            overflowX: 'hidden',
+          },
+          width: '100%',
+          fontSize: fontSize(textBox.length),
+          textAlign: 'left',
+          padding: '0px',
+          alignItems: 'flex-start',
+        }}
+        inputRef={inputRef}
+        multiline
+        onChange={checkTypeOfText}
+        value={textBox}
+        placeholder="Type or paste (⌘ + V) text you want to encrypt or a Pastebin.com link or ciphertext you want to decrypt here..."
+        inputProps={{
+          'aria-label': 'text to encrypt or decrypt',
+        }}
+      />
+    </Box>
   );
 };
 

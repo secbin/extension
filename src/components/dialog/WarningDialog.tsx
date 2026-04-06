@@ -8,33 +8,26 @@ import {
   Divider,
   Typography,
 } from '@mui/material';
-import { makeStyles } from '@mui/styles';
 import { AppContext } from '../../contexts/AppContext';
 import { Action, Storage } from '../../constants';
 import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded';
-import clsx from 'clsx';
 import { setLocalItem } from '../../chrome/utils/storage';
 
-const useStyles = makeStyles(theme => ({
-  buttonEd: {
-    width: '100%',
-    backgroundColor: 'rgba(0,117,250,0.08)',
-  },
-  buttonWarning: {
-    backgroundColor: 'rgb(250,0,0,0.08)',
-    color: 'rgb(213,0,0)',
-  },
-  buttonContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    flexDirection: 'column',
-    gap: '7px',
-    marginTop: '20px',
-  },
-}));
+const buttonEdSx = { width: '100%', backgroundColor: 'rgba(0,117,250,0.08)' };
+const buttonWarningSx = {
+  width: '100%',
+  backgroundColor: 'rgb(250,0,0,0.08)',
+  color: 'rgb(213,0,0)',
+};
+const buttonContainerSx = {
+  display: 'flex',
+  alignItems: 'center',
+  flexDirection: 'column' as const,
+  gap: '7px',
+  marginTop: '20px',
+};
 
 const WarningDialog = () => {
-  const classes = useStyles();
   const { state, dispatch } = useContext(AppContext);
   const {
     app: { dialog_id },
@@ -71,14 +64,11 @@ const WarningDialog = () => {
               history will be deleted from local storage and synced devices.
             </Typography>
           </DialogContentText>
-          <div className={classes.buttonContainer}>
-            <Button className={classes.buttonEd} onClick={handleCancel}>
+          <div style={buttonContainerSx}>
+            <Button sx={buttonEdSx} onClick={handleCancel}>
               Cancel
             </Button>
-            <Button
-              className={clsx(classes.buttonEd, classes.buttonWarning)}
-              onClick={clearHistory}
-            >
+            <Button sx={buttonWarningSx} onClick={clearHistory}>
               Clear History
             </Button>
           </div>

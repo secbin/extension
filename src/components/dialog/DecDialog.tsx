@@ -3,7 +3,6 @@ import {
   Button,
   Card,
   Dialog,
-  DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
@@ -11,44 +10,29 @@ import {
   InputBase,
   Typography,
 } from '@mui/material';
-import { makeStyles } from '@mui/styles';
 import { AppContext } from '../../contexts/AppContext';
 import { Action } from '../../constants';
 import KeyRoundedIcon from '@mui/icons-material/KeyRounded';
 
-const useStyles = makeStyles(theme => ({
-  copybox: {
-    paddingLeft: 10,
-    paddingRight: 10,
-    borderRadius: 6,
-    border: '1px solid',
-    borderColor: 'rgba(170,170,170,0.25)',
-    boxShadow: '0 0 7px 0 rgba(0,0,0,0.04)',
-    marginTop: 20,
-    marginBottom: 20,
-  },
-  buttonEd: {
-    width: '100%',
-    backgroundColor: 'rgba(0,117,250,0.08)',
-  },
-  buttonGr: {
-    width: '100%',
-    backgroundColor: 'rgba(149,149,149,0.08)',
-    marginBottom: 8,
-    color: 'grey',
-  },
-}));
+const inputCardSx = {
+  paddingLeft: '10px',
+  paddingRight: '10px',
+  borderRadius: '6px',
+  border: '1px solid rgba(170,170,170,0.25)',
+  boxShadow: '0 0 7px 0 rgba(0,0,0,0.04)',
+  marginTop: '20px',
+  marginBottom: '20px',
+};
 
 const DecryptFormDialog = () => {
-  const classes = useStyles();
   const { state, dispatch } = useContext(AppContext);
   const {
     app: { dialog_id },
   } = state;
 
   const [key, setKey] = React.useState('');
+
   const handleClose = () => {
-    console.log('SETTING KEY', { key });
     dispatch({ type: Action.SET_KEY, payload: { key } });
   };
 
@@ -73,7 +57,7 @@ const DecryptFormDialog = () => {
               contents
             </Typography>
           </DialogContentText>
-          <Card className={classes.copybox}>
+          <Card sx={inputCardSx}>
             <InputBase
               autoFocus
               placeholder={'Decryption Key'}
@@ -89,17 +73,24 @@ const DecryptFormDialog = () => {
               }}
             />
           </Card>
-          <Button className={classes.buttonGr} onClick={handleCancel}>
+          <Button
+            sx={{
+              width: '100%',
+              backgroundColor: 'rgba(149,149,149,0.08)',
+              marginBottom: 1,
+              color: 'grey',
+            }}
+            onClick={handleCancel}
+          >
             Cancel
           </Button>
-          <Button className={classes.buttonEd} onClick={handleClose}>
+          <Button
+            sx={{ width: '100%', backgroundColor: 'rgba(0,117,250,0.08)' }}
+            onClick={handleClose}
+          >
             Decrypt
           </Button>
         </DialogContent>
-        {/*<DialogActions>*/}
-        {/*  <Button onClick={handleCancel}>Cancel</Button>*/}
-        {/*  <Button onClick={handleClose}>Enter</Button>*/}
-        {/*</DialogActions>*/}
       </Dialog>
     </div>
   );

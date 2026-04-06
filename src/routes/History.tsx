@@ -1,32 +1,12 @@
 import React, { useContext } from 'react';
 import List from '@mui/material/List';
 import { Typography } from '@mui/material';
-import { makeStyles } from '@mui/styles';
 import moment from 'moment';
 import { AppContext, HistoryType } from '../contexts/AppContext';
 import { useHistory } from 'react-router-dom';
 import { printDateInCorrectFormat } from '../chrome/utils';
 import DateOrderedItem from '../components/common/DateOrderedItem';
 import StatusIcon from '../components/editor/StatusIcon';
-
-const useStyles = makeStyles(theme => ({
-  pageHeading: {
-    paddingLeft: 20,
-    paddingTop: 20,
-    marginBottom: 10,
-  },
-  list: {
-    padding: 20,
-  },
-  center: {
-    width: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    textAlign: 'center',
-    alignItems: 'center',
-  },
-}));
 
 export default function History() {
   const { push } = useHistory();
@@ -49,27 +29,38 @@ export default function History() {
     }
   };
 
-  const classes = useStyles();
   let lastLastDate = '';
 
   return (
     <>
       {history && history?.length ? (
-        <Typography variant="h2" className={classes.pageHeading}>
+        <Typography
+          variant="h2"
+          sx={{ paddingLeft: '20px', paddingTop: '20px', marginBottom: '10px' }}
+        >
           History
         </Typography>
       ) : (
         <>
-          <div className={classes.center}>
+          <div
+            style={{
+              width: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              textAlign: 'center',
+              alignItems: 'center',
+            }}
+          >
             <StatusIcon variant={'empty-history'} />
           </div>
         </>
       )}
-      <List className={classes.list}>
+      <List sx={{ padding: '20px' }}>
         {history
           ?.slice()
           .reverse()
-          .map((item: any, index: number) => {
+          .map((item: HistoryType, index: number) => {
             let showItem = false;
             const itemTime = moment(item.date).format('MMMM D, YYYY');
             if (itemTime !== lastLastDate) {

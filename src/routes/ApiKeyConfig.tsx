@@ -10,41 +10,17 @@ import {
   ListItemText,
   Typography,
 } from '@mui/material';
-import { makeStyles } from '@mui/styles';
 import { AppContext } from '../contexts/AppContext';
 import { CheckCircle, Error } from '@mui/icons-material';
 import { isValidDevKey } from '../chrome/utils/pastebin';
 import { Action, PASTEBIN_API_KEY_LENGTH } from '../constants';
-import clsx from 'clsx';
 
-const useStyles = makeStyles(theme => ({
-  copybox: {
-    padding: '7px 0 7px 10px',
-    borderRadius: 6,
-    border: '1px solid',
-    borderColor: 'rgba(170,170,170,0.25)',
-    boxShadow: '0 0 7px 0 rgba(0,0,0,0.04)',
-    marginBottom: 14,
-  },
-  margin: {
-    marginTop: 10,
-  },
-  green: {
-    color: 'green',
-  },
-  red: {
-    color: 'red',
-  },
-  icon: {
-    fontSize: '14px',
-  },
-}));
+type StatusBannerProps = {
+  success: boolean;
+};
 
-export function StatusBanner(props: any) {
-  const classes = useStyles();
-
+export function StatusBanner({ success }: StatusBannerProps) {
   return (
-    // <Card classes={{ root: classes.card }}>
     <ListItem
       sx={{
         padding: 0,
@@ -56,28 +32,24 @@ export function StatusBanner(props: any) {
       }}
     >
       <ListItemIcon sx={{ minWidth: '18px' }}>
-        {props.success ? (
-          <CheckCircle className={clsx(classes.green, classes.icon)} />
+        {success ? (
+          <CheckCircle sx={{ color: 'green', fontSize: '14px' }} />
         ) : (
-          <Error className={clsx(classes.red, classes.icon)} />
+          <Error sx={{ color: 'red', fontSize: '14px' }} />
         )}
       </ListItemIcon>
       <ListItemText
         primaryTypographyProps={{
-          color: props.success ? 'green' : 'red',
+          color: success ? 'green' : 'red',
           fontSize: '14px',
         }}
-        primary={
-          props.success ? 'Verified by Pastebin' : 'Rejected by Pastebin'
-        }
+        primary={success ? 'Verified by Pastebin' : 'Rejected by Pastebin'}
       />
     </ListItem>
-    // </Card>
   );
 }
 
 const EncryptionConfig = () => {
-  const classes = useStyles();
   const { state, dispatch } = React.useContext(AppContext);
   const { api_key } = state.settings;
   const [apiKey, setApiKey] = React.useState(api_key);
@@ -107,7 +79,6 @@ const EncryptionConfig = () => {
     }
 
     const id = setTimeout(() => {
-      // Execute your command here
       if (apiKey.length === PASTEBIN_API_KEY_LENGTH) {
         handleApiKeyTest();
       }
@@ -115,9 +86,9 @@ const EncryptionConfig = () => {
 
     setTimeoutId(id);
 
-    // Cleanup function to clear the timeout if the component unmounts
     return () => clearTimeout(id);
-  }, [apiKey, handleApiKeyTest, timeoutId, valid]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [apiKey]);
 
   useLayoutEffect(() => {
     dispatch({
@@ -145,7 +116,15 @@ const EncryptionConfig = () => {
             <StatusBanner success={false} />
           )}
         </Box>
-        <Card className={classes.copybox}>
+        <Card
+          sx={{
+            padding: '7px 0 7px 10px',
+            borderRadius: '6px',
+            border: '1px solid rgba(170,170,170,0.25)',
+            boxShadow: '0 0 7px 0 rgba(0,0,0,0.04)',
+            marginBottom: '14px',
+          }}
+        >
           <InputBase
             autoFocus
             defaultValue={api_key}
@@ -189,7 +168,7 @@ const EncryptionConfig = () => {
         </Typography>
 
         <Typography variant={'h4'}>Access Your API Key</Typography>
-        <Typography variant={'body2'} className={classes.margin}>
+        <Typography variant={'body2'} sx={{ marginTop: '10px' }}>
           Once you have an account, your API key can be found in the API
           documentation section. Access it{' '}
           <a
