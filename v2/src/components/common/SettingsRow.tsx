@@ -36,7 +36,7 @@ export default function SettingsRow({
       <div className="min-w-0 flex-1">
         <p className={cn('text-sm font-medium', danger && 'text-danger')}>{label}</p>
         {description && (
-          <p className="text-xs text-text-muted mt-0.5 leading-relaxed">{description}</p>
+          <p className="text-xs text-text-muted mt-0.5 leading-snug">{description}</p>
         )}
       </div>
       <div className="flex items-center gap-2 shrink-0">

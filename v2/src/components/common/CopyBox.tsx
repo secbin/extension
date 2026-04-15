@@ -38,12 +38,46 @@ export default function CopyBox({
 
   return (
     <div className={cn('space-y-1.5', className)}>
-      {label && (
-        <label className="text-xs font-medium text-text-muted uppercase tracking-wider">
-          {label}
-        </label>
-      )}
-      <div className="relative group rounded-xl border border-border bg-surface-secondary/50 overflow-hidden transition-colors hover:border-border-hover">
+      <div className="flex items-center justify-between">
+        {label && (
+          <label className="text-xs font-medium text-text-secondary">
+            {label}
+          </label>
+        )}
+        <div className="flex items-center gap-2 ml-auto">
+          {masked && (
+            <button
+              onClick={() => setVisible(!visible)}
+              className="flex items-center gap-1 text-xs text-text-muted hover:text-text-secondary transition-colors"
+            >
+              {visible ? <EyeOff size={13} /> : <Eye size={13} />}
+              {visible ? 'Hide' : 'Show'}
+            </button>
+          )}
+          {openInNew && (
+            <button
+              onClick={handleOpenNew}
+              className="p-1 rounded text-text-muted hover:text-text-secondary transition-colors"
+              title="Open in new tab"
+            >
+              <ExternalLink size={13} />
+            </button>
+          )}
+          {allowCopy && (
+            <button
+              onClick={handleCopy}
+              className={cn(
+                'flex items-center gap-1 text-xs transition-colors',
+                copied ? 'text-success' : 'text-text-muted hover:text-text-secondary',
+              )}
+            >
+              {copied ? <Check size={13} /> : <Copy size={13} />}
+              {copied ? 'Copied' : 'Copy'}
+            </button>
+          )}
+        </div>
+      </div>
+      <div className="relative rounded-xl border border-border bg-surface-secondary/50 overflow-hidden transition-colors hover:border-border-hover">
         {multiline ? (
           <textarea
             readOnly
@@ -56,46 +90,9 @@ export default function CopyBox({
             readOnly
             type={visible ? 'text' : 'password'}
             value={value}
-            className="w-full pl-3 pr-20 py-2.5 text-[13px] font-mono bg-transparent focus:outline-none text-text-primary"
+            className="w-full px-3 py-2.5 text-[13px] font-mono bg-transparent focus:outline-none text-text-primary"
           />
         )}
-        <div className={cn(
-          'absolute flex items-center gap-0.5',
-          multiline ? 'top-1.5 right-1.5' : 'top-1/2 -translate-y-1/2 right-1.5',
-        )}>
-          {masked && (
-            <button
-              onClick={() => setVisible(!visible)}
-              className="p-1.5 rounded-md text-text-muted hover:text-text-secondary hover:bg-surface-hover transition-all"
-              title={visible ? 'Hide' : 'Show'}
-            >
-              {visible ? <EyeOff size={14} /> : <Eye size={14} />}
-            </button>
-          )}
-          {openInNew && (
-            <button
-              onClick={handleOpenNew}
-              className="p-1.5 rounded-md text-text-muted hover:text-text-secondary hover:bg-surface-hover transition-all"
-              title="Open in new tab"
-            >
-              <ExternalLink size={14} />
-            </button>
-          )}
-          {allowCopy && (
-            <button
-              onClick={handleCopy}
-              className={cn(
-                'p-1.5 rounded-md transition-all',
-                copied
-                  ? 'text-success'
-                  : 'text-text-muted hover:text-text-secondary hover:bg-surface-hover',
-              )}
-              title={copied ? 'Copied!' : 'Copy'}
-            >
-              {copied ? <Check size={14} /> : <Copy size={14} />}
-            </button>
-          )}
-        </div>
       </div>
     </div>
   )

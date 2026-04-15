@@ -20,7 +20,7 @@ export default function DecryptDialog({ open, onConfirm, onCancel }: DecryptDial
 
   return (
     <Dialog.Root open={open} onOpenChange={(o) => { if (!o) { onCancel(); setPasskey('') } }}>
-      <Dialog.Portal>
+      <Dialog.Portal container={(window as any).__SECUREBIN_PORTAL__ ?? document.body}>
         <Dialog.Overlay className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50" />
         <Dialog.Content className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[360px] rounded-2xl bg-surface border border-border shadow-2xl p-5 focus:outline-none">
           <div className="flex items-center gap-3 mb-4">

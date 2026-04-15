@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { CheckCircle2, XCircle, Loader2, ExternalLink } from 'lucide-react'
+import { CheckCircle2, ExternalLink } from 'lucide-react'
 import { useStore } from '@/lib/store'
 import { isValidDevKey } from '@/lib/pastebin'
 import { PASTEBIN_API_KEY_LENGTH } from '@/lib/constants'
@@ -13,14 +13,20 @@ export default function ApiKeyConfig() {
   const defaultKey = atob('MmU1OGNlMjcyMzllMzRhNzdjNWVmNjVkYmVhOGIyNGQ=')
   const [apiKey, setApiKey] = useState(settings.apiKey === defaultKey ? '' : settings.apiKey)
   const [validation, setValidation] = useState<ValidationState>('idle')
-  const [saved, setSaved] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   useEffect(() => () => clearTimeout(debounceRef.current), [])
 
+  // Pre-validate on mount if there's already a key
+  useEffect(() => {
+    if (apiKey.length === PASTEBIN_API_KEY_LENGTH) {
+      setValidation('validating')
+      isValidDevKey(apiKey).then(valid => setValidation(valid ? 'valid' : 'invalid'))
+    }
+  }, [])
+
   const handleChange = (value: string) => {
     setApiKey(value)
-    setSaved(false)
     clearTimeout(debounceRef.current)
 
     if (value.length === PASTEBIN_API_KEY_LENGTH) {
@@ -37,82 +43,66 @@ export default function ApiKeyConfig() {
   const handleSave = () => {
     if (!apiKey.trim()) return
     setSettings({ apiKey: apiKey.trim() })
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
   }
 
   return (
-    <div>
-      <PageHeader title="Pastebin API" subtitle="Configure your API key" />
+    <div className="flex flex-col h-full">
+      <PageHeader title="Pastebin API" subtitle="Set API Key" />
 
-      <div className="px-4 py-4 space-y-4">
-        <div className="space-y-2">
-          <label className="text-xs font-medium text-text-muted">API Developer Key</label>
-          <div className="relative">
-            <input
-              type="text"
-              value={apiKey}
-              onChange={(e) => handleChange(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSave()}
-              placeholder="5b6d1b053d850e4c095ff6707ba816fc"
-              maxLength={32}
-              className="w-full px-3 py-2.5 pr-10 text-[13px] font-mono rounded-xl border border-border bg-surface-secondary/50 focus:outline-none focus:border-primary transition-colors"
-            />
-            <div className="absolute right-3 top-1/2 -translate-y-1/2">
-              {validation === 'validating' && <Loader2 size={16} className="text-text-muted animate-spin" />}
-              {validation === 'valid'      && <CheckCircle2 size={16} className="text-success" />}
-              {validation === 'invalid'    && <XCircle size={16} className="text-warning" />}
-            </div>
-          </div>
-
+      <div className="flex-1 px-4 py-4 space-y-4">
+        {/* Label row: "API Key" left, "✓ Verified by Pastebin" right */}
+        <div className="flex items-center justify-between">
+          <label className="text-sm font-medium text-text-secondary">API Key</label>
           {validation === 'valid' && (
-            <p className="text-xs text-success">Key verified with Pastebin.</p>
+            <span className="flex items-center gap-1 text-xs font-semibold text-success">
+              <CheckCircle2 size={13} />
+              Verified by Pastebin
+            </span>
           )}
-          {validation === 'invalid' && (
-            <p className="text-xs text-text-muted">Could not verify with Pastebin — you can still save and use the key.</p>
-          )}
-
-          <button
-            onClick={handleSave}
-            disabled={!apiKey.trim()}
-            className={cn(
-              'w-full py-2 rounded-xl text-sm font-semibold transition-all',
-              saved
-                ? 'bg-success/10 text-success border border-success/30'
-                : apiKey.trim()
-                  ? 'bg-primary text-white hover:bg-primary-hover active:scale-[0.98]'
-                  : 'bg-surface-secondary text-text-muted/40 cursor-not-allowed border border-border',
-            )}
-          >
-            {saved ? '✓ Saved' : 'Save API Key'}
-          </button>
         </div>
 
-        <div className="rounded-xl border border-border bg-surface-secondary/30 p-4 space-y-3">
-          <h3 className="text-sm font-semibold">Get your API key</h3>
-          <ol className="text-xs text-text-secondary space-y-2 list-decimal list-inside leading-relaxed">
-            <li>
-              Create an account on{' '}
-              <button
-                onClick={() => window.open('https://pastebin.com/signup', '_blank', 'noopener')}
-                className="text-primary hover:underline inline-flex items-center gap-0.5"
-              >
-                pastebin.com <ExternalLink size={10} />
-              </button>
-            </li>
-            <li>
-              Go to the{' '}
-              <button
-                onClick={() => window.open('https://pastebin.com/doc_api', '_blank', 'noopener')}
-                className="text-primary hover:underline inline-flex items-center gap-0.5"
-              >
-                API documentation <ExternalLink size={10} />
-              </button>
-            </li>
-            <li>Copy your Unique Developer API Key</li>
-            <li>Paste it above and tap <strong>Save API Key</strong></li>
-          </ol>
+        <input
+          type="text"
+          value={apiKey}
+          onChange={(e) => handleChange(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && handleSave()}
+          placeholder="5b6d1b053d850e4c095ff6707ba816fc"
+          maxLength={32}
+          className="w-full px-3 py-2.5 text-[14px] font-mono rounded-xl border border-border bg-surface focus:outline-none focus:border-primary transition-colors"
+        />
+
+        <div className="space-y-2 text-sm text-text-secondary leading-relaxed">
+          <p className="font-medium text-text-primary">Getting your API Key</p>
+          <p>
+            In order to be able to use the PasteBin API, you will need to create an account with{' '}
+            <button
+              onClick={() => window.open('https://pastebin.com/signup', '_blank', 'noopener')}
+              className="text-primary hover:underline inline-flex items-center gap-0.5"
+            >
+              PasteBin <ExternalLink size={11} />
+            </button>{' '}
+            in order to get an Api key.
+          </p>
+          <p>
+            Once you have made an account enter in the key here and you are all good to go!
+          </p>
         </div>
+      </div>
+
+      {/* Bottom footer save button — matches v1 */}
+      <div className="border-t border-border bg-surface px-4 py-3">
+        <button
+          onClick={handleSave}
+          disabled={!apiKey.trim()}
+          className={cn(
+            'w-full py-2.5 text-sm font-semibold transition-all',
+            apiKey.trim()
+              ? 'text-primary hover:text-primary-hover'
+              : 'text-text-muted/40 cursor-not-allowed',
+          )}
+        >
+          Save Key
+        </button>
       </div>
     </div>
   )

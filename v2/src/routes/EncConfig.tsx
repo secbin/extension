@@ -60,7 +60,8 @@ export default function EncConfig() {
         <div className="px-4 py-3">
           <p className="text-xs text-text-muted leading-relaxed">
             SecureBin uses AES encryption to protect your text before it's posted to Pastebin.
-            AES-GCM is recommended as it provides both encryption and authentication.
+            AES-GCM is recommended — it provides both encryption and authentication (AEAD), so tampering is detectable.
+            AES-CTR provides confidentiality only. Existing AES-CBC ciphertexts can still be decrypted.
           </p>
         </div>
       </div>

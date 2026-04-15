@@ -11,21 +11,26 @@ export default function PageHeader({ title, subtitle, showBack = true }: PageHea
   const navigate = useNavigate()
 
   return (
-    <div className="flex items-center gap-3 px-4 py-3 border-b border-border bg-surface-secondary/50">
+    <div className="flex items-center border-b border-border bg-surface">
       {showBack && (
-        <button
-          onClick={() => navigate(-1)}
-          className="p-1.5 -ml-1.5 rounded-lg hover:bg-surface-hover active:scale-95 transition-all text-text-muted hover:text-text-primary"
-        >
-          <ChevronLeft size={20} />
-        </button>
+        <>
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center justify-center w-12 h-12 shrink-0 text-text-secondary hover:text-text-primary hover:bg-surface-hover active:scale-95 transition-all"
+          >
+            <ChevronLeft size={22} />
+          </button>
+          <div className="w-px self-stretch bg-border mx-1" />
+        </>
       )}
-      <div className="min-w-0">
-        <h2 className="text-sm font-semibold truncate">{title}</h2>
+      <div className="flex-1 flex flex-col items-center justify-center py-3.5 px-2 text-center">
+        <h2 className="text-sm font-semibold text-text-primary leading-tight">{title}</h2>
         {subtitle && (
-          <p className="text-xs text-text-muted truncate">{subtitle}</p>
+          <p className="text-xs text-text-muted leading-tight mt-0.5">{subtitle}</p>
         )}
       </div>
+      {/* Spacer to visually balance the back button */}
+      {showBack && <div className="w-14 shrink-0" />}
     </div>
   )
 }

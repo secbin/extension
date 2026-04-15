@@ -1,7 +1,9 @@
 import { useNavigate, useLocation } from 'react-router-dom'
-import { PenLine, Clock, Settings } from 'lucide-react'
+import { PenLine, Clock, Settings, X } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { useStore } from '@/lib/store'
+import { isInjected } from '../App'
+import SecurebinLogo from './common/SecurebinLogo'
 
 export default function NavBar() {
   const navigate = useNavigate()
@@ -15,13 +17,17 @@ export default function NavBar() {
   ]
 
   return (
-    <header className="flex items-center justify-between px-4 py-3 border-b border-border bg-surface/80 backdrop-blur-xl">
+    <header className={cn('flex items-center justify-between border-b border-border bg-surface', isInjected() ? 'px-5 py-3' : 'px-4 py-3')}>
       <div className="flex items-center">
-        <img
-          src={isDark ? '/securebinlogo_dark.svg' : '/securebinlogo.svg'}
-          alt="SecureBin"
-          className="h-5"
-        />
+        {isInjected() ? (
+          <SecurebinLogo darkmode={isDark} />
+        ) : (
+          <img
+            src={isDark ? '/securebinlogo_dark.svg' : '/securebinlogo.svg'}
+            alt="SecureBin"
+            className="h-5"
+          />
+        )}
       </div>
       <nav className="flex items-center gap-1">
         {navItems.map(({ icon: Icon, path, label }) => {
@@ -43,6 +49,15 @@ export default function NavBar() {
             </button>
           )
         })}
+        {isInjected() && (
+          <button
+            onClick={() => window.dispatchEvent(new CustomEvent('securebin:close'))}
+            className="p-2 rounded-lg text-text-muted hover:text-text-secondary hover:bg-surface-hover transition-all duration-150"
+            title="Close"
+          >
+            <X size={18} />
+          </button>
+        )}
       </nav>
     </header>
   )

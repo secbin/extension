@@ -23,9 +23,11 @@ export interface Settings {
   apiKey: string
   encMode: EncryptionMode
   keyLength: number
-  theme: 'light' | 'dark'
+  theme: 'light' | 'dark' | 'system'
   default_action: EditorAction  // default primary action in editor
   page_timeout: number          // seconds to remember last page; 0 = disabled, -1 = always
+  userKey: string       // api_user_key from Pastebin login, empty = not logged in
+  username: string      // display name, from userdetails
 }
 
 export interface Draft {
@@ -36,6 +38,10 @@ export interface Draft {
   pastebinLink: string
   key: string
   updatedAt: number
+  title: string
+  format: string
+  expiry: string
+  privacy: '0' | '1'
 }
 
 interface AppState {
@@ -47,6 +53,7 @@ interface AppState {
 
   // Theme
   toggleTheme: () => void
+  signOut: () => void
 
   // Draft
   draft: Draft
@@ -71,13 +78,39 @@ interface AppState {
   initialize: () => Promise<void>
 }
 
+function getSystemTheme(): 'light' | 'dark' {
+  try {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+  } catch {
+    return 'light'
+  }
+}
+
+function generateDraftTitle(): string {
+  return new Date().toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+  })
+  // → "Apr 9, 2:34 PM"
+}
+
 const DEFAULT_SETTINGS: Settings = {
   apiKey: atob(DEFAULT_API_KEY_HASH),
   encMode: EncryptionMode.AES_GCM,
   keyLength: 16,
-  theme: 'light',
+  theme: 'system',
   default_action: EditorAction.POST_PASTEBIN,
   page_timeout: 30,
+  userKey: '',
+  username: '',
+}
+
+/** Resolves the effective dark/light value for a given theme setting */
+export function resolveTheme(theme: Settings['theme']): 'light' | 'dark' {
+  if (theme === 'system') return getSystemTheme()
+  return theme
 }
 
 const DEFAULT_DRAFT: Draft = {
@@ -88,6 +121,10 @@ const DEFAULT_DRAFT: Draft = {
   pastebinLink: '',
   key: '',
   updatedAt: 0,
+  title: 'Untitled Paste',
+  format: 'text',
+  expiry: 'N',
+  privacy: '0',
 }
 
 export const useStore = create<AppState>((set, get) => ({
@@ -117,6 +154,9 @@ export const useStore = create<AppState>((set, get) => ({
           settings: {
             ...DEFAULT_SETTINGS,
             ...parsed,
+            theme: parsed.theme ?? getSystemTheme(),
+            userKey: parsed.userKey ?? '',
+            username: parsed.username ?? '',
             apiKey: parsed.apiKey ? decodeURIComponent(atob(parsed.apiKey)) : DEFAULT_SETTINGS.apiKey,
           },
         })
@@ -129,8 +169,12 @@ export const useStore = create<AppState>((set, get) => ({
   // Theme
   toggleTheme: () => {
     const current = get().settings.theme
-    const next = current === 'dark' ? 'light' : 'dark'
+    const next: Settings['theme'] = current === 'light' ? 'dark' : current === 'dark' ? 'system' : 'light'
     get().setSettings({ theme: next })
+  },
+
+  signOut: () => {
+    get().setSettings({ userKey: '', username: '' })
   },
 
   // Draft
@@ -144,7 +188,7 @@ export const useStore = create<AppState>((set, get) => ({
 
   resetDraft: () => {
     const defaultAction = get().settings.default_action ?? EditorAction.POST_PASTEBIN
-    set({ draft: { ...DEFAULT_DRAFT, action: defaultAction } })
+    set({ draft: { ...DEFAULT_DRAFT, action: defaultAction, title: generateDraftTitle() } })
     deleteSyncItem(StorageKey.DRAFT)
   },
 

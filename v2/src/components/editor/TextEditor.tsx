@@ -1,66 +1,148 @@
 import { useRef, useEffect, useCallback } from 'react'
-import { useStore } from '@/lib/store'
-import { cn } from '@/lib/cn'
-import { EditorAction } from '@/lib/constants'
-import { detectAction, getMaxLength, isWithinLimit } from '@/lib/editor-utils'
+import { useStore, resolveTheme } from '@/lib/store'
+import { detectLanguage } from '@/lib/detect-language'
+import {
+  EditorView,
+  EditorState,
+  buildBaseExtensions,
+  getLangKey,
+  getLanguage,
+  languageCompartment,
+  themeCompartment,
+  getThemeExtension,
+} from '@/lib/cm-setup'
+import { isInjected } from '@/App'
+
+function getPastePlaceholder(): string {
+  const platform = navigator.platform.toLowerCase()
+  const ua = navigator.userAgent.toLowerCase()
+  const isMac = platform.startsWith('mac') || ua.includes('mac os')
+  const shortcut = isMac ? '⌘ + V' : 'Ctrl + V'
+  return `Type or paste (${shortcut}) text you want to encrypt or a Pastebin.com link or ciphertext you want to decrypt here...`
+}
+
+const PLACEHOLDER = getPastePlaceholder()
+
+const CODE_BG_LIGHT = '#f3f3f5'
+const CODE_BG_DARK = '#2c313c'
 
 export default function TextEditor() {
   const { draft, updateDraft, settings } = useStore()
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  const cmRef = useRef<HTMLDivElement>(null)
+  const viewRef = useRef<EditorView | null>(null)
+  const isUpdatingRef = useRef(false)
+  const currentLangRef = useRef('')
+  const isDark = resolveTheme(settings.theme) === 'dark'
+  const isCodeMode = draft.format !== 'text'
 
   const handleChange = useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-      const text = e.target.value
-      clearTimeout(debounceRef.current)
-      debounceRef.current = setTimeout(() => {
-        const action = detectAction(text, settings.default_action)
-        updateDraft({
-          plaintext: text,
-          action,
-          buttonEnabled: isWithinLimit(text, action),
-        })
-      }, 200)
-      // Immediate text update for responsive typing
-      updateDraft({ plaintext: text })
+    (text: string) => {
+      let format = draft.format
+      if (format === 'text' && text.length > 80) {
+        try {
+          const detected = detectLanguage(text)
+          if (detected !== 'text') format = detected
+        } catch {
+          // keep current format
+        }
+      }
+      updateDraft({ plaintext: text, format, buttonEnabled: text.length > 0 })
     },
-    [settings.default_action, updateDraft],
+    [draft.format, updateDraft],
   )
 
+  // Initialize CodeMirror when entering code mode
   useEffect(() => {
-    return () => clearTimeout(debounceRef.current)
-  }, [])
+    if (!isCodeMode || !cmRef.current) return
 
-  const placeholder = (() => {
-    if (draft.action === EditorAction.DECRYPT || draft.action === EditorAction.DECRYPT_PASTEBIN) {
-      return 'Paste encrypted text or Pastebin link...'
+    const shadowRoot = isInjected()
+      ? ((window as any).__SECUREBIN_SHADOW_ROOT__ as ShadowRoot | undefined)
+      : undefined
+
+    // Resolve language synchronously — all grammars are eagerly imported
+    const langKey = getLangKey(draft.format, draft.plaintext)
+    const lang = getLanguage(langKey)
+    currentLangRef.current = langKey
+
+    const view = new EditorView({
+      state: EditorState.create({
+        doc: draft.plaintext,
+        extensions: [
+          ...buildBaseExtensions(isDark),
+          // Set language immediately in the initial state — no async delay
+          languageCompartment.of(lang ?? []),
+          EditorView.updateListener.of(update => {
+            if (update.docChanged && !isUpdatingRef.current) {
+              handleChange(update.state.doc.toString())
+            }
+          }),
+        ],
+      }),
+      parent: cmRef.current,
+      ...(shadowRoot ? { root: shadowRoot } : {}),
+    })
+    viewRef.current = view
+
+    return () => {
+      view.destroy()
+      viewRef.current = null
+      currentLangRef.current = ''
     }
-    return 'Type or paste your text here...'
-  })()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isCodeMode])
 
-  const isEmpty = draft.plaintext.length === 0
+  // Sync content from outside (resetDraft, securebin:set-text)
+  useEffect(() => {
+    const view = viewRef.current
+    if (!view || !isCodeMode) return
+    const current = view.state.doc.toString()
+    if (current !== draft.plaintext) {
+      isUpdatingRef.current = true
+      view.dispatch({ changes: { from: 0, to: current.length, insert: draft.plaintext } })
+      isUpdatingRef.current = false
+    }
+  }, [draft.plaintext, isCodeMode])
+
+  // Sync theme
+  useEffect(() => {
+    const view = viewRef.current
+    if (!view || !isCodeMode) return
+    view.dispatch({ effects: themeCompartment.reconfigure(getThemeExtension(isDark)) })
+  }, [isDark, isCodeMode])
+
+  // Swap language when format changes (e.g. user picks a different format from dropdown)
+  useEffect(() => {
+    if (!isCodeMode) return
+    const view = viewRef.current
+    if (!view) return
+    const key = getLangKey(draft.format, draft.plaintext)
+    if (key === currentLangRef.current) return
+    currentLangRef.current = key
+    const lang = getLanguage(key)
+    view.dispatch({ effects: languageCompartment.reconfigure(lang ?? []) })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draft.format, isCodeMode])
+
+  if (isCodeMode) {
+    return (
+      <div
+        ref={cmRef}
+        className="flex-1 overflow-hidden"
+        style={{ backgroundColor: isDark ? CODE_BG_DARK : CODE_BG_LIGHT }}
+      />
+    )
+  }
 
   return (
     <div className="relative flex-1 flex flex-col">
       <textarea
-        ref={textareaRef}
         value={draft.plaintext}
-        onChange={handleChange}
-        placeholder={placeholder}
-        spellCheck={false}
-        className="flex-1 w-full px-4 py-3 text-[15px] leading-relaxed bg-transparent resize-none focus:outline-none placeholder:text-text-muted/50"
-        style={{
-          fontSize: draft.plaintext.length > 300 ? '13px' : '15px',
-        }}
+        onChange={e => handleChange(e.target.value)}
+        placeholder={PLACEHOLDER}
+        spellCheck={true}
+        className="flex-1 w-full px-4 py-4 leading-relaxed bg-transparent resize-none focus:outline-none placeholder:text-text-muted/50"
+        style={{ fontSize: draft.plaintext.length > 300 ? '16px' : '24px' }}
       />
-      {isEmpty && (
-        <div className="px-4 pb-3 flex flex-col gap-1.5 pointer-events-none">
-          <p className="text-[11px] text-text-muted/60 leading-relaxed">
-            Paste a <span className="font-medium">pastebin.com</span> link to open or decrypt it.
-            Paste <span className="font-medium">encrypted text</span> (starting with C_TXT) to decrypt locally.
-          </p>
-        </div>
-      )}
     </div>
   )
 }

@@ -7,6 +7,7 @@ import { EditorAction } from '@/lib/constants'
 import { detectAction, isWithinLimit } from '@/lib/editor-utils'
 import TextEditor from '@/components/editor/TextEditor'
 import ActionBar from '@/components/editor/ActionBar'
+import PasteMetadata from '@/components/editor/PasteMetadata'
 import EncryptDialog from '@/components/dialog/EncryptDialog'
 import DecryptDialog from '@/components/dialog/DecryptDialog'
 
@@ -35,6 +36,36 @@ export default function Editor() {
     })
   }, [])
 
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const { ciphertext } = (e as CustomEvent).detail
+      updateDraft({
+        plaintext: ciphertext,
+        action: EditorAction.DECRYPT,
+        buttonEnabled: ciphertext.length > 0,
+      })
+    }
+    window.addEventListener('securebin:load-for-decrypt', handler)
+    return () => window.removeEventListener('securebin:load-for-decrypt', handler)
+  }, [updateDraft])
+
+  // Handle text injected by the right-click context menu when the panel is already open.
+  // The content script dispatches this when the panel opens with pendingText set.
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const text: string = (e as CustomEvent).detail ?? ''
+      if (!text) return
+      const action = detectAction(text, settings.default_action)
+      updateDraft({
+        plaintext: text,
+        action,
+        buttonEnabled: isWithinLimit(text, action),
+      })
+    }
+    window.addEventListener('securebin:set-text', handler)
+    return () => window.removeEventListener('securebin:set-text', handler)
+  }, [settings.default_action, updateDraft])
+
   const handleAction = useCallback((overrideAction?: EditorAction) => {
     // The dropdown passes the action directly so we don't rely on a stale draft closure
     const action = overrideAction ?? draft.action
@@ -54,6 +85,24 @@ export default function Editor() {
     // Direct actions
     executeAction(undefined, action)
   }, [draft])
+
+  // Keyboard shortcuts: Cmd/Ctrl+Enter = trigger action, Cmd/Ctrl+Shift+E = toggle encryption
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const mod = e.metaKey || e.ctrlKey
+      if (mod && e.key === 'Enter') {
+        e.preventDefault()
+        if (draft.buttonEnabled) handleAction()
+      }
+      if (mod && e.shiftKey && e.key === 'e') {
+        e.preventDefault()
+        const isEnc = draft.action === EditorAction.ENCRYPT_PASTEBIN || draft.action === EditorAction.ENCRYPT
+        updateDraft({ action: isEnc ? EditorAction.POST_PASTEBIN : EditorAction.ENCRYPT_PASTEBIN })
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [draft, handleAction, updateDraft])
 
   const executeAction = useCallback(
     async (passkey?: string, overrideAction?: EditorAction) => {
@@ -78,7 +127,7 @@ export default function Editor() {
           navigate('/result')
         } else if (action === EditorAction.ENCRYPT_PASTEBIN && passkey) {
           const result = await encrypt(plaintext, encMode, keyLength, passkey)
-          const link = await postPastebin(result.cipherData, apiKey)
+          const link = await postPastebin(result.cipherData, apiKey, { title: draft.title, format: draft.format, expiry: draft.expiry, privacy: draft.privacy })
           addToHistory({
             id: crypto.randomUUID(),
             action: EditorAction.ENCRYPT_PASTEBIN,
@@ -92,7 +141,7 @@ export default function Editor() {
           resetDraft()
           navigate('/result')
         } else if (action === EditorAction.POST_PASTEBIN) {
-          const link = await postPastebin(plaintext, apiKey)
+          const link = await postPastebin(plaintext, apiKey, { title: draft.title, format: draft.format, expiry: draft.expiry, privacy: draft.privacy })
           addToHistory({
             id: crypto.randomUUID(),
             action: EditorAction.POST_PASTEBIN,
@@ -164,6 +213,7 @@ export default function Editor() {
 
   return (
     <div className="flex flex-col h-full">
+      <PasteMetadata />
       <TextEditor />
       <ActionBar onAction={handleAction} />
 

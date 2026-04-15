@@ -16,8 +16,10 @@ export const KEY_LENGTHS = [
   { label: '256-bit', value: 32 },
 ] as const
 
+// AES-CBC omitted — no authentication tag, vulnerable to padding oracle attacks.
+// The EncryptionMode.AES_CBC enum value is kept so existing CBC ciphertexts can
+// still be decrypted, but it is not offered as an option for new encryptions.
 export const ENCRYPTION_MODES = [
-  { label: 'AES-CBC', value: EncryptionMode.AES_CBC },
   { label: 'AES-CTR', value: EncryptionMode.AES_CTR },
   { label: 'AES-GCM (Recommended)', value: EncryptionMode.AES_GCM },
 ] as const
@@ -47,3 +49,76 @@ export enum EditorAction {
 }
 
 export const DEFAULT_API_KEY_HASH = 'MmU1OGNlMjcyMzllMzRhNzdjNWVmNjVkYmVhOGIyNGQ='
+
+export const PASTEBIN_FORMATS = [
+  { label: 'Plain Text', value: 'text' },
+  { label: 'ActionScript', value: 'actionscript' },
+  { label: 'ActionScript 3', value: 'actionscript3' },
+  { label: 'Ada', value: 'ada' },
+  { label: 'ANTLR4', value: 'antlr4' },
+  { label: 'Apache Log', value: 'apache' },
+  { label: 'Assembly (NASM)', value: 'asm' },
+  { label: 'Bash', value: 'bash' },
+  { label: 'C', value: 'c' },
+  { label: 'C#', value: 'csharp' },
+  { label: 'C++', value: 'cpp' },
+  { label: 'CSS', value: 'css' },
+  { label: 'Dart', value: 'dart' },
+  { label: 'Diff', value: 'diff' },
+  { label: 'Docker', value: 'docker' },
+  { label: 'Elixir', value: 'elixir' },
+  { label: 'Erlang', value: 'erlang' },
+  { label: 'Go', value: 'go' },
+  { label: 'Haskell', value: 'haskell' },
+  { label: 'HTML', value: 'html5' },
+  { label: 'Java', value: 'java' },
+  { label: 'JavaScript', value: 'javascript' },
+  { label: 'JSON', value: 'json' },
+  { label: 'Kotlin', value: 'kotlin' },
+  { label: 'Lua', value: 'lua' },
+  { label: 'Markdown', value: 'markdown' },
+  { label: 'MATLAB', value: 'matlab' },
+  { label: 'MySQL', value: 'mysql' },
+  { label: 'Nginx', value: 'nginx' },
+  { label: 'Objective-C', value: 'objc' },
+  { label: 'Pascal', value: 'pascal' },
+  { label: 'Perl', value: 'perl' },
+  { label: 'PHP', value: 'php' },
+  { label: 'PowerShell', value: 'powershell' },
+  { label: 'Python', value: 'python' },
+  { label: 'R', value: 'r' },
+  { label: 'Ruby', value: 'ruby' },
+  { label: 'Rust', value: 'rust' },
+  { label: 'Scala', value: 'scala' },
+  { label: 'Shell', value: 'bash' },
+  { label: 'SQL', value: 'sql' },
+  { label: 'Swift', value: 'swift' },
+  { label: 'TOML', value: 'toml' },
+  { label: 'TypeScript', value: 'typescript' },
+  { label: 'VB.NET', value: 'vbnet' },
+  { label: 'XML', value: 'xml' },
+  { label: 'YAML', value: 'yaml' },
+] as const
+
+export const PASTEBIN_EXPIRY = [
+  { label: 'Never', value: 'N' },
+  { label: '10 Minutes', value: '10M' },
+  { label: '1 Hour', value: '1H' },
+  { label: '1 Day', value: '1D' },
+  { label: '1 Week', value: '1W' },
+  { label: '2 Weeks', value: '2W' },
+  { label: '1 Month', value: '1M' },
+  { label: '6 Months', value: '6M' },
+  { label: '1 Year', value: '1Y' },
+] as const
+
+export type PastebinFormat = typeof PASTEBIN_FORMATS[number]['value']
+export type PastebinExpiry = typeof PASTEBIN_EXPIRY[number]['value']
+
+export const PASTE_PRIVACY = [
+  { label: 'Public', value: '0' },
+  { label: 'Unlisted', value: '1' },
+  { label: 'Private', value: '2' },
+] as const
+
+export type PastePrivacy = typeof PASTE_PRIVACY[number]['value']

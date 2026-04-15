@@ -3,26 +3,29 @@
 @theme {
   --color-primary: #1D6BC6;
   --color-primary-hover: #1558a8;
-  --color-primary-light: #dbeafe;
+  --color-primary-light: #e3eefc;
   --color-danger: #ef4444;
   --color-danger-hover: #dc2626;
-  --color-success: #22c55e;
-  --color-warning: #f59e0b;
+  --color-success: #34c759;
+  --color-warning: #ff9500;
+
+  /* Apple HIG light */
   --color-surface: #ffffff;
-  --color-surface-secondary: #f8fafc;
-  --color-surface-hover: #f1f5f9;
-  --color-border: #e2e8f0;
-  --color-border-hover: #cbd5e1;
-  --color-text-primary: #0f172a;
-  --color-text-secondary: #475569;
-  --color-text-muted: #94a3b8;
-  --font-mono: 'SF Mono', 'Fira Code', 'JetBrains Mono', 'Menlo', monospace;
+  --color-surface-secondary: #f2f2f7;
+  --color-surface-hover: #e5e5ea;
+  --color-border: #d1d1d6;
+  --color-border-hover: #aeaeb2;
+  --color-text-primary: #1c1c1e;
+  --color-text-secondary: #3a3a3c;
+  --color-text-muted: #6c6c70;
+
+  --font-mono: 'Menlo', 'SF Mono', 'Fira Code', 'JetBrains Mono', monospace;
 }
 
 @variant dark (&:where(.dark, .dark *));
 
 :root {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -30,18 +33,20 @@
   --color-primary: #4795fd;
   --color-primary-hover: #3b82f6;
   --color-primary-light: #1e3a5f;
-  --color-danger: #f87171;
+  --color-danger: #ff453a;
   --color-danger-hover: #ef4444;
-  --color-success: #4ade80;
-  --color-warning: #fbbf24;
-  --color-surface: #0f172a;
-  --color-surface-secondary: #1e293b;
-  --color-surface-hover: #334155;
-  --color-border: #334155;
-  --color-border-hover: #475569;
-  --color-text-primary: #f1f5f9;
-  --color-text-secondary: #94a3b8;
-  --color-text-muted: #64748b;
+  --color-success: #30d158;
+  --color-warning: #ffd60a;
+
+  /* Apple HIG dark */
+  --color-surface: #1c1c1e;
+  --color-surface-secondary: #2c2c2e;
+  --color-surface-hover: #3a3a3c;
+  --color-border: #38383a;
+  --color-border-hover: #545458;
+  --color-text-primary: #f2f2f7;
+  --color-text-secondary: #ebebf5cc;
+  --color-text-muted: #8e8e93;
 }
 
 body {
@@ -60,27 +65,20 @@ body {
 
 /* Scrollbar styling */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 4px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
   background: var(--color-border);
-  border-radius: 3px;
+  border-radius: 2px;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-border-hover);
 }
 
 /* Dialog overlay animation */
-[data-state="open"] > [data-radix-dialog-overlay] {
-  animation: fadeIn 150ms ease-out;
-}
-[data-state="closed"] > [data-radix-dialog-overlay] {
-  animation: fadeOut 100ms ease-in;
-}
-
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -90,7 +88,6 @@ body {
   to { opacity: 0; }
 }
 
-/* Focus ring utility */
 .focus-ring {
   outline: none;
 }
@@ -98,3 +95,81 @@ body {
   box-shadow: 0 0 0 2px var(--color-surface), 0 0 0 4px var(--color-primary);
   border-radius: 8px;
 }
+
+/* ── Prism syntax token colors ────────────────────────────── */
+/* Light mode */
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata { color: #6c6c70; font-style: italic; }
+
+.token.punctuation { color: #3a3a3c; }
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol { color: #1d6bc6; }
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin { color: #c0760a; }
+
+.token.operator,
+.token.entity,
+.token.url,
+.token.variable { color: #1c1c1e; }
+
+.token.atrule,
+.token.attr-value,
+.token.keyword { color: #af52de; }
+
+.token.function,
+.token.class-name { color: #0055cc; }
+
+.token.regex,
+.token.important { color: #ff3b30; }
+
+.token.namespace { opacity: 0.7; }
+.token.important,
+.token.bold { font-weight: 600; }
+.token.italic { font-style: italic; }
+
+/* Dark mode — Apple HIG dark */
+.dark .token.comment,
+.dark .token.prolog,
+.dark .token.doctype,
+.dark .token.cdata { color: #8e8e93; font-style: italic; }
+
+.dark .token.punctuation { color: #ebebf5cc; }
+
+.dark .token.property,
+.dark .token.tag,
+.dark .token.boolean,
+.dark .token.number,
+.dark .token.constant,
+.dark .token.symbol { color: #4795fd; }
+
+.dark .token.selector,
+.dark .token.attr-name,
+.dark .token.string,
+.dark .token.char,
+.dark .token.builtin { color: #ff9f0a; }
+
+.dark .token.operator,
+.dark .token.entity,
+.dark .token.url,
+.dark .token.variable { color: #f2f2f7; }
+
+.dark .token.atrule,
+.dark .token.attr-value,
+.dark .token.keyword { color: #bf5af2; }
+
+.dark .token.function,
+.dark .token.class-name { color: #4fc3f7; }
+
+.dark .token.regex,
+.dark .token.important { color: #ff453a; }
