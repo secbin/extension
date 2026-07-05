@@ -16,16 +16,44 @@ To learn more about our project and the design decisions check out the [Wiki pag
 | <img width="400" src="assets/video/demo_pastebin.gif" alt="Demo: paste code and post it straight to Pastebin"> | <img width="400" src="assets/video/demo_encrypt.gif" alt="Demo in dark mode: encrypt with a passkey, post, and copy the share link"> |
 | Post code or notes straight to Pastebin — formats, expiry, and visibility included. | Encrypt locally with AES-GCM first; only ciphertext ever reaches Pastebin. |
 
-## How to Install this extension:
+## What's new in v2
 
-You can grab a prebuilt version of this extension under the release tab or build it yourself.
+Version 2 is a complete rewrite of the extension using modern web technologies:
 
-The current extension (v2) lives in [`v2/`](v2/) — see [v2/README.md](v2/README.md) for build instructions:
+- **Framework:** React 19 with TypeScript
+- **Styling:** Tailwind CSS v4 and Radix UI primitives for a modern, beautiful, and accessible UI
+- **State Management:** Zustand
+- **Routing:** React Router v7
+- **Bundler:** Vite with `@crxjs/vite-plugin` for optimized extension builds and HMR (Hot Module Replacement)
+
+## How to install
+
+You can grab a prebuilt version of this extension under the [releases tab](https://github.com/secbin/extension/releases) or build it yourself:
 
 ```
-$ cd v2
 $ npm install
 $ npm run build
 ```
 
-Then load the generated `v2/dist` folder via `chrome://extensions` → Developer mode → Load unpacked.
+Then load the generated `dist` folder via `chrome://extensions` → Developer mode → Load unpacked.
+
+## Development
+
+`npm run dev` starts the Vite development server with Hot Module Replacement; load the generated `dist` folder in Chrome the same way.
+
+Optionally bundle a default Pastebin API key into the build (used when the person installing the extension hasn't configured their own key). The key is injected at build time from a gitignored env file and never committed:
+
+```bash
+cp .env.example .env.local
+# then set VITE_DEFAULT_PASTEBIN_API_KEY in .env.local
+```
+
+Builds without `.env.local` work normally — posting to Pastebin is simply disabled until a key is entered under Settings → API Key.
+
+### Scripts
+
+- `npm run dev`: Start the Vite development server with HMR.
+- `npm run build`: Build the extension for production into `dist/`.
+- `npm run test`: Run unit tests using Vitest.
+- `npm run test:watch`: Run tests in watch mode.
+- `npm run preview`: Preview the production build.
