@@ -15,7 +15,7 @@ async function syncActionPopup(tabId: number, url?: string) {
 
 function registerContextMenus() {
   chrome.contextMenus.removeAll(() => {
-    chrome.contextMenus.create({ id: 'securebinRoot', title: 'SecureBin', contexts: ['selection'] })
+    chrome.contextMenus.create({ id: 'securebinRoot', title: 'securebin', contexts: ['selection'] })
     chrome.contextMenus.create({ id: 'securebinOpen', title: 'Open in Editor', parentId: 'securebinRoot', contexts: ['selection'] })
     chrome.contextMenus.create({ id: 'securebinPost', title: 'Post to Pastebin', parentId: 'securebinRoot', contexts: ['selection'] })
   })

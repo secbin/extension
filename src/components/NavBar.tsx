@@ -24,7 +24,7 @@ export default function NavBar() {
         ) : (
           <img
             src={isDark ? '/securebinlogo_dark.svg' : '/securebinlogo.svg'}
-            alt="SecureBin"
+            alt="securebin"
             className="h-5"
           />
         )}

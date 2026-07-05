@@ -1,10 +1,10 @@
 {
-  "name": "SecureBin: Powerful Pastebin Tool",
+  "name": "securebin: Powerful Pastebin Tool",
   "description": "Securely encrypt your text on Pastebin.com",
   "version": "2.0.1",
   "manifest_version": 3,
   "action": {
-    "default_title": "Open SecureBin"
+    "default_title": "Open securebin"
   },
   "icons": {
     "16": "icons/logo48.png",
