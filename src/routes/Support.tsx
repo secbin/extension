@@ -1,72 +1,68 @@
-import React, { useLayoutEffect } from 'react';
-import { Box, DialogContent, Typography } from '@mui/material';
-import { AppContext } from '../contexts/AppContext';
-import { Action } from '../constants';
-import SettingsItem from '../components/SettingsItem';
-import ButtonRedirect from '../components/dialog/ButtonRedirect';
+import { ExternalLink, MessageCircle, Bug, GitPullRequest, Heart } from 'lucide-react'
+import PageHeader from '@/components/common/PageHeader'
+import SettingsRow from '@/components/common/SettingsRow'
 
-const EncConfig = () => {
-  const { state, dispatch } = React.useContext(AppContext);
+const links = {
+  faq: 'https://securebin.org/support/',
+  bug: 'https://github.com/secbin/extension/issues/new',
+  contribute: 'https://github.com/secbin/extension/pulls',
+  donate: 'https://securebin.org/donate/',
+}
 
-  useLayoutEffect(() => {
-    dispatch({
-      type: Action.SET_SUBHEADER,
-      payload: {
-        subheader: {
-          back_button: true,
-          primary: 'Help',
-          secondary: '',
-          custom_button: null,
-        },
-      },
-    });
-  }, [dispatch, state.app.location]);
+function openExternal(url: string) {
+  window.open(url, '_blank', 'noopener,noreferrer')
+}
 
+export default function Support() {
   return (
-    <Box>
-      <DialogContent
-        sx={{
-          overflowY: 'auto',
-          WebkitOverflowScrolling: 'touch',
-          willChange: 'scroll-position',
-          scrollBehavior: 'smooth',
-          transform: 'translateZ(0)',
-        }}
-      >
-        <Typography variant={'h4'}>Support</Typography>
-        <SettingsItem multilineSecondaryText={true} primary={'FAQs'}>
-          <ButtonRedirect external url={'https://securebin.org/support/'} />
-        </SettingsItem>
-        <SettingsItem
-          multilineSecondaryText={true}
-          primary={'Report a bug or request feature'}
-        >
-          <ButtonRedirect
-            external
-            url={'https://github.com/secbin/extension/issues/new'}
-          />
-        </SettingsItem>
-        <Typography variant={'h4'}>Contribute</Typography>
-        <SettingsItem
-          multilineSecondaryText={true}
-          primary={'Contribute to project'}
-          secondary={'Contribute to this open-source project'}
-        >
-          <ButtonRedirect
-            external
-            url={'https://github.com/secbin/extension/pulls'}
-          />
-        </SettingsItem>
-        <SettingsItem
-          multilineSecondaryText={true}
-          primary={'Support to project'}
-          secondary={'Make a financial donation'}
-        >
-          <ButtonRedirect external url={'https://securebin.org/donate/'} />
-        </SettingsItem>
-      </DialogContent>
-    </Box>
-  );
-};
+    <div>
+      <PageHeader title="Help & Support" />
 
-export default EncConfig;
+      <div className="divide-y divide-border">
+        <div className="py-1">
+          <p className="px-4 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-widest text-text-muted">
+            Support
+          </p>
+          <SettingsRow
+            label="FAQs"
+            description="Common questions answered"
+            onClick={() => openExternal(links.faq)}
+            chevron
+          >
+            <MessageCircle size={16} className="text-text-muted" />
+          </SettingsRow>
+          <SettingsRow
+            label="Report a Bug"
+            description="Open an issue on GitHub"
+            onClick={() => openExternal(links.bug)}
+            chevron
+          >
+            <Bug size={16} className="text-text-muted" />
+          </SettingsRow>
+        </div>
+
+        <div className="py-1">
+          <p className="px-4 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-widest text-text-muted">
+            Contribute
+          </p>
+          <SettingsRow
+            label="Contribute Code"
+            description="Submit a pull request"
+            onClick={() => openExternal(links.contribute)}
+            chevron
+          >
+            <GitPullRequest size={16} className="text-text-muted" />
+          </SettingsRow>
+          <SettingsRow
+            label="Donate"
+            description="Support the project"
+            onClick={() => openExternal(links.donate)}
+            chevron
+          >
+            <Heart size={16} className="text-text-muted" />
+          </SettingsRow>
+        </div>
+      </div>
+    </div>
+  )
+}

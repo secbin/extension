@@ -151,3 +151,8 @@ package-lock.json
 yarn.lock
 yarn.lock
 *.lock
+dist/
+.env
+.env.local
+tsconfig.tsbuildinfo
+*.tsbuildinfo

@@ -1,337 +1,181 @@
-import React, { useEffect, useState } from 'react';
-import { Route, Switch, useLocation } from 'react-router-dom';
-import { useHistory } from 'react-router-dom';
-import './styles/App.css';
-import {
-  AppBar,
-  Box,
-  Divider,
-  IconButton,
-  ThemeProvider,
-  Toolbar,
-} from '@mui/material';
-import { createTheme } from '@mui/material/styles';
-import { makeStyles } from '@mui/styles';
-import {
-  HistorySharp as HistoryIcon,
-  SettingsSharp as SettingsIcon,
-  EditSharp as EditIcon,
-} from '@mui/icons-material';
-import { AppContext } from './contexts/AppContext';
-import { Action, DEFAULT_SETTINGS, Storage } from './constants';
-import Settings from './routes/Settings';
-import History from './routes/History';
-import Result from './routes/Result';
-import Editor from './routes/Editor';
-import { getLocalItem, getSyncItem } from './chrome/utils/storage';
-import SubHeader from './components/common/SubHeader';
-import ApiKeyConfig from './routes/ApiKeyConfig';
-import EncConfig from './routes/EncConfig';
-import Support from './routes/Support';
+import { useEffect, useCallback } from 'react'
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
+import { useStore, resolveTheme, type HistoryItem } from './lib/store'
+import { EditorAction } from './lib/constants'
+import { detectAction } from './lib/editor-utils'
+import { detectLanguage } from './lib/detect-language'
+import { cn } from './lib/cn'
+import NavBar from './components/NavBar'
+import Editor from './routes/Editor'
+import Settings from './routes/Settings'
+import History from './routes/History'
+import Result from './routes/Result'
+import ApiKeyConfig from './routes/ApiKeyConfig'
+import EncConfig from './routes/EncConfig'
+import Support from './routes/Support'
+import PastebinAccount from './routes/PastebinAccount'
+import CloudPasteDetail from './routes/CloudPasteDetail'
+import PasteNameConfig from './routes/PasteNameConfig'
+import QuickPostLoading from './routes/QuickPostLoading'
 
-export const App = () => {
-  const { state, dispatch } = React.useContext(AppContext);
-  const [darkmode, setDarkmode] = useState(state.settings.theme);
-  const [routeEntering, setRouteEntering] = useState(false);
+// Evaluated at call-time (not module load) so content/index.tsx has set the
+// flag before any component renders, even though ES module imports hoist App
+// before the content script's own code runs.
+export const isInjected = () => !!(window as any).__SECUREBIN_INJECTED__;
 
-  const useStyles = makeStyles(() => ({
-    root: {
-      boxShadow: 'none',
-    },
-    container: {
-      display: 'flex',
-      flexDirection: 'column',
-      height: '600px',
-    },
-    content: {
-      flexGrow: 1,
-      willChange: 'scroll-position',
-      scrollBehavior: 'smooth',
-    },
-    hoverStyle: {
-      fontSize: '0.9em',
-      '&:hover': {
-        transition: '0.10s',
-        color: darkmode ? '#d5d5d5' : '#4b4b4b',
-      },
-      '&:active': {
-        transition: '0.08s',
-        color: '#4b4b4b',
-      },
-      transition: '0.15s',
-    },
-    background: {
-      bgColor: 'background.default',
-    },
-  }));
+// Routes we won't try to restore (transient pages)
+const NON_RESTORABLE_ROUTES = new Set(['/', '/home', '/result', '/quick-post-loading'])
 
-  const { push } = useHistory();
-  const location = useLocation();
+export default function App() {
+  const { settings, initialized, initialize, addToHistory, updateDraft } = useStore()
+  const isDark = resolveTheme(settings.theme) === 'dark'
+  const navigate = useNavigate()
+  const location = useLocation()
 
   useEffect(() => {
-    getSyncItem(Storage.THEME, data => {
-      const stored = data[Storage.THEME];
-      if (stored !== undefined && stored !== null) {
-        dispatch({
-          type: Action.SET_THEME,
-          payload: { theme: JSON.parse(stored) },
-        });
-      } else {
-        // No stored preference — use system setting (issue #47)
-        const prefersDark = window.matchMedia(
-          '(prefers-color-scheme: dark)'
-        ).matches;
-        dispatch({
-          type: Action.SET_THEME,
-          payload: { theme: prefersDark },
-        });
+    initialize()
+  }, [initialize])
+
+  // Handle quick-post result from background context menu action
+  const handleQuickPostResult = useCallback((detail: { url: string | null; error: string | null; text: string }) => {
+    const item: HistoryItem = {
+      id: Date.now().toString(),
+      action: EditorAction.POST_PASTEBIN,
+      pastebinLink: detail.url ?? `Error: ${detail.error ?? 'Post failed'}`,
+      encText: detail.text,
+      key: null,
+      encMode: null,
+      keyLength: null,
+      date: Date.now(),
+      title: 'Quick Post',
+      format: 'text',
+      privacy: '0',
+      expiry: 'N',
+    }
+    addToHistory(item)
+    // Auto-copy the URL to clipboard so the user can paste it immediately
+    if (detail.url) {
+      navigator.clipboard.writeText(detail.url).catch(() => {})
+    }
+    navigate('/result/0', { replace: true })
+  }, [addToHistory, navigate])
+
+  // Handle text injected by context menu ("Open in Editor")
+  // Lives in App.tsx so it works regardless of which route is active
+  const handleSetText = useCallback((text: string) => {
+    if (!text) return
+    const action = detectAction(text, settings.default_action)
+    // Auto-detect code language so the editor opens in the right mode
+    const format = text.length > 80 ? detectLanguage(text) : 'text'
+    updateDraft({ plaintext: text, format, formatLocked: false, action })
+    navigate('/home')
+  }, [settings.default_action, updateDraft, navigate])
+
+  // Injected mode: event from content script
+  useEffect(() => {
+    const handler = (e: Event) => handleSetText((e as CustomEvent).detail ?? '')
+    window.addEventListener('securebin:set-text', handler)
+    return () => window.removeEventListener('securebin:set-text', handler)
+  }, [handleSetText])
+
+  // Quick-post: show loading overlay while background makes the API call
+  useEffect(() => {
+    const handler = () => navigate('/quick-post-loading', { replace: true })
+    window.addEventListener('securebin:quick-post-loading', handler)
+    return () => window.removeEventListener('securebin:quick-post-loading', handler)
+  }, [navigate])
+
+  // Quick-post result — injected mode
+  useEffect(() => {
+    const handler = (e: Event) => handleQuickPostResult((e as CustomEvent).detail)
+    window.addEventListener('securebin:quick-post-result', handler)
+    return () => window.removeEventListener('securebin:quick-post-result', handler)
+  }, [handleQuickPostResult])
+
+  // Popup mode: read pending data from session after init. Injected mode gets
+  // this via window events instead — content scripts can't read session storage.
+  useEffect(() => {
+    if (!initialized || isInjected()) return
+    chrome.storage.session.get(['pendingQuickPost', 'pendingText'], (data) => {
+      if (data.pendingQuickPost) {
+        chrome.storage.session.remove(['pendingQuickPost'])
+        handleQuickPostResult(data.pendingQuickPost)
+      } else if (data.pendingText?.text) {
+        chrome.storage.session.remove(['pendingText'])
+        handleSetText(data.pendingText.text)
       }
-    });
-
-    // Load settings and draft together so we can apply the draft timeout
-    getSyncItem([Storage.SETTINGS, Storage.DRAFT], data => {
-      const settings = data[Storage.SETTINGS]
-        ? JSON.parse(data[Storage.SETTINGS])
-        : DEFAULT_SETTINGS;
-      dispatch({ type: Action.SET_SETTINGS, payload: settings });
-
-      const rawDraft = data[Storage.DRAFT];
-      if (rawDraft) {
-        const draft = JSON.parse(rawDraft);
-        const draftTimeout: number = settings.draft_timeout ?? 30;
-        if (draftTimeout > 0 && draft.plaintext?.length) {
-          const savedAt: number = draft.savedAt ?? 0;
-          if (Date.now() - savedAt <= draftTimeout * 1000) {
-            dispatch({ type: Action.SET_DRAFT, payload: draft });
-          }
-        }
-      }
-    });
-
-    getLocalItem(Storage.HISTORY, data => {
-      dispatch({
-        type: Action.SET_HISTORY,
-        payload: data[Storage.HISTORY] || [],
-      });
-    });
-
-    // Preserve app state for 10 seconds
-    getSyncItem(Storage.APP, data => {
-      const TEN_SECONDS = 10 * 1000;
-      if (data[Storage.APP]) {
-        const { location, date } = JSON.parse(data[Storage.APP]);
-        if (date + TEN_SECONDS > new Date().getTime()) {
-          push(location);
-        }
-      }
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    })
+  }, [initialized, handleQuickPostResult, handleSetText])
 
   useEffect(() => {
-    setDarkmode(state.settings.theme);
-  }, [state.settings.theme]);
+    document.documentElement.classList.toggle('dark', isDark)
+  }, [isDark])
 
+  // When theme is 'system', re-evaluate whenever the OS preference changes
   useEffect(() => {
-    dispatch({ type: Action.UPDATE_NAVIGATION, payload: { location } });
-    // Trigger fade-in on route change (issue #48)
-    setRouteEntering(true);
-    const t = setTimeout(() => setRouteEntering(false), 200);
-    return () => clearTimeout(t);
-  }, [dispatch, location]);
+    if (settings.theme !== 'system') return
+    const mq = window.matchMedia('(prefers-color-scheme: dark)')
+    const handler = () => {
+      document.documentElement.classList.toggle('dark', mq.matches)
+    }
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [settings.theme])
 
-  const classes = useStyles();
+  // Restore last page on popup open (after settings are loaded)
+  useEffect(() => {
+    if (!initialized) return
+    if (isInjected()) return
+    const { page_timeout } = settings
+    if (page_timeout === 0) return
 
-  // setTimeout(() => { setDarkmode(true) }, 4000);
+    chrome.storage.session.get(['lastRoute', 'lastRouteTime'], (data) => {
+      const lastRoute: string = data.lastRoute ?? ''
+      const lastRouteTime: number = data.lastRouteTime ?? 0
+      if (!lastRoute || NON_RESTORABLE_ROUTES.has(lastRoute)) return
 
-  const theme = createTheme({
-    palette: {
-      mode: darkmode ? 'dark' : 'light',
-      primary: {
-        main: darkmode ? '#4795fd' : '#1D6BC6',
-      },
-      secondary: {
-        main: darkmode ? '#f3f3f3' : '#242424',
-      },
-    },
-    shape: {
-      borderRadius: 12,
-    },
-    typography: {
-      h1: {
-        fontSize: 36,
-        fontWeight: 700,
-      },
-      h2: {
-        fontSize: 24,
-        fontWeight: 800,
-      },
-      h3: {
-        fontSize: 14,
-        fontWeight: 700,
-        opacity: 0.95,
-      },
-      h4: {
-        fontSize: 14,
-        fontWeight: 500,
-        opacity: 0.7,
-        marginBottom: 12,
-        paddingTop: 12,
-      },
-      subtitle2: {
-        fontSize: 12,
-        fontWeight: 400,
-        opacity: 0.6,
-      },
-      body1: {
-        fontSize: 15,
-        lineHeight: 1.2,
-        fontWeight: 500,
-      },
-      button: {
-        fontSize: 14,
-        textTransform: 'none',
-        fontWeight: 600,
-        borderRadius: '50px',
-      },
-    },
-    components: {
-      MuiButtonBase: {
-        defaultProps: {
-          disableRipple: true,
-        },
-      },
-      MuiButton: {
-        styleOverrides: {
-          root: {
-            // padding: '10px 16px',
-          },
-        },
-      },
-      MuiMenu: {
-        styleOverrides: {
-          paper: {
-            boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.02)',
-          },
-        },
-      },
-      MuiPaper: {
-        styleOverrides: {
-          elevation8: {
-            border: '1px solid #eaeaea',
-            boxShadow:
-              '0px 4px 12px rgba(0, 0, 0, 0.07), 0px 1px 1px rgba(0, 0, 0, 0.06)',
-          },
-        },
-      },
-    },
-  });
+      const ageMs = Date.now() - lastRouteTime
+      if (page_timeout === -1 || ageMs < page_timeout * 1000) {
+        navigate(lastRoute, { replace: true })
+      }
+    })
+  }, [initialized])
+
+  // Persist current route so we can restore it next time
+  useEffect(() => {
+    if (!initialized) return
+    if (isInjected()) return
+    chrome.storage.session.set({ lastRoute: location.pathname, lastRouteTime: Date.now() })
+  }, [location.pathname, initialized])
+
+  if (!initialized) {
+    return (
+      <div className={cn('h-full flex items-center justify-center', isDark && 'dark')}>
+        <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    )
+  }
 
   return (
-    <ThemeProvider theme={theme}>
-      <Box
-        className={classes.container}
-        sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}
-      >
-        <div className={classes.background}>
-          <AppBar
-            sx={{ bgcolor: 'background.default' }}
-            className={classes.root}
-            position="relative"
-            enableColorOnDark
-          >
-            <Toolbar sx={{ bgcolor: 'background.default' }}>
-              <img
-                src={
-                  darkmode ? '/securebinlogo_dark.svg' : '/securebinlogo.svg'
-                }
-                alt="logo"
-                style={{ cursor: 'pointer' }}
-                onClick={() => push('/home')}
-              />
-              <div style={{ marginLeft: 'auto' }}>
-                {
-                  <IconButton
-                    className={classes.hoverStyle}
-                    aria-label="Latest paste"
-                    sx={{ mr: 1 }}
-                    disableRipple
-                    onClick={() => {
-                      push('/home');
-                    }}
-                  >
-                    <EditIcon />
-                  </IconButton>
-                }
-                {/*{<IconButton className={classes.hoverStyle} aria-label="Latest paste" sx={{ mr: 1 }} disableRipple onClick={() => { push('/result')}}>*/}
-                {/*<ContentPaste />*/}
-                {/*</IconButton>}*/}
-                <IconButton
-                  className={classes.hoverStyle}
-                  aria-label="History"
-                  sx={{ mr: 1 }}
-                  disableRipple
-                  onClick={() => {
-                    push('/history');
-                  }}
-                >
-                  <HistoryIcon />
-                </IconButton>
-                <IconButton
-                  className={classes.hoverStyle}
-                  aria-label="Settings"
-                  disableRipple
-                  onClick={() => {
-                    push('/settings');
-                  }}
-                >
-                  <SettingsIcon />
-                </IconButton>
-              </div>
-            </Toolbar>
-            <Divider />
-            {!!state.app.subheader && <SubHeader />}
-          </AppBar>
-        </div>
-        <Box
-          className={classes.content}
-          sx={{
-            bgcolor: 'background.default',
-            color: 'text.primary',
-            overflow: 'auto',
-          }}
-        >
-          <div className={routeEntering ? 'route-enter' : 'route-enter-active'}>
-            <Switch>
-              <Route path="/home">
-                <Editor />
-              </Route>
-              <Route path="/settings">
-                <Settings />
-              </Route>
-              {/*Sub heading routes*/}
-              <Route path="/apikey">
-                <ApiKeyConfig />
-              </Route>
-              <Route path="/encconfig">
-                <EncConfig />
-              </Route>
-              <Route path="/support">
-                <Support />
-              </Route>
-              <Route path="/history">
-                <History />
-              </Route>
-              <Route path="/result/:id?">
-                <Result />
-              </Route>
-              <Route path="/">
-                <Editor />
-              </Route>
-            </Switch>
-          </div>
-        </Box>
-      </Box>
-    </ThemeProvider>
-  );
-};
+    <div className={cn('flex flex-col h-full bg-surface text-text-primary')}>
+      <NavBar />
+      <main className="flex-1 overflow-y-auto">
+        <Routes>
+          <Route path="/" element={<Editor />} />
+          <Route path="/home" element={<Editor />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/apikey" element={<ApiKeyConfig />} />
+          <Route path="/encconfig" element={<EncConfig />} />
+          <Route path="/support" element={<Support />} />
+          <Route path="/history" element={<History />} />
+          <Route path="/result" element={<Result />} />
+          <Route path="/result/:index" element={<Result />} />
+          <Route path="/pastebin-account" element={<PastebinAccount />} />
+          <Route path="/cloud-paste" element={<CloudPasteDetail />} />
+          <Route path="/paste-name" element={<PasteNameConfig />} />
+          <Route path="/quick-post-loading" element={<QuickPostLoading />} />
+        </Routes>
+      </main>
+    </div>
+  )
+}
