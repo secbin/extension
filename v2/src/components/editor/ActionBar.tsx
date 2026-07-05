@@ -1,19 +1,15 @@
 import { useState, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import { ChevronDown, Lock, Unlock, Send, Save, Link, ExternalLink, KeyRound } from 'lucide-react'
+import { ChevronDown, Lock, Unlock, Send, Save, Link, ExternalLink, KeyRound, Loader2 } from 'lucide-react'
 import { useStore } from '@/lib/store'
 import { cn } from '@/lib/cn'
-import {
-  EditorAction,
-  MAX_PASTEBIN_TEXT_LENGTH,
-  MAX_ENC_PASTEBIN_PLAINTEXT_LENGTH,
-  MAX_ENC_TEXT_LENGTH,
-} from '@/lib/constants'
-import { isEncryptionAction } from '@/lib/editor-utils'
+import { EditorAction } from '@/lib/constants'
+import { isEncryptionAction, getMaxLength, byteLength } from '@/lib/editor-utils'
 import { isInjected } from '@/App'
 
 interface ActionBarProps {
   onAction: (action?: EditorAction) => void
+  loading?: boolean
 }
 
 const actionConfig: Record<EditorAction, { icon: typeof Lock; label: string }> = {
@@ -26,22 +22,22 @@ const actionConfig: Record<EditorAction, { icon: typeof Lock; label: string }> =
   [EditorAction.SAVE_DRAFT]: { icon: Save, label: 'Save Draft' },
 }
 
-export default function ActionBar({ onAction }: ActionBarProps) {
+export default function ActionBar({ onAction, loading = false }: ActionBarProps) {
   const { draft, updateDraft, settings } = useStore()
   const [menuOpen, setMenuOpen] = useState(false)
   const buttonGroupRef = useRef<HTMLDivElement>(null)
 
-  const maxLen =
-    draft.action === EditorAction.ENCRYPT_PASTEBIN
-      ? MAX_ENC_PASTEBIN_PLAINTEXT_LENGTH
-      : draft.action === EditorAction.POST_PASTEBIN
-        ? MAX_PASTEBIN_TEXT_LENGTH
-        : MAX_ENC_TEXT_LENGTH
-
-  const isOverLimit = draft.plaintext.length > maxLen
+  const maxLen = getMaxLength(draft.action)
+  const byteCount = byteLength(draft.plaintext)
+  const isOverLimit = byteCount > maxLen
   const currentAction = actionConfig[draft.action]
   const Icon = currentAction.icon
-  const hasApiKey = settings.apiKey && settings.apiKey !== atob('MmU1OGNlMjcyMzllMzRhNzdjNWVmNjVkYmVhOGIyNGQ=')
+  // Posting works with any key, including the bundled default; only a build
+  // without a bundled key and no user-configured key disables posting.
+  const hasPostKey = Boolean(settings.apiKey)
+  const actionNeedsApiKey =
+    draft.action === EditorAction.POST_PASTEBIN || draft.action === EditorAction.ENCRYPT_PASTEBIN
+  const canRun = draft.buttonEnabled && !loading && (!actionNeedsApiKey || hasPostKey)
 
   // Derive encryption preference from the default action setting
   const encryptionDefault = isEncryptionAction(settings.default_action)
@@ -49,21 +45,23 @@ export default function ActionBar({ onAction }: ActionBarProps) {
   // "Decrypt from Link" / "Open Paste" are only relevant when a Pastebin URL is detected
   const isPastebinLink = draft.action === EditorAction.DECRYPT_PASTEBIN || draft.action === EditorAction.OPEN_PASTEBIN
 
+  // Only posting actions need a dev key — fetching a raw paste
+  // (Open Paste / Decrypt from Link) works without one.
   const menuItems: { action: EditorAction; icon: typeof Lock; label: string; disabled?: boolean; divider?: boolean }[] = encryptionDefault
     ? [
-        { action: EditorAction.ENCRYPT_PASTEBIN, icon: KeyRound, label: 'Encrypt & Post', disabled: !hasApiKey },
-        { action: EditorAction.POST_PASTEBIN, icon: Send, label: 'Post (Unencrypted)', disabled: !hasApiKey },
+        { action: EditorAction.ENCRYPT_PASTEBIN, icon: KeyRound, label: 'Encrypt & Post', disabled: !hasPostKey },
+        { action: EditorAction.POST_PASTEBIN, icon: Send, label: 'Post (Unencrypted)', disabled: !hasPostKey },
         { action: EditorAction.ENCRYPT, icon: Lock, label: 'Encrypt Only' },
         { action: EditorAction.SAVE_DRAFT, icon: Save, label: 'Save Draft', divider: true },
         { action: EditorAction.DECRYPT, icon: Unlock, label: 'Decrypt' },
-        ...(isPastebinLink ? [{ action: EditorAction.DECRYPT_PASTEBIN, icon: Unlock, label: 'Decrypt from Link', disabled: !hasApiKey }] : []),
+        ...(isPastebinLink ? [{ action: EditorAction.DECRYPT_PASTEBIN, icon: Unlock, label: 'Decrypt from Link' }] : []),
       ]
     : [
-        { action: EditorAction.POST_PASTEBIN, icon: Send, label: 'Post to Pastebin', disabled: !hasApiKey },
-        { action: EditorAction.ENCRYPT_PASTEBIN, icon: KeyRound, label: 'Encrypt & Post', disabled: !hasApiKey },
+        { action: EditorAction.POST_PASTEBIN, icon: Send, label: 'Post to Pastebin', disabled: !hasPostKey },
+        { action: EditorAction.ENCRYPT_PASTEBIN, icon: KeyRound, label: 'Encrypt & Post', disabled: !hasPostKey },
         { action: EditorAction.ENCRYPT, icon: Lock, label: 'Encrypt Only' },
         { action: EditorAction.SAVE_DRAFT, icon: Save, label: 'Save Draft', divider: true },
-        ...(isPastebinLink ? [{ action: EditorAction.OPEN_PASTEBIN, icon: Link, label: 'Open Paste', disabled: !hasApiKey, divider: true }] : []),
+        ...(isPastebinLink ? [{ action: EditorAction.OPEN_PASTEBIN, icon: Link, label: 'Open Paste', divider: true }] : []),
       ]
 
   const dropdownContent = (
@@ -98,35 +96,38 @@ export default function ActionBar({ onAction }: ActionBarProps) {
   );
 
   return (
-    <div className="flex items-start justify-between px-4 pt-2 pb-3 bg-surface border-t border-border">
-      {/* Character count — top-left corner, aligned with top of button */}
-      <span className={cn('text-[11px] tabular-nums text-text-muted/50 mt-1.5', isOverLimit && 'text-danger font-medium')}>
-        {draft.plaintext.length.toLocaleString()} / {maxLen.toLocaleString()}
+    <div className="flex items-center justify-between px-4 py-3 bg-surface border-t border-border">
+      {/* Byte count (Pastebin's 512 KB limit is bytes, not characters) */}
+      <span className={cn('text-[11px] tabular-nums text-text-muted/50', isOverLimit && 'text-danger font-medium')}>
+        {byteCount.toLocaleString()} / {maxLen.toLocaleString()}
       </span>
 
       {/* Action button group */}
       <div ref={buttonGroupRef} className="relative flex items-stretch">
         <button
           onClick={() => onAction()}
-          disabled={!draft.buttonEnabled}
+          disabled={!canRun}
           className={cn(
             'flex items-center gap-2 pl-5 pr-4 py-2.5 rounded-l-full text-sm font-semibold transition-all',
-            draft.buttonEnabled
+            canRun
               ? 'bg-primary text-white hover:bg-primary-hover active:scale-[0.98]'
               : 'bg-surface-secondary text-text-muted cursor-not-allowed',
           )}
         >
-          {draft.action !== EditorAction.POST_PASTEBIN && <Icon size={15} />}
+          {loading
+            ? <Loader2 size={15} className="animate-spin" />
+            : draft.action !== EditorAction.POST_PASTEBIN && <Icon size={15} />
+          }
           {currentAction.label}
         </button>
         <button
-          onClick={() => {
-            setMenuOpen(!menuOpen)
-          }}
+          onClick={() => draft.buttonEnabled && !loading && setMenuOpen(!menuOpen)}
+          disabled={!draft.buttonEnabled || loading}
           className={cn(
-            'flex items-center px-3.5 py-2.5 rounded-r-full text-white transition-all',
-            'bg-primary hover:bg-primary-hover active:scale-[0.98]',
-            draft.buttonEnabled ? 'border-l border-white/20' : 'border-l border-primary/30',
+            'flex items-center px-3.5 py-2.5 rounded-r-full transition-all',
+            draft.buttonEnabled && !loading
+              ? 'bg-primary text-white hover:bg-primary-hover active:scale-[0.98] border-l border-white/20'
+              : 'bg-surface-secondary text-text-muted cursor-not-allowed border-l border-border',
           )}
         >
           <ChevronDown size={16} className={cn('transition-transform', menuOpen && 'rotate-180')} />

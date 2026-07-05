@@ -106,7 +106,7 @@ export type { Extension }
 export const languageCompartment = new Compartment()
 export const themeCompartment = new Compartment()
 
-export function buildBaseExtensions(dark: boolean): Extension[] {
+export function buildBaseExtensions(dark: boolean, lang?: Extension | null): Extension[] {
   return [
     lineNumbers(),
     drawSelection(),
@@ -116,7 +116,7 @@ export function buildBaseExtensions(dark: boolean): Extension[] {
     syntaxHighlighting(defaultHighlightStyle, { fallback: true }),
     keymap.of([...defaultKeymap, ...historyKeymap, indentWithTab]),
     themeCompartment.of(getThemeExtension(dark)),
-    languageCompartment.of([]),
+    languageCompartment.of(lang ?? []),
     EditorView.theme({
       '&': {
         height: '100%',

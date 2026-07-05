@@ -4,6 +4,7 @@ import { LogOut, User, CheckCircle2, Loader2 } from 'lucide-react'
 import { useStore } from '@/lib/store'
 import { loginPastebin, getUserDetails } from '@/lib/pastebin'
 import PageHeader from '@/components/common/PageHeader'
+import pastebinFavicon from '@/assets/pastebin-favicon.webp'
 import { cn } from '@/lib/cn'
 
 export default function PastebinAccount() {
@@ -15,7 +16,6 @@ export default function PastebinAccount() {
   const [error, setError] = useState('')
   const isLoggedIn = !!settings.userKey
 
-  // Load fresh user details when already logged in
   useEffect(() => {
     if (!isLoggedIn) return
     getUserDetails(settings.apiKey, settings.userKey)
@@ -81,11 +81,16 @@ export default function PastebinAccount() {
 
   return (
     <div className="flex flex-col h-full">
-      <PageHeader title="Pastebin Account" subtitle="Sign in" />
-      <div className="flex-1 px-4 py-4 space-y-4">
-        <p className="text-sm text-text-secondary leading-relaxed">
-          Sign in to list, manage, and delete your Pastebin pastes directly from SecureBin. Your password is used only to obtain a session token and is never stored.
-        </p>
+      <PageHeader title="Pastebin Account" subtitle="Unlocks paste history, private pastes, and delete" />
+      <div className="flex-1 flex flex-col px-4 py-4">
+        {/* Centered favicon */}
+        <div className="flex justify-center pt-4 pb-5">
+          <img
+            src={pastebinFavicon}
+            alt="Pastebin"
+            className="w-8 h-8 rounded-lg object-contain"
+          />
+        </div>
 
         <div className="space-y-3">
           <div>
@@ -96,8 +101,9 @@ export default function PastebinAccount() {
               onChange={e => setUsername(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleLogin()}
               autoComplete="username"
+              autoCapitalize="none"
               className="w-full px-3 py-2.5 text-sm rounded-xl border border-border bg-surface focus:outline-none focus:border-primary transition-colors"
-              placeholder="your_username"
+              placeholder="username"
             />
           </div>
           <div>
@@ -115,10 +121,14 @@ export default function PastebinAccount() {
         </div>
 
         {error && (
-          <p className="text-xs text-danger bg-danger/5 border border-danger/20 rounded-lg px-3 py-2 leading-snug">
+          <p className="text-xs text-danger bg-danger/5 border border-danger/20 rounded-lg px-3 py-2 leading-snug mt-3">
             {error}
           </p>
         )}
+
+        <p className="text-[11px] text-text-muted/60 text-center mt-auto pt-4 leading-snug">
+          Password sent directly to Pastebin and never stored.
+        </p>
       </div>
 
       <div className="border-t border-border px-4 py-3">
@@ -126,7 +136,7 @@ export default function PastebinAccount() {
           onClick={handleLogin}
           disabled={loading || !username.trim() || !password.trim()}
           className={cn(
-            'w-full flex items-center justify-center gap-2 py-2.5 text-sm font-semibold rounded-xl transition-all',
+            'w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all',
             loading || !username.trim() || !password.trim()
               ? 'bg-surface-secondary text-text-muted cursor-not-allowed'
               : 'bg-primary text-white hover:bg-primary-hover active:scale-[0.98]',

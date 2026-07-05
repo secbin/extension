@@ -1,18 +1,18 @@
 import { useNavigate, useLocation } from 'react-router-dom'
-import { PenLine, Clock, Settings, X } from 'lucide-react'
+import { PenLine, Files, Settings, X } from 'lucide-react'
 import { cn } from '@/lib/cn'
-import { useStore } from '@/lib/store'
+import { useStore, resolveTheme } from '@/lib/store'
 import { isInjected } from '../App'
 import SecurebinLogo from './common/SecurebinLogo'
 
 export default function NavBar() {
   const navigate = useNavigate()
   const location = useLocation()
-  const isDark = useStore((s) => s.settings.theme === 'dark')
+  const isDark = useStore((s) => resolveTheme(s.settings.theme) === 'dark')
 
   const navItems = [
     { icon: PenLine, path: '/home', label: 'Editor' },
-    { icon: Clock, path: '/history', label: 'History' },
+    { icon: Files, path: '/history', label: 'Pastes' },
     { icon: Settings, path: '/settings', label: 'Settings' },
   ]
 

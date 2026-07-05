@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { format, formatDistanceToNow, differenceInHours } from 'date-fns'
-import { ChevronRight, Lock, Send, Save, ExternalLink, X, Search, Cloud, Globe, EyeOff, RefreshCw, Loader2 } from 'lucide-react'
+import { ChevronRight, Lock, Send, Save, ExternalLink, X, Search, Cloud, Globe, EyeOff, RefreshCw, Loader2, SlidersHorizontal, Check } from 'lucide-react'
+import pastebinFavicon from '@/assets/pastebin-favicon.webp'
 import { useStore, type HistoryItem } from '@/lib/store'
 import { EditorAction } from '@/lib/constants'
-import { listPastes, type PasteItem } from '@/lib/pastebin'
+import { listPastes, formatBytes, type PasteItem } from '@/lib/pastebin'
 import StatusBadge from '@/components/common/StatusBadge'
 import { cn } from '@/lib/cn'
 
@@ -36,6 +37,25 @@ function getLocalIcon(action: EditorAction) {
   }
 }
 
+// Swiss-style color coding: each action type gets a consistent accent
+function getLocalColors(action: EditorAction, isError: boolean) {
+  if (isError) return { bg: 'bg-danger/10', fg: 'text-danger' }
+  switch (action) {
+    case EditorAction.ENCRYPT:
+    case EditorAction.ENCRYPT_PASTEBIN:
+    case EditorAction.DECRYPT:
+    case EditorAction.DECRYPT_PASTEBIN:
+      return { bg: 'bg-primary/10', fg: 'text-primary' }
+    case EditorAction.POST_PASTEBIN:
+    case EditorAction.OPEN_PASTEBIN:
+      return { bg: 'bg-success/10', fg: 'text-success' }
+    case EditorAction.SAVE_DRAFT:
+      return { bg: 'bg-warning/10', fg: 'text-warning' }
+    default:
+      return { bg: 'bg-surface-secondary', fg: 'text-text-muted' }
+  }
+}
+
 function getLocalTitle(item: HistoryItem): string {
   if (item.pastebinLink && !item.pastebinLink.startsWith('Error')) return item.pastebinLink
   if (item.pastebinLink?.startsWith('Error')) return 'Error'
@@ -47,7 +67,7 @@ const PRIVACY_ICONS: Record<string, typeof Globe> = { '0': Globe, '1': EyeOff, '
 
 export default function History() {
   const navigate = useNavigate()
-  const { history, removeFromHistory, settings } = useStore()
+  const { history, removeFromHistory, settings, updateDraft } = useStore()
   const isLoggedIn = !!settings.userKey
 
   const [search, setSearch] = useState('')
@@ -59,6 +79,7 @@ export default function History() {
   const [cloudError, setCloudError] = useState('')
   const [cloudLimit, setCloudLimit] = useState(50)
   const [cloudLoaded, setCloudLoaded] = useState(false)
+  const [filtersOpen, setFiltersOpen] = useState(false)
 
   const loadCloud = useCallback(async (limit = cloudLimit) => {
     setCloudLoading(true)
@@ -128,85 +149,111 @@ export default function History() {
   const showEmpty = filtered.length === 0 && !cloudLoading
   const hasContent = history.length > 0 || cloudPastes.length > 0
 
+  const totalCount = history.length + cloudPastes.length
+
   return (
     <div className="flex flex-col h-full">
-      {/* Search */}
-      <div className="px-4 pt-3 pb-2 space-y-2 shrink-0">
-        <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-border bg-surface-secondary/50">
-          <Search size={14} className="text-text-muted shrink-0" />
-          <input
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Search history…"
-            className="flex-1 text-sm bg-transparent focus:outline-none placeholder:text-text-muted/60"
-          />
-          {search && (
-            <button onClick={() => setSearch('')} className="text-text-muted hover:text-text-primary">
-              <X size={13} />
+      {/* ── Header zone ─────────────────────────────────── */}
+      <div className="bg-surface border-b border-border/60 shrink-0">
+        {/* Title row */}
+        <div className="flex items-center justify-between px-4 pt-4 pb-3">
+          <div className="flex items-baseline gap-2">
+            <h2 className="text-lg font-bold text-text-primary tracking-tight">Pastes</h2>
+            {totalCount > 0 && (
+              <span className="text-xs font-medium text-text-muted tabular-nums">{totalCount}</span>
+            )}
+          </div>
+          {isLoggedIn && (
+            <button
+              onClick={() => loadCloud()}
+              disabled={cloudLoading}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs text-text-muted hover:text-text-primary hover:bg-surface-secondary transition-colors disabled:opacity-50"
+            >
+              <RefreshCw size={12} className={cloudLoading ? 'animate-spin' : ''} />
+              {cloudLoading && cloudPastes.length === 0 ? 'Syncing…' : 'Refresh'}
             </button>
           )}
         </div>
 
-        {/* Scope + type filters in one scrollable row */}
-        <div className="flex gap-1.5 overflow-x-auto pb-0.5 scrollbar-hide">
-          {/* Scope pills — only when logged in */}
-          {isLoggedIn && (
-            <>
-              {(['all', 'local', 'cloud'] as ScopeFilter[]).map(s => (
-                <button
-                  key={s}
-                  onClick={() => setScope(s)}
-                  className={cn(
-                    'shrink-0 flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium transition-colors',
-                    scope === s ? 'bg-primary text-white' : 'bg-surface-secondary text-text-muted hover:text-text-primary',
-                  )}
-                >
-                  {s === 'cloud' && <Cloud size={10} />}
-                  {s === 'all' ? 'All' : s === 'local' ? 'On Device' : 'Pastebin'}
-                </button>
-              ))}
-              <div className="w-px self-stretch bg-border mx-0.5 shrink-0" />
-            </>
-          )}
-
-          {/* Type filters */}
-          {(['all', 'pastes', 'encrypted', 'drafts', 'errors'] as TypeFilter[]).map(f => (
-            <button
-              key={f}
-              onClick={() => setTypeFilter(f)}
-              className={cn(
-                'shrink-0 px-3 py-1 rounded-full text-xs font-medium transition-colors capitalize',
-                typeFilter === f ? 'bg-primary text-white' : 'bg-surface-secondary text-text-muted hover:text-text-primary',
+        {/* Search bar with inline filter button */}
+        <div className="px-4 pb-3">
+          <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-border/70 bg-surface-secondary/50">
+            <Search size={14} className="text-text-muted shrink-0" />
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search pastes…"
+              className="flex-1 text-sm bg-transparent focus:outline-none placeholder:text-text-muted/50"
+            />
+            {search && (
+              <button onClick={() => setSearch('')} className="text-text-muted hover:text-text-primary shrink-0">
+                <X size={13} />
+              </button>
+            )}
+            <div className="w-px h-4 bg-border/60 shrink-0" />
+            {/* Filter icon with active indicator */}
+            <div className="relative shrink-0">
+              <button
+                onClick={() => setFiltersOpen(v => !v)}
+                className={cn(
+                  'flex items-center transition-colors',
+                  (scope !== 'all' || typeFilter !== 'all') ? 'text-primary' : 'text-text-muted hover:text-text-secondary',
+                )}
+                title="Filter"
+              >
+                <SlidersHorizontal size={14} />
+                {(scope !== 'all' || typeFilter !== 'all') && (
+                  <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-primary" />
+                )}
+              </button>
+              {filtersOpen && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setFiltersOpen(false)} />
+                  <div
+                    className="absolute right-0 top-full mt-2 z-50 w-44 rounded-xl border border-border bg-surface py-1.5 animate-in fade-in slide-in-from-top-1 duration-150"
+                    style={{ boxShadow: '0 8px 24px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.06)' }}
+                  >
+                    {isLoggedIn && (
+                      <>
+                        <p className="px-3 pt-2 pb-0.5 text-[10px] font-semibold text-text-muted/60 uppercase tracking-[0.06em]">Source</p>
+                        {(['all', 'local', 'cloud'] as ScopeFilter[]).map(s => (
+                          <button
+                            key={s}
+                            onClick={() => setScope(s)}
+                            className="w-full flex items-center justify-between px-3 py-2 text-sm hover:bg-surface-hover transition-colors"
+                          >
+                            <span className={cn(scope === s ? 'text-primary font-medium' : 'text-text-primary')}>
+                              {s === 'all' ? 'All' : s === 'local' ? 'On Device' : 'Pastebin'}
+                            </span>
+                            {scope === s && <Check size={13} className="text-primary" />}
+                          </button>
+                        ))}
+                        <div className="border-t border-border/20 mx-3 my-1" />
+                      </>
+                    )}
+                    <p className="px-3 pt-2 pb-0.5 text-[10px] font-semibold text-text-muted/60 uppercase tracking-[0.06em]">Type</p>
+                    {(['all', 'pastes', 'encrypted', 'drafts', 'errors'] as TypeFilter[]).map(f => (
+                      <button
+                        key={f}
+                        onClick={() => { setTypeFilter(f); setFiltersOpen(false) }}
+                        className="w-full flex items-center justify-between px-3 py-2 text-sm capitalize hover:bg-surface-hover transition-colors"
+                      >
+                        <span className={cn(typeFilter === f ? 'text-primary font-medium' : 'text-text-primary')}>
+                          {f === 'all' ? 'Any type' : f}
+                        </span>
+                        {typeFilter === f && <Check size={13} className="text-primary" />}
+                      </button>
+                    ))}
+                  </div>
+                </>
               )}
-            >
-              {f === 'all' ? 'Any type' : f}
-            </button>
-          ))}
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Connect banner — when not logged in */}
-      {!isLoggedIn && (
-        <button
-          onClick={() => navigate('/pastebin-account')}
-          className="mx-4 mb-2 flex items-center gap-3 px-3 py-2.5 rounded-xl border border-border bg-surface-secondary/50 hover:bg-surface-hover transition-colors text-left shrink-0"
-        >
-          <Cloud size={14} className="text-text-muted shrink-0" />
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-medium text-text-secondary">Connect Pastebin account</p>
-            <p className="text-[11px] text-text-muted leading-snug">Sign in to see and manage your cloud pastes here</p>
-          </div>
-          <ChevronRight size={13} className="text-text-muted shrink-0" />
-        </button>
-      )}
 
-      {/* Cloud loading indicator */}
-      {cloudLoading && cloudPastes.length === 0 && (
-        <div className="flex items-center gap-2 px-4 py-2 shrink-0">
-          <Loader2 size={12} className="animate-spin text-text-muted" />
-          <span className="text-xs text-text-muted">Loading Pastebin…</span>
-        </div>
-      )}
+      {/* Cloud error */}
       {cloudError && (
         <div className="px-4 py-2 shrink-0 flex items-center justify-between">
           <span className="text-xs text-danger">{cloudError}</span>
@@ -215,7 +262,7 @@ export default function History() {
       )}
 
       {/* List */}
-      <div className="flex-1 overflow-y-auto divide-y divide-border">
+      <div className="flex-1 overflow-y-auto divide-y divide-border/30">
         {!hasContent && !cloudLoading ? (
           <div className="h-full flex items-center justify-center">
             <StatusBadge variant="empty-history" title="No History" subtitle="Your pastes and encrypted items will appear here" />
@@ -245,7 +292,7 @@ export default function History() {
                       onClick={() => navigate('/cloud-paste', { state: { paste } })}
                       className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-surface-hover transition-colors"
                     >
-                      <div className="w-8 h-8 rounded-lg bg-surface-secondary flex items-center justify-center shrink-0">
+                      <div className="w-9 h-9 rounded-full bg-surface-secondary flex items-center justify-center shrink-0">
                         <PrivacyIcon size={14} className="text-text-muted" />
                       </div>
                       <div className="min-w-0 flex-1">
@@ -254,7 +301,7 @@ export default function History() {
                           <Cloud size={10} className="text-text-muted shrink-0" />
                         </div>
                         <p className="text-xs text-text-muted">
-                          {paste.formatShort || 'text'} · {date}
+                          {paste.formatShort || 'text'}{paste.size ? ` · ${formatBytes(paste.size)}` : ''} · {date}
                         </p>
                       </div>
                       <ChevronRight size={15} className="text-text-muted shrink-0" />
@@ -265,43 +312,73 @@ export default function History() {
 
               const item = u.item
               const Icon = getLocalIcon(item.action)
-              const isError = item.pastebinLink?.startsWith('Error')
+              const isError = !!item.pastebinLink?.startsWith('Error')
               const realIndex = history.indexOf(item)
+              const { bg, fg } = getLocalColors(item.action, isError)
+              const isDraft = item.action === EditorAction.SAVE_DRAFT
+
+              const handleLocalItemClick = () => {
+                if (isDraft && item.encText) {
+                  // Drafts open directly in the editor for continued editing
+                  updateDraft({
+                    plaintext: item.encText,
+                    title: item.title || '',
+                    format: item.format || 'text',
+                    expiry: item.expiry || 'N',
+                    privacy: (item.privacy as '0' | '1') || '0',
+                    action: settings.default_action,
+                    buttonEnabled: true,
+                  })
+                  navigate('/home')
+                } else {
+                  navigate(`/result/${realIndex}`)
+                }
+              }
+
               return (
                 <div key={item.id}>
                   {showHeading && (
-                    <p className="px-4 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-widest text-text-muted bg-surface-secondary/30">
+                    <p className="px-4 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-[0.06em] text-text-muted bg-surface-secondary/30">
                       {heading}
                     </p>
                   )}
-                  <div className="relative group flex items-center hover:bg-surface-hover transition-colors">
-                    <button
-                      onClick={() => navigate(`/result/${realIndex}`)}
-                      className="flex-1 flex items-center gap-3 px-4 py-3 text-left min-w-0 pr-12"
-                    >
-                      <div className={cn('w-8 h-8 rounded-lg flex items-center justify-center shrink-0', isError ? 'bg-danger/10' : 'bg-primary/10')}>
-                        <Icon size={15} className={isError ? 'text-danger' : 'text-primary'} />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className={cn('text-sm font-medium truncate', isError && 'text-danger')}>
-                          {getLocalTitle(item)}
-                        </p>
-                        <p className="text-xs text-text-muted">{formatDate(item.date)}</p>
-                      </div>
-                      <ChevronRight size={16} className="text-text-muted shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    </button>
-                    <button
-                      onClick={e => handleDeleteLocal(e, item.id)}
-                      className="absolute right-3 p-1.5 rounded-lg text-text-muted hover:text-danger hover:bg-danger/10 opacity-0 group-hover:opacity-100 transition-all"
-                      title="Remove from history"
-                    >
-                      <X size={14} />
-                    </button>
-                  </div>
+                  <button
+                    onClick={handleLocalItemClick}
+                    className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-surface-hover transition-colors"
+                  >
+                    {/* Circular colored icon — Swiss/Apple type indicator */}
+                    <div className={cn('w-9 h-9 rounded-full flex items-center justify-center shrink-0', bg)}>
+                      <Icon size={15} className={fg} />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className={cn('text-sm font-medium truncate', isError ? 'text-danger' : 'text-text-primary')}>
+                        {getLocalTitle(item)}
+                      </p>
+                      <p className="text-xs text-text-muted">{formatDate(item.date)}</p>
+                    </div>
+                    <ChevronRight size={15} className="text-text-muted/50 shrink-0" />
+                  </button>
                 </div>
               )
             })
           })()
+        )}
+
+        {/* Connect banner at bottom — Apple pattern: show what you have first, invite more below */}
+        {!isLoggedIn && (
+          <button
+            onClick={() => navigate('/pastebin-account')}
+            className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-surface-hover transition-colors border-t border-border/30"
+          >
+            <div className="w-9 h-9 rounded-full bg-surface-secondary flex items-center justify-center shrink-0">
+              <img src={pastebinFavicon} alt="Pastebin" className="w-5 h-5 rounded-sm object-contain" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-medium text-text-secondary">Connect Pastebin account</p>
+              <p className="text-xs text-text-muted">Sign in to see your cloud pastes here</p>
+            </div>
+            <ChevronRight size={15} className="text-text-muted/50 shrink-0" />
+          </button>
         )}
 
         {/* Load more cloud */}
@@ -315,21 +392,6 @@ export default function History() {
         )}
       </div>
 
-      {/* Footer */}
-      <div className="border-t border-border px-4 py-2.5 flex items-center justify-between shrink-0">
-        <p className="text-[10px] text-text-muted">
-          Local deletes don't affect pastebin.com
-        </p>
-        {isLoggedIn && (
-          <button
-            onClick={() => loadCloud()}
-            className="flex items-center gap-1 text-[10px] text-text-muted hover:text-text-primary transition-colors"
-          >
-            <RefreshCw size={10} />
-            Refresh
-          </button>
-        )}
-      </div>
     </div>
   )
 }

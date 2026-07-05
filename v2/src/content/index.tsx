@@ -175,20 +175,18 @@ ReactDOM.createRoot(appRoot).render(
 // Panel show/hide + context menu pending text
 chrome.runtime.onMessage.addListener(message => {
   if (message.type === 'SB_TOGGLE') {
+    // Toolbar icon — toggle open/closed
     const isOpening = panel.style.display === 'none';
     panel.style.display = isOpening ? 'block' : 'none';
-    if (isOpening) {
-      chrome.storage.session.get(['pendingText'], data => {
-        if (data.pendingText?.text) {
-          window.dispatchEvent(
-            new CustomEvent('securebin:set-text', {
-              detail: data.pendingText.text,
-            })
-          );
-          chrome.storage.session.remove(['pendingText']);
-        }
-      });
+  } else if (message.type === 'SB_OPEN') {
+    panel.style.display = 'block';
+    if (message.quickPostLoading) {
+      window.dispatchEvent(new CustomEvent('securebin:quick-post-loading'));
+    } else if (message.pendingText) {
+      window.dispatchEvent(new CustomEvent('securebin:set-text', { detail: message.pendingText }));
     }
+  } else if (message.type === 'SB_QUICK_POST_RESULT') {
+    window.dispatchEvent(new CustomEvent('securebin:quick-post-result', { detail: message.payload }));
   }
 });
 

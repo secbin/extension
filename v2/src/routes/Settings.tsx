@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Moon, Sun, SunMoon, Shield, Key, HelpCircle, Trash2, RotateCcw, Send, KeyRound, Lock, Download, UserCircle, ChevronDown } from 'lucide-react'
-import { useStore } from '@/lib/store'
-import { EditorAction } from '@/lib/constants'
+import { Moon, Sun, SunMoon, Shield, Key, HelpCircle, Trash2, RotateCcw, Send, KeyRound, Lock, Download, UserCircle, ChevronDown, Type } from 'lucide-react'
+import { useStore, generateDraftTitle } from '@/lib/store'
+import { EditorAction, hasCustomApiKey } from '@/lib/constants'
 import SettingsRow from '@/components/common/SettingsRow'
 import ConfirmDialog from '@/components/dialog/ConfirmDialog'
 import { cn } from '@/lib/cn'
@@ -46,7 +46,17 @@ export default function Settings() {
   const [resetSettingsOpen, setResetSettingsOpen] = useState(false)
   const [pageTimeoutOpen, setPageTimeoutOpen] = useState(false)
 
-  const hasApiKey = settings.apiKey && settings.apiKey !== atob('MmU1OGNlMjcyMzllMzRhNzdjNWVmNjVkYmVhOGIyNGQ=')
+  const titlePrefix = settings.draft_title_prefix?.trim() || ''
+  const PASTE_NAME_PREVIEW: Record<string, string> = {
+    datetime: generateDraftTitle('datetime', ''),
+    date: generateDraftTitle('date', ''),
+    untitled: 'Untitled Paste',
+    custom: titlePrefix || 'Custom',
+    custom_date: generateDraftTitle('custom_date', titlePrefix || 'Paste'),
+    custom_datetime: generateDraftTitle('custom_datetime', titlePrefix || 'Paste'),
+  }
+
+  const hasApiKey = hasCustomApiKey(settings.apiKey)
 
   const THEME_OPTIONS: { value: 'light' | 'dark' | 'system'; label: string; icon: typeof Sun }[] = [
     { value: 'light', label: 'Light', icon: Sun },
@@ -55,14 +65,20 @@ export default function Settings() {
   ]
 
   return (
-    <div className="divide-y divide-border">
+    <div className="flex flex-col h-full overflow-y-auto">
+      {/* ── Header zone ─────────────────────────────── */}
+      <div className="bg-surface shrink-0 px-4 pt-4 pb-3">
+        <h2 className="text-lg font-bold text-text-primary tracking-tight">Settings</h2>
+      </div>
+
+      <div className="divide-y divide-border/20">
       {/* Appearance */}
       <div className="py-1">
-        <p className="px-4 pt-4 pb-1 text-xs font-semibold text-text-muted">
+        <p className="px-4 pt-4 pb-1 text-[11px] font-semibold text-text-muted uppercase tracking-[0.06em]">
           Appearance
         </p>
         <div className="px-4 pt-1 pb-3">
-          <p className="text-sm font-medium text-text-primary mb-2">Theme</p>
+          <p className="text-[11px] font-semibold text-text-muted uppercase tracking-[0.06em] mb-2">Theme</p>
           <div className="flex gap-2">
             {THEME_OPTIONS.map(opt => {
               const Icon = opt.icon
@@ -89,7 +105,7 @@ export default function Settings() {
 
       {/* Security */}
       <div className="py-1">
-        <p className="px-4 pt-4 pb-1 text-xs font-semibold text-text-muted">
+        <p className="px-4 pt-4 pb-1 text-[11px] font-semibold text-text-muted uppercase tracking-[0.06em]">
           Security
         </p>
         <SettingsRow
@@ -120,13 +136,13 @@ export default function Settings() {
 
       {/* Editor */}
       <div className="py-1">
-        <p className="px-4 pt-4 pb-1 text-xs font-semibold text-text-muted">
+        <p className="px-4 pt-4 pb-1 text-[11px] font-semibold text-text-muted uppercase tracking-[0.06em]">
           Editor
         </p>
 
         {/* Default Action — custom option cards */}
         <div className="px-4 pt-2 pb-3 space-y-1.5">
-          <p className="text-sm font-medium text-text-primary">Default Action</p>
+          <p className="text-[11px] font-semibold text-text-muted uppercase tracking-[0.06em] mb-0.5">Default Action</p>
           {DEFAULT_ACTION_OPTIONS.map((opt) => {
             const Icon = opt.icon
             const isSelected = settings.default_action === opt.value
@@ -184,8 +200,8 @@ export default function Settings() {
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setPageTimeoutOpen(false)} />
                 <div className="absolute right-0 top-full mt-1 z-50 w-40 py-1.5 rounded-xl border border-border bg-surface animate-in fade-in slide-in-from-top-1 duration-150" style={{ boxShadow: '0 4px 20px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04)' }}>
-                  <p className="px-3 pt-1 pb-1 text-[10px] font-semibold text-text-muted">Restore on open</p>
-                  <div className="mx-3 mb-1 border-t border-border" />
+                  <p className="px-3 pt-2 pb-0.5 text-[10px] font-semibold text-text-muted/60 uppercase tracking-[0.06em]">Restore on open</p>
+                  <div className="border-t border-border/30 mb-1" />
                   {PAGE_TIMEOUT_OPTIONS.map(opt => (
                     <button
                       key={opt.value}
@@ -205,11 +221,20 @@ export default function Settings() {
             )}
           </div>
         </div>
+
+        <SettingsRow
+          label="Default Paste Name"
+          description={PASTE_NAME_PREVIEW[settings.draft_title_mode ?? 'datetime']}
+          onClick={() => navigate('/paste-name')}
+          chevron
+        >
+          <Type size={16} className="text-text-muted" />
+        </SettingsRow>
       </div>
 
       {/* Help */}
       <div className="py-1">
-        <p className="px-4 pt-4 pb-1 text-xs font-semibold text-text-muted">
+        <p className="px-4 pt-4 pb-1 text-[11px] font-semibold text-text-muted uppercase tracking-[0.06em]">
           Help
         </p>
         <SettingsRow
@@ -223,7 +248,7 @@ export default function Settings() {
 
       {/* Data */}
       <div className="py-1">
-        <p className="px-4 pt-4 pb-1 text-xs font-semibold text-text-muted">
+        <p className="px-4 pt-4 pb-1 text-[11px] font-semibold text-text-muted uppercase tracking-[0.06em]">
           Data
         </p>
         <SettingsRow
@@ -277,6 +302,7 @@ export default function Settings() {
         onConfirm={() => { resetSettings(); setResetSettingsOpen(false) }}
         onCancel={() => setResetSettingsOpen(false)}
       />
+      </div>
     </div>
   )
 }

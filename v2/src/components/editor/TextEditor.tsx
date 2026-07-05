@@ -1,5 +1,6 @@
 import { useRef, useEffect, useCallback } from 'react'
-import { useStore, resolveTheme } from '@/lib/store'
+import { useStore, resolveTheme, type Draft } from '@/lib/store'
+import { EditorAction } from '@/lib/constants'
 import { detectLanguage } from '@/lib/detect-language'
 import {
   EditorView,
@@ -13,15 +14,26 @@ import {
 } from '@/lib/cm-setup'
 import { isInjected } from '@/App'
 
-function getPastePlaceholder(): string {
-  const platform = navigator.platform.toLowerCase()
+function getShortcut(): string {
+  const p = navigator.platform.toLowerCase()
   const ua = navigator.userAgent.toLowerCase()
-  const isMac = platform.startsWith('mac') || ua.includes('mac os')
-  const shortcut = isMac ? '⌘ + V' : 'Ctrl + V'
-  return `Type or paste (${shortcut}) text you want to encrypt or a Pastebin.com link or ciphertext you want to decrypt here...`
+  return p.startsWith('mac') || ua.includes('mac os') ? '⌘V' : 'Ctrl+V'
 }
 
-const PLACEHOLDER = getPastePlaceholder()
+const SHORTCUT = getShortcut()
+
+function getPlaceholder(action: EditorAction): string {
+  switch (action) {
+    case EditorAction.ENCRYPT:
+    case EditorAction.ENCRYPT_PASTEBIN:
+      return `Type or paste (${SHORTCUT}) text to encrypt and share securely…`
+    case EditorAction.DECRYPT:
+    case EditorAction.DECRYPT_PASTEBIN:
+      return `Paste your ciphertext or a Pastebin link to decrypt…`
+    default:
+      return `Type or paste (${SHORTCUT}) anything — code, notes, a link…`
+  }
+}
 
 const CODE_BG_LIGHT = '#f3f3f5'
 const CODE_BG_DARK = '#2c313c'
@@ -37,19 +49,29 @@ export default function TextEditor() {
 
   const handleChange = useCallback(
     (text: string) => {
-      let format = draft.format
-      if (format === 'text' && text.length > 80) {
+      const partial: Partial<Draft> = { plaintext: text }
+      // Auto-detect a code language, but never override a format the user
+      // picked explicitly (formatLocked) — including an explicit "Plain Text".
+      if (draft.format === 'text' && !draft.formatLocked && text.length > 80) {
         try {
           const detected = detectLanguage(text)
-          if (detected !== 'text') format = detected
+          if (detected !== 'text') partial.format = detected
         } catch {
           // keep current format
         }
       }
-      updateDraft({ plaintext: text, format, buttonEnabled: text.length > 0 })
+      updateDraft(partial)
     },
-    [draft.format, updateDraft],
+    [draft.format, draft.formatLocked, updateDraft],
   )
+
+  // The CodeMirror update listener is registered once per view, so it must
+  // read the latest handleChange through a ref — a direct capture would keep
+  // stale draft state (e.g. the format at view-creation time) forever.
+  const handleChangeRef = useRef(handleChange)
+  useEffect(() => {
+    handleChangeRef.current = handleChange
+  }, [handleChange])
 
   // Initialize CodeMirror when entering code mode
   useEffect(() => {
@@ -68,12 +90,10 @@ export default function TextEditor() {
       state: EditorState.create({
         doc: draft.plaintext,
         extensions: [
-          ...buildBaseExtensions(isDark),
-          // Set language immediately in the initial state — no async delay
-          languageCompartment.of(lang ?? []),
+          ...buildBaseExtensions(isDark, lang),
           EditorView.updateListener.of(update => {
             if (update.docChanged && !isUpdatingRef.current) {
-              handleChange(update.state.doc.toString())
+              handleChangeRef.current(update.state.doc.toString())
             }
           }),
         ],
@@ -138,7 +158,7 @@ export default function TextEditor() {
       <textarea
         value={draft.plaintext}
         onChange={e => handleChange(e.target.value)}
-        placeholder={PLACEHOLDER}
+        placeholder={getPlaceholder(draft.action)}
         spellCheck={true}
         className="flex-1 w-full px-4 py-4 leading-relaxed bg-transparent resize-none focus:outline-none placeholder:text-text-muted/50"
         style={{ fontSize: draft.plaintext.length > 300 ? '16px' : '24px' }}

@@ -48,7 +48,21 @@ export enum EditorAction {
   SAVE_DRAFT = 'Save Draft',
 }
 
-export const DEFAULT_API_KEY_HASH = 'MmU1OGNlMjcyMzllMzRhNzdjNWVmNjVkYmVhOGIyNGQ='
+// Bundled Pastebin dev key, injected at build time from .env.local (see
+// .env.example). The key is kept out of the committed source because the repo
+// is public; a build without the env var ships no default key, and posting is
+// disabled until the user configures their own key.
+export const DEFAULT_API_KEY: string = import.meta.env.VITE_DEFAULT_PASTEBIN_API_KEY ?? ''
+
+/** True when the user has configured their own key (not the bundled default). */
+export function hasCustomApiKey(apiKey: string): boolean {
+  return !!apiKey && apiKey !== DEFAULT_API_KEY
+}
+
+// Stored form of the API key in chrome.storage: base64 of the URI-encoded key
+// so any character set round-trips.
+export const encodeStoredApiKey = (key: string): string => btoa(encodeURIComponent(key))
+export const decodeStoredApiKey = (stored: string): string => decodeURIComponent(atob(stored))
 
 export const PASTEBIN_FORMATS = [
   { label: 'Plain Text', value: 'text' },
@@ -90,7 +104,6 @@ export const PASTEBIN_FORMATS = [
   { label: 'Ruby', value: 'ruby' },
   { label: 'Rust', value: 'rust' },
   { label: 'Scala', value: 'scala' },
-  { label: 'Shell', value: 'bash' },
   { label: 'SQL', value: 'sql' },
   { label: 'Swift', value: 'swift' },
   { label: 'TOML', value: 'toml' },

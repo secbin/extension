@@ -30,6 +30,18 @@ cd v2
 npm install
 ```
 
+Optionally bundle a default Pastebin API key into the build (used when the
+person installing the extension hasn't configured their own key). The key is
+injected at build time from a gitignored env file and never committed:
+
+```bash
+cp .env.example .env.local
+# then set VITE_DEFAULT_PASTEBIN_API_KEY in .env.local
+```
+
+Builds without `.env.local` work normally — posting to Pastebin is simply
+disabled until a key is entered under Settings → API Key.
+
 ### Scripts
 
 - `npm run dev`: Start the Vite development server with Hot Module Replacement (HMR). You should load the generated `v2/dist` folder in Chrome.

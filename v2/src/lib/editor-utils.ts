@@ -26,9 +26,10 @@ export function detectAction(text: string, defaultAction: EditorAction): EditorA
     return EditorAction.DECRYPT
   }
 
-  // Match pastebin.com only when it appears as a domain, not as a substring of
-  // another hostname (e.g. "not-pastebin.com" should not match).
-  if (/(?:^|[\s/:("])pastebin\.com[/\s]?/.test(trimmed)) {
+  // Match pastebin.com only when it appears as a whole domain, not as a
+  // substring of another hostname — neither "not-pastebin.com" (prefix) nor
+  // "pastebin.com.evil.com" / "pastebin.community" (suffix) should match.
+  if (/(?:^|[\s/:("'])pastebin\.com(?:[/\s:)"',]|$)/.test(trimmed)) {
     return isEncryptionAction(defaultAction) ? EditorAction.DECRYPT_PASTEBIN : EditorAction.OPEN_PASTEBIN
   }
 
@@ -46,9 +47,20 @@ export function getMaxLength(action: EditorAction): number {
   return MAX_ENC_TEXT_LENGTH
 }
 
+const utf8 = new TextEncoder()
+
 /**
- * Returns true when the text is non-empty and within the limit for the given action.
+ * UTF-8 byte length of the text — Pastebin's 512 KB limit is bytes, so
+ * multibyte characters count for more than their UTF-16 char count.
+ */
+export function byteLength(text: string): number {
+  return utf8.encode(text).length
+}
+
+/**
+ * Returns true when the text is non-empty and within the byte limit for the
+ * given action.
  */
 export function isWithinLimit(text: string, action: EditorAction): boolean {
-  return text.length > 0 && text.length <= getMaxLength(action)
+  return text.length > 0 && byteLength(text) <= getMaxLength(action)
 }

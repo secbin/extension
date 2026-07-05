@@ -4,7 +4,7 @@ import { useStore } from '@/lib/store'
 import { encrypt, decrypt as decryptText } from '@/lib/crypto'
 import { postPastebin, getPastebin } from '@/lib/pastebin'
 import { EditorAction } from '@/lib/constants'
-import { detectAction, isWithinLimit } from '@/lib/editor-utils'
+import { detectAction } from '@/lib/editor-utils'
 import TextEditor from '@/components/editor/TextEditor'
 import ActionBar from '@/components/editor/ActionBar'
 import PasteMetadata from '@/components/editor/PasteMetadata'
@@ -16,25 +16,10 @@ export default function Editor() {
   const { draft, settings, updateDraft, resetDraft, addToHistory } = useStore()
   const [encDialogOpen, setEncDialogOpen] = useState(false)
   const [decDialogOpen, setDecDialogOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
 
-  // Handle text injected by the right-click context menu (background service worker)
-  useEffect(() => {
-    chrome.storage.session.get(['pendingText', 'lastResult'], (data) => {
-      if (data.pendingText?.text) {
-        const text: string = data.pendingText.text
-        const action = detectAction(text, settings.default_action)
-        updateDraft({ 
-          plaintext: text, 
-          action, 
-          buttonEnabled: isWithinLimit(text, action) 
-        })
-        chrome.storage.session.remove('pendingText')
-      } else if (data.lastResult) {
-        chrome.storage.session.remove('lastResult')
-        navigate('/result')
-      }
-    })
-  }, [])
+  // Context-menu text ("Open in Editor") is handled centrally in App.tsx —
+  // via chrome.storage.session in popup mode and window events when injected.
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -42,29 +27,12 @@ export default function Editor() {
       updateDraft({
         plaintext: ciphertext,
         action: EditorAction.DECRYPT,
-        buttonEnabled: ciphertext.length > 0,
       })
     }
     window.addEventListener('securebin:load-for-decrypt', handler)
     return () => window.removeEventListener('securebin:load-for-decrypt', handler)
   }, [updateDraft])
 
-  // Handle text injected by the right-click context menu when the panel is already open.
-  // The content script dispatches this when the panel opens with pendingText set.
-  useEffect(() => {
-    const handler = (e: Event) => {
-      const text: string = (e as CustomEvent).detail ?? ''
-      if (!text) return
-      const action = detectAction(text, settings.default_action)
-      updateDraft({
-        plaintext: text,
-        action,
-        buttonEnabled: isWithinLimit(text, action),
-      })
-    }
-    window.addEventListener('securebin:set-text', handler)
-    return () => window.removeEventListener('securebin:set-text', handler)
-  }, [settings.default_action, updateDraft])
 
   const handleAction = useCallback((overrideAction?: EditorAction) => {
     // The dropdown passes the action directly so we don't rely on a stale draft closure
@@ -92,9 +60,10 @@ export default function Editor() {
       const mod = e.metaKey || e.ctrlKey
       if (mod && e.key === 'Enter') {
         e.preventDefault()
-        if (draft.buttonEnabled) handleAction()
+        if (draft.buttonEnabled && !loading) handleAction()
       }
-      if (mod && e.shiftKey && e.key === 'e') {
+      // key is 'E' while Shift is held, so compare case-insensitively
+      if (mod && e.shiftKey && e.key.toLowerCase() === 'e') {
         e.preventDefault()
         const isEnc = draft.action === EditorAction.ENCRYPT_PASTEBIN || draft.action === EditorAction.ENCRYPT
         updateDraft({ action: isEnc ? EditorAction.POST_PASTEBIN : EditorAction.ENCRYPT_PASTEBIN })
@@ -102,7 +71,7 @@ export default function Editor() {
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [draft, handleAction, updateDraft])
+  }, [draft, loading, handleAction, updateDraft])
 
   const executeAction = useCallback(
     async (passkey?: string, overrideAction?: EditorAction) => {
@@ -110,6 +79,10 @@ export default function Editor() {
       const action = overrideAction ?? draft.action
       const { encMode, keyLength, apiKey } = settings
 
+      // Shared paste metadata from the current draft
+      const meta = { title: draft.title, format: draft.format, expiry: draft.expiry, privacy: draft.privacy }
+
+      setLoading(true)
       try {
         if (action === EditorAction.ENCRYPT && passkey) {
           const result = await encrypt(plaintext, encMode, keyLength, passkey)
@@ -122,12 +95,13 @@ export default function Editor() {
             encMode: result.mode,
             keyLength: result.keyLength,
             date: Date.now(),
+            ...meta,
           })
           resetDraft()
           navigate('/result')
         } else if (action === EditorAction.ENCRYPT_PASTEBIN && passkey) {
           const result = await encrypt(plaintext, encMode, keyLength, passkey)
-          const link = await postPastebin(result.cipherData, apiKey, { title: draft.title, format: draft.format, expiry: draft.expiry, privacy: draft.privacy })
+          const link = await postPastebin(result.cipherData, apiKey, meta)
           addToHistory({
             id: crypto.randomUUID(),
             action: EditorAction.ENCRYPT_PASTEBIN,
@@ -137,11 +111,12 @@ export default function Editor() {
             encMode: result.mode,
             keyLength: result.keyLength,
             date: Date.now(),
+            ...meta,
           })
           resetDraft()
           navigate('/result')
         } else if (action === EditorAction.POST_PASTEBIN) {
-          const link = await postPastebin(plaintext, apiKey, { title: draft.title, format: draft.format, expiry: draft.expiry, privacy: draft.privacy })
+          const link = await postPastebin(plaintext, apiKey, meta)
           addToHistory({
             id: crypto.randomUUID(),
             action: EditorAction.POST_PASTEBIN,
@@ -151,6 +126,7 @@ export default function Editor() {
             encMode: null,
             keyLength: null,
             date: Date.now(),
+            ...meta,
           })
           resetDraft()
           navigate('/result')
@@ -164,48 +140,45 @@ export default function Editor() {
             encMode: null,
             keyLength: null,
             date: Date.now(),
+            ...meta,
           })
           resetDraft()
           navigate('/result')
         } else if (action === EditorAction.DECRYPT && passkey) {
           const decrypted = await decryptText(plaintext, passkey)
-          const nextAction = detectAction(decrypted, settings.default_action)
-          updateDraft({ 
+          updateDraft({
             plaintext: decrypted,
-            action: nextAction,
-            buttonEnabled: isWithinLimit(decrypted, nextAction)
+            action: detectAction(decrypted, settings.default_action),
           })
         } else if (action === EditorAction.DECRYPT_PASTEBIN && passkey) {
           const pasteText = await getPastebin(plaintext)
           const decrypted = await decryptText(pasteText, passkey)
-          const nextAction = detectAction(decrypted, settings.default_action)
-          updateDraft({ 
+          updateDraft({
             plaintext: decrypted,
-            action: nextAction,
-            buttonEnabled: isWithinLimit(decrypted, nextAction)
+            action: detectAction(decrypted, settings.default_action),
           })
         } else if (action === EditorAction.OPEN_PASTEBIN) {
           const pasteText = await getPastebin(plaintext)
-          const nextAction = detectAction(pasteText, settings.default_action)
-          updateDraft({ 
+          updateDraft({
             plaintext: pasteText,
-            action: nextAction,
-            buttonEnabled: isWithinLimit(pasteText, nextAction)
+            action: detectAction(pasteText, settings.default_action),
           })
         }
       } catch (err) {
-        console.error('Action failed:', err)
         addToHistory({
           id: crypto.randomUUID(),
           action,
           pastebinLink: `Error: ${err instanceof Error ? err.message : 'Unknown error'}`,
           key: null,
-          encText: null,
+          encText: plaintext,  // save original text so user can recover it from result page
           encMode: null,
           keyLength: null,
           date: Date.now(),
+          ...meta,
         })
         navigate('/result')
+      } finally {
+        setLoading(false)
       }
     },
     [draft, settings, addToHistory, resetDraft, updateDraft, navigate],
@@ -215,7 +188,7 @@ export default function Editor() {
     <div className="flex flex-col h-full">
       <PasteMetadata />
       <TextEditor />
-      <ActionBar onAction={handleAction} />
+      <ActionBar onAction={handleAction} loading={loading} />
 
       <EncryptDialog
         open={encDialogOpen}

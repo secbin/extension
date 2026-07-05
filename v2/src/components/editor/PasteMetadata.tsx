@@ -18,8 +18,8 @@ const EXPIRY_LABEL: Record<string, string> = {
   '1Y': '1 yr',
 }
 
-const DROPDOWN_LABEL = 'px-3 pt-2 pb-0.5 text-[10px] text-text-muted/70'
-const DROPDOWN_DIVIDER = 'border-t border-primary/10 mb-1'
+const DROPDOWN_LABEL = 'px-3 pt-2 pb-0.5 text-[10px] font-semibold text-text-muted/60 uppercase tracking-[0.06em]'
+const DROPDOWN_DIVIDER = 'border-t border-border/30 mb-1'
 
 export default function PasteMetadata() {
   const { draft, updateDraft } = useStore()
@@ -107,7 +107,7 @@ export default function PasteMetadata() {
             {PASTEBIN_FORMATS.map(f => (
               <button
                 key={f.value + f.label}
-                onClick={() => { updateDraft({ format: f.value }); setOpenDropdown(null) }}
+                onClick={() => { updateDraft({ format: f.value, formatLocked: true }); setOpenDropdown(null) }}
                 className={cn(
                   'w-full text-left px-3 py-2 text-sm transition-colors',
                   draft.format === f.value

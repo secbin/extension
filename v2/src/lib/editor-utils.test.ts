@@ -116,6 +116,18 @@ describe('detectAction with POST_PASTEBIN default', () => {
   it('does NOT match not-pastebin.com', () => {
     expect(detectAction('not-pastebin.com/fake', def)).toBe(EditorAction.POST_PASTEBIN)
   })
+
+  it('does NOT match pastebin.com as a subdomain of another host', () => {
+    expect(detectAction('https://pastebin.com.evil.com/fake', def)).toBe(EditorAction.POST_PASTEBIN)
+  })
+
+  it('does NOT match hostnames that merely start with pastebin.com', () => {
+    expect(detectAction('https://pastebin.community/fake', def)).toBe(EditorAction.POST_PASTEBIN)
+  })
+
+  it('matches a bare pastebin.com domain with no path', () => {
+    expect(detectAction('pastebin.com', def)).toBe(EditorAction.OPEN_PASTEBIN)
+  })
 })
 
 // ---------------------------------------------------------------------------
@@ -179,5 +191,13 @@ describe('isWithinLimit', () => {
     const text = 'a'.repeat(encLimit + 1)
     expect(isWithinLimit(text, EditorAction.ENCRYPT_PASTEBIN)).toBe(false)
     expect(text.length).toBeLessThan(plainLimit)
+  })
+
+  it('counts UTF-8 bytes, not characters — multibyte text hits the limit sooner', () => {
+    const limit = getMaxLength(EditorAction.POST_PASTEBIN)
+    // '語' is 3 bytes in UTF-8, so limit/3 + 1 of them exceeds the byte limit
+    const multibyte = '語'.repeat(Math.floor(limit / 3) + 1)
+    expect(multibyte.length).toBeLessThan(limit)
+    expect(isWithinLimit(multibyte, EditorAction.POST_PASTEBIN)).toBe(false)
   })
 })

@@ -35,8 +35,13 @@ export async function postPastebin(
 
   const text = await response.text()
 
-  // Pastebin always returns HTTP 200 even for errors — detect by body content
-  if (!response.ok || text.startsWith('Bad API request') || text.startsWith('CLOUDFLARE')) {
+  // A non-2xx status carries an HTML error page — don't surface that as the
+  // error message. Pastebin API errors come back as HTTP 200 with a short
+  // "Bad API request..." body, which is worth showing verbatim.
+  if (!response.ok) {
+    throw new Error(`Pastebin request failed (HTTP ${response.status})`)
+  }
+  if (text.startsWith('Bad API request') || text.startsWith('CLOUDFLARE')) {
     throw new Error(text)
   }
 
@@ -50,11 +55,39 @@ export async function getPastebin(link: string): Promise<string> {
   const response = await fetch(proxied(`https://pastebin.com/raw/${id}`))
   const text = await response.text()
 
-  if (!response.ok || text.startsWith('Bad API request') || text.startsWith('CLOUDFLARE')) {
+  if (!response.ok) {
+    throw new Error(
+      response.status === 404
+        ? 'Paste not found — it may have expired or been removed'
+        : `Could not fetch paste (HTTP ${response.status})`,
+    )
+  }
+  if (text.startsWith('Bad API request') || text.startsWith('CLOUDFLARE')) {
     throw new Error(text)
   }
 
   return text
+}
+
+/** Fetch paste content with session cache so repeat views are instant. */
+export async function getCachedPasteContent(key: string, url: string): Promise<string> {
+  const cacheKey = `paste_${key}`
+  try {
+    const cached = await chrome.storage.session.get(cacheKey)
+    if (cached[cacheKey]) return cached[cacheKey]
+  } catch { /* session storage unavailable — fall through */ }
+  const content = await getPastebin(url)
+  try { chrome.storage.session.set({ [cacheKey]: content }) } catch { /* best-effort */ }
+  return content
+}
+
+/** Format byte count to human-readable string (e.g. "2.4 KB") */
+export function formatBytes(bytes: string | number): string {
+  const n = typeof bytes === 'string' ? parseInt(bytes, 10) : bytes
+  if (isNaN(n) || n === 0) return '0 B'
+  if (n < 1024) return `${n} B`
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(n < 10240 ? 1 : 0)} KB`
+  return `${(n / (1024 * 1024)).toFixed(1)} MB`
 }
 
 export async function isValidDevKey(apiKey: string): Promise<boolean> {

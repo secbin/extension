@@ -3,9 +3,12 @@ import {
   StorageKey,
   EncryptionMode,
   EditorAction,
-  DEFAULT_API_KEY_HASH,
+  DEFAULT_API_KEY,
+  encodeStoredApiKey,
+  decodeStoredApiKey,
 } from './constants'
-import { getSyncItem, setSyncItem, deleteSyncItem, getLocalItem, setLocalItem, appendToLocalArray, removeFromLocalArray } from './storage'
+import { isWithinLimit } from './editor-utils'
+import { getSyncItem, setSyncItem, deleteSyncItem, getLocalItem, setLocalItem, deleteLocalItem, appendToLocalArray, removeFromLocalArray } from './storage'
 
 // Types
 export interface HistoryItem {
@@ -17,7 +20,14 @@ export interface HistoryItem {
   encMode: string | null
   keyLength: number | null
   date: number
+  // Paste metadata (optional — not stored on old history items)
+  title?: string
+  format?: string
+  expiry?: string   // 'N' | '10M' | '1H' | '1D' | '1W' | '2W' | '1M' | '6M' | '1Y'
+  privacy?: string  // '0' public | '1' unlisted
 }
+
+export type DraftTitleMode = 'datetime' | 'date' | 'untitled' | 'custom' | 'custom_date' | 'custom_datetime'
 
 export interface Settings {
   apiKey: string
@@ -28,6 +38,8 @@ export interface Settings {
   page_timeout: number          // seconds to remember last page; 0 = disabled, -1 = always
   userKey: string       // api_user_key from Pastebin login, empty = not logged in
   username: string      // display name, from userdetails
+  draft_title_mode: DraftTitleMode
+  draft_title_prefix: string    // used when draft_title_mode === 'custom'
 }
 
 export interface Draft {
@@ -40,6 +52,7 @@ export interface Draft {
   updatedAt: number
   title: string
   format: string
+  formatLocked: boolean  // user explicitly picked the format — don't auto-detect over it
   expiry: string
   privacy: '0' | '1'
 }
@@ -86,18 +99,30 @@ function getSystemTheme(): 'light' | 'dark' {
   }
 }
 
-function generateDraftTitle(): string {
-  return new Date().toLocaleString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  })
-  // → "Apr 9, 2:34 PM"
+export function generateDraftTitle(mode: DraftTitleMode = 'datetime', prefix = ''): string {
+  const now = new Date()
+  switch (mode) {
+    case 'datetime':
+      return now.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+    case 'date':
+      return now.toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    case 'untitled':
+      return 'Untitled Paste'
+    case 'custom':
+      return prefix.trim() || 'Untitled Paste'
+    case 'custom_date': {
+      const p = prefix.trim() || 'Paste'
+      return `${p} — ${now.toLocaleString('en-US', { month: 'short', day: 'numeric' })}`
+    }
+    case 'custom_datetime': {
+      const p = prefix.trim() || 'Paste'
+      return `${p} — ${now.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}`
+    }
+  }
 }
 
 const DEFAULT_SETTINGS: Settings = {
-  apiKey: atob(DEFAULT_API_KEY_HASH),
+  apiKey: DEFAULT_API_KEY,
   encMode: EncryptionMode.AES_GCM,
   keyLength: 16,
   theme: 'system',
@@ -105,6 +130,8 @@ const DEFAULT_SETTINGS: Settings = {
   page_timeout: 30,
   userKey: '',
   username: '',
+  draft_title_mode: 'datetime',
+  draft_title_prefix: '',
 }
 
 /** Resolves the effective dark/light value for a given theme setting */
@@ -123,9 +150,15 @@ const DEFAULT_DRAFT: Draft = {
   updatedAt: 0,
   title: 'Untitled Paste',
   format: 'text',
+  formatLocked: false,
   expiry: 'N',
   privacy: '0',
 }
+
+// Draft writes are debounced: updateDraft fires on every keystroke and drafts
+// can be large, so each write replaces any still-pending one.
+const DRAFT_PERSIST_DELAY_MS = 400
+let draftPersistTimer: ReturnType<typeof setTimeout> | undefined
 
 export const useStore = create<AppState>((set, get) => ({
   // Settings
@@ -134,15 +167,13 @@ export const useStore = create<AppState>((set, get) => ({
   setSettings: (partial) => {
     const updated = { ...get().settings, ...partial }
     set({ settings: updated })
-    // Encode API key as base64 for storage; use encodeURIComponent to handle any character set
-    const encodedKey = btoa(encodeURIComponent(updated.apiKey))
-    const toStore = { ...updated, apiKey: encodedKey }
+    const toStore = { ...updated, apiKey: encodeStoredApiKey(updated.apiKey) }
     setSyncItem(StorageKey.SETTINGS, JSON.stringify(toStore))
   },
 
   resetSettings: () => {
     set({ settings: { ...DEFAULT_SETTINGS } })
-    setSyncItem(StorageKey.SETTINGS, JSON.stringify({ ...DEFAULT_SETTINGS, apiKey: DEFAULT_API_KEY_HASH }))
+    setSyncItem(StorageKey.SETTINGS, JSON.stringify({ ...DEFAULT_SETTINGS, apiKey: encodeStoredApiKey(DEFAULT_API_KEY) }))
   },
 
   loadSettings: async () => {
@@ -157,7 +188,7 @@ export const useStore = create<AppState>((set, get) => ({
             theme: parsed.theme ?? getSystemTheme(),
             userKey: parsed.userKey ?? '',
             username: parsed.username ?? '',
-            apiKey: parsed.apiKey ? decodeURIComponent(atob(parsed.apiKey)) : DEFAULT_SETTINGS.apiKey,
+            apiKey: parsed.apiKey ? decodeStoredApiKey(parsed.apiKey) : DEFAULT_SETTINGS.apiKey,
           },
         })
       } catch {
@@ -182,19 +213,39 @@ export const useStore = create<AppState>((set, get) => ({
 
   updateDraft: (partial) => {
     const updated = { ...get().draft, ...partial, updatedAt: Date.now() }
+    // Keep buttonEnabled in sync with the text/action pair unless the caller
+    // explicitly set it — limits differ per action, so switching the action
+    // must re-validate the current text.
+    if (partial.buttonEnabled === undefined && (partial.plaintext !== undefined || partial.action !== undefined)) {
+      updated.buttonEnabled = isWithinLimit(updated.plaintext, updated.action)
+    }
     set({ draft: updated })
-    setSyncItem(StorageKey.DRAFT, JSON.stringify(updated))
+    // Drafts live in local storage: sync storage caps items at 8 KB and 120
+    // writes/min, both far below what per-keystroke saving of large pastes needs.
+    clearTimeout(draftPersistTimer)
+    draftPersistTimer = setTimeout(() => {
+      setLocalItem(StorageKey.DRAFT, JSON.stringify(updated)).catch(() => {})
+    }, DRAFT_PERSIST_DELAY_MS)
   },
 
   resetDraft: () => {
-    const defaultAction = get().settings.default_action ?? EditorAction.POST_PASTEBIN
-    set({ draft: { ...DEFAULT_DRAFT, action: defaultAction, title: generateDraftTitle() } })
-    deleteSyncItem(StorageKey.DRAFT)
+    clearTimeout(draftPersistTimer)  // a pending write would resurrect the cleared draft
+    const { default_action, draft_title_mode, draft_title_prefix } = get().settings
+    const action = default_action ?? EditorAction.POST_PASTEBIN
+    const title = generateDraftTitle(draft_title_mode ?? 'datetime', draft_title_prefix ?? '')
+    set({ draft: { ...DEFAULT_DRAFT, action, title } })
+    deleteLocalItem(StorageKey.DRAFT)
+    deleteSyncItem(StorageKey.DRAFT)  // clear any copy left from the sync-storage era
   },
 
   loadDraft: async () => {
     const defaultAction = get().settings.default_action ?? EditorAction.POST_PASTEBIN
-    const raw = await getSyncItem<string>(StorageKey.DRAFT)
+    let raw = await getLocalItem<string>(StorageKey.DRAFT)
+    if (!raw) {
+      // Migrate drafts saved before the move from sync to local storage
+      raw = await getSyncItem<string>(StorageKey.DRAFT)
+      if (raw) deleteSyncItem(StorageKey.DRAFT)
+    }
     if (raw) {
       try {
         const parsed = JSON.parse(raw)
