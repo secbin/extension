@@ -21,20 +21,10 @@
     "clipboardWrite",
     "clipboardRead",
     "activeTab",
-    "tabs"
-  ],
-  "optional_host_permissions": [
-    "<all_urls>"
+    "scripting"
   ],
   "host_permissions": [
     "https://pastebin.com/*"
-  ],
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "js": ["src/content/index.tsx"],
-      "run_at": "document_idle"
-    }
   ],
   "web_accessible_resources": [
     {
