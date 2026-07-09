@@ -1,7 +1,7 @@
 {
   "name": "securebin: Powerful Pastebin Tool",
   "description": "Securely encrypt your text on Pastebin.com",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "manifest_version": 3,
   "action": {
     "default_title": "Open securebin"
@@ -27,8 +27,7 @@
     "<all_urls>"
   ],
   "host_permissions": [
-    "https://pastebin.com/*",
-    "https://cors.securebin.workers.dev/*"
+    "https://pastebin.com/*"
   ],
   "content_scripts": [
     {

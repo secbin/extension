@@ -1,10 +1,39 @@
-import { CORS_PROXY } from './constants'
+// All Pastebin traffic goes straight to pastebin.com — no proxy. Extension
+// contexts (popup, service worker) are exempt from CORS for hosts listed in
+// host_permissions, so they fetch directly. The injected in-page panel runs
+// in the content-script world, where the page's CORS policy applies and host
+// permissions do not, so it relays requests to the background service worker
+// (SB_FETCH in background.ts) which performs the same direct fetch.
 
-// Build a proxied URL using the cloudflare-cors-anywhere format:
-// https://cors.securebin.workers.dev/?https://target.com/path
-// The target URL is the raw query string — no ?uri= key, no encoding.
-function proxied(target: string): string {
-  return `${CORS_PROXY}${target}`
+interface PbResponse {
+  ok: boolean
+  status: number
+  text: string
+}
+
+function isInjectedContext(): boolean {
+  return typeof window !== 'undefined' && (window as any).__SECUREBIN_INJECTED__ === true
+}
+
+async function pbFetch(url: string, body?: URLSearchParams): Promise<PbResponse> {
+  if (isInjectedContext()) {
+    const res: PbResponse | undefined = await chrome.runtime.sendMessage({
+      type: 'SB_FETCH',
+      url,
+      body: body?.toString(),
+    })
+    if (!res) throw new Error('No response from the securebin background service')
+    // status 0 = the background fetch itself failed (network error) — mirror
+    // the direct path, where fetch() rejects instead of resolving
+    if (res.status === 0) throw new Error(res.text || 'Network error')
+    return res
+  }
+  const response = await fetch(url, body ? {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body,
+  } : undefined)
+  return { ok: response.ok, status: response.status, text: await response.text() }
 }
 
 const PASTEBIN_API = 'https://pastebin.com/api/api_post.php'
@@ -27,19 +56,13 @@ export async function postPastebin(
   if (options?.expiry) body.append('api_paste_expire_date', options.expiry)
   if (options?.privacy !== undefined) body.append('api_paste_private', options.privacy)
 
-  const response = await fetch(proxied(PASTEBIN_API), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body,
-  })
-
-  const text = await response.text()
+  const { ok, status, text } = await pbFetch(PASTEBIN_API, body)
 
   // A non-2xx status carries an HTML error page — don't surface that as the
   // error message. Pastebin API errors come back as HTTP 200 with a short
   // "Bad API request..." body, which is worth showing verbatim.
-  if (!response.ok) {
-    throw new Error(`Pastebin request failed (HTTP ${response.status})`)
+  if (!ok) {
+    throw new Error(`Pastebin request failed (HTTP ${status})`)
   }
   if (text.startsWith('Bad API request') || text.startsWith('CLOUDFLARE')) {
     throw new Error(text)
@@ -52,14 +75,13 @@ export async function getPastebin(link: string): Promise<string> {
   const parts = link.trim().split('/')
   const id = parts[parts.length - 1] || parts[parts.length - 2]
 
-  const response = await fetch(proxied(`https://pastebin.com/raw/${id}`))
-  const text = await response.text()
+  const { ok, status, text } = await pbFetch(`https://pastebin.com/raw/${id}`)
 
-  if (!response.ok) {
+  if (!ok) {
     throw new Error(
-      response.status === 404
+      status === 404
         ? 'Paste not found — it may have expired or been removed'
-        : `Could not fetch paste (HTTP ${response.status})`,
+        : `Could not fetch paste (HTTP ${status})`,
     )
   }
   if (text.startsWith('Bad API request') || text.startsWith('CLOUDFLARE')) {
@@ -96,14 +118,9 @@ export async function isValidDevKey(apiKey: string): Promise<boolean> {
   body.append('api_option', 'userdetails')
 
   try {
-    const response = await fetch(proxied(PASTEBIN_API), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body,
-    })
+    const { text } = await pbFetch(PASTEBIN_API, body)
     // A valid dev key returns "Bad API request, invalid api_user_key" (user key missing).
     // An invalid dev key returns "Bad API request, invalid api_dev_key".
-    const text = await response.text()
     return !text.includes('invalid api_dev_key')
   } catch {
     return false
@@ -144,13 +161,8 @@ export async function loginPastebin(apiKey: string, username: string, password: 
   body.append('api_user_name', username)
   body.append('api_user_password', password)
 
-  const response = await fetch(proxied(PASTEBIN_LOGIN), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body,
-  })
-  const text = await response.text()
-  if (!response.ok || text.startsWith('Bad API request')) throw new Error(text)
+  const { ok, text } = await pbFetch(PASTEBIN_LOGIN, body)
+  if (!ok || text.startsWith('Bad API request')) throw new Error(text)
   return text.trim()
 }
 
@@ -162,13 +174,8 @@ export async function deletePastebin(apiKey: string, userKey: string, pasteKey: 
   body.append('api_paste_key', pasteKey)
   body.append('api_option', 'delete')
 
-  const response = await fetch(proxied(PASTEBIN_API), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body,
-  })
-  const text = await response.text()
-  if (!response.ok || text.startsWith('Bad API request')) throw new Error(text)
+  const { ok, text } = await pbFetch(PASTEBIN_API, body)
+  if (!ok || text.startsWith('Bad API request')) throw new Error(text)
 }
 
 /** List the logged-in user's pastes (max 1000) */
@@ -179,13 +186,8 @@ export async function listPastes(apiKey: string, userKey: string, limit = 50): P
   body.append('api_option', 'list')
   body.append('api_results_limit', String(Math.min(limit, 1000)))
 
-  const response = await fetch(proxied(PASTEBIN_API), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body,
-  })
-  const text = await response.text()
-  if (!response.ok || text.startsWith('Bad API request')) throw new Error(text)
+  const { ok, text } = await pbFetch(PASTEBIN_API, body)
+  if (!ok || text.startsWith('Bad API request')) throw new Error(text)
   // No pastes returns "No pastes found."
   if (text.trim() === 'No pastes found.') return []
   return parseXmlPasteList(text)
@@ -198,13 +200,8 @@ export async function getUserDetails(apiKey: string, userKey: string): Promise<U
   body.append('api_user_key', userKey)
   body.append('api_option', 'userdetails')
 
-  const response = await fetch(proxied(PASTEBIN_API), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body,
-  })
-  const text = await response.text()
-  if (!response.ok || text.startsWith('Bad API request')) throw new Error(text)
+  const { ok, text } = await pbFetch(PASTEBIN_API, body)
+  if (!ok || text.startsWith('Bad API request')) throw new Error(text)
   return parseXmlUserDetails(text)
 }
 

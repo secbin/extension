@@ -35,7 +35,6 @@ export const MAX_ENC_PASTEBIN_PLAINTEXT_LENGTH =
 export const MAX_ENC_TEXT_LENGTH = 512 * 1024                         // local encrypt / decrypt only (same ceiling)
 export const PASTEBIN_API_KEY_LENGTH = 32
 export const PASTEBIN_BASE_URL = 'pastebin.com'
-export const CORS_PROXY = 'https://cors.securebin.workers.dev/?'
 export const CIPHER_PREFIX = 'C_TXT'
 
 export enum EditorAction {
