@@ -1,10 +1,10 @@
 {
-  "name": "SecureBin: Powerful Pastebin Tool",
+  "name": "securebin: Powerful Pastebin Tool",
   "description": "Securely encrypt your text on Pastebin.com",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "manifest_version": 3,
   "action": {
-    "default_title": "Open SecureBin"
+    "default_title": "Open securebin"
   },
   "icons": {
     "16": "icons/logo48.png",
@@ -21,21 +21,10 @@
     "clipboardWrite",
     "clipboardRead",
     "activeTab",
-    "tabs"
-  ],
-  "optional_host_permissions": [
-    "<all_urls>"
+    "scripting"
   ],
   "host_permissions": [
-    "https://pastebin.com/*",
-    "https://cors.securebin.workers.dev/*"
-  ],
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "js": ["src/content/index.tsx"],
-      "run_at": "document_idle"
-    }
+    "https://pastebin.com/*"
   ],
   "web_accessible_resources": [
     {

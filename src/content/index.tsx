@@ -4,6 +4,9 @@ import { MemoryRouter } from 'react-router-dom';
 import App from '../App';
 import styles from '../index.css?inline';
 
+// Injected on demand via chrome.scripting.executeScript (activeTab gesture),
+// which can run more than once on the same tab — mount only once.
+if (!(window as any).__SECUREBIN_INJECTED__) {
 (window as any).__SECUREBIN_INJECTED__ = true;
 
 const host = document.createElement('div');
@@ -193,3 +196,5 @@ chrome.runtime.onMessage.addListener(message => {
 window.addEventListener('securebin:close', () => {
   panel.style.display = 'none';
 });
+
+} // end single-injection guard
