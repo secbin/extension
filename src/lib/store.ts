@@ -86,6 +86,13 @@ interface AppState {
   decryptResult: { plaintext: string; date: number } | null
   setDecryptResult: (result: { plaintext: string; date: number } | null) => void
 
+  // Ciphertext queued for decryption (e.g. Decrypt on a history item) —
+  // Editor consumes it on mount and opens the passkey prompt. A store field,
+  // not an event: the requester navigates to the editor, which isn't mounted
+  // yet when the request is made.
+  decryptRequest: string | null
+  setDecryptRequest: (ciphertext: string | null) => void
+
   // Dialog
   activeDialog: string | null
   openDialog: (id: string) => void
@@ -297,6 +304,10 @@ export const useStore = create<AppState>((set, get) => ({
   // Decrypt result
   decryptResult: null,
   setDecryptResult: (result) => set({ decryptResult: result }),
+
+  // Decrypt request
+  decryptRequest: null,
+  setDecryptRequest: (ciphertext) => set({ decryptRequest: ciphertext }),
 
   // Dialog
   activeDialog: null,

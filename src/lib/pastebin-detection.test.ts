@@ -12,7 +12,7 @@ describe('Pastebin link detection via detectAction', () => {
     'http://pastebin.com/xyz',
     'pastebin.com/AbCdEf',
     '  pastebin.com/raw/abc  ',
-    'Check this out: pastebin.com/abc123 for more',
+    'https://www.pastebin.com/abc123',
   ]
 
   const nonPastebinTexts = [
@@ -20,6 +20,10 @@ describe('Pastebin link detection via detectAction', () => {
     'just some plain text',
     'not-pastebin.com/fake',
     'https://github.com/user/repo',
+    // The whole text must BE a link — prose around it must not trigger
+    'Check this out: pastebin.com/abc123 for more',
+    'just mentioning pastebin.com in a note',
+    'pastebin.com',
   ]
 
   describe('POST_PASTEBIN default → OPEN_PASTEBIN for Pastebin URLs', () => {
@@ -48,12 +52,12 @@ describe('Pastebin link detection via detectAction', () => {
     })
   })
 
-  it('cipher prefix takes priority over Pastebin URL (POST default)', () => {
-    expect(detectAction(`${CIPHER_PREFIX} pastebin.com/abc`, EditorAction.POST_PASTEBIN)).toBe(EditorAction.DECRYPT)
+  it('ciphertext blob takes priority over an embedded Pastebin URL (POST default)', () => {
+    expect(detectAction(`{"${CIPHER_PREFIX}":"abc","src":"pastebin.com/abc"}`, EditorAction.POST_PASTEBIN)).toBe(EditorAction.DECRYPT)
   })
 
-  it('cipher prefix takes priority over Pastebin URL (ENCRYPT default)', () => {
-    expect(detectAction(`${CIPHER_PREFIX} pastebin.com/abc`, EditorAction.ENCRYPT_PASTEBIN)).toBe(EditorAction.DECRYPT)
+  it('ciphertext blob takes priority over an embedded Pastebin URL (ENCRYPT default)', () => {
+    expect(detectAction(`{"${CIPHER_PREFIX}":"abc","src":"pastebin.com/abc"}`, EditorAction.ENCRYPT_PASTEBIN)).toBe(EditorAction.DECRYPT)
   })
 })
 
@@ -91,24 +95,26 @@ describe('isPastebinLink (ActionBar conditional visibility)', () => {
 })
 
 // ---------------------------------------------------------------------------
-// Open in SecureBin — initial action inference
+// "Open in Editor" (context menu) — initial action inference via detectAction
 // ---------------------------------------------------------------------------
 
-describe('Open in SecureBin — initial action inference', () => {
-  function inferInitialAction(text: string): EditorAction {
-    return text.trim().includes(CIPHER_PREFIX) ? EditorAction.DECRYPT : EditorAction.POST_PASTEBIN
-  }
+describe('Open in Editor — initial action inference', () => {
+  const def = EditorAction.POST_PASTEBIN
 
-  it('routes cipher text to DECRYPT', () => {
-    expect(inferInitialAction('C_TXT:iv:salt:ciphertext')).toBe(EditorAction.DECRYPT)
+  it('routes a ciphertext blob to DECRYPT', () => {
+    expect(detectAction(`{"${CIPHER_PREFIX}":"iv","IV":"x"}`, def)).toBe(EditorAction.DECRYPT)
   })
 
-  it('routes plain text to POST_PASTEBIN', () => {
-    expect(inferInitialAction('just some selected text')).toBe(EditorAction.POST_PASTEBIN)
+  it('routes plain text to the default action', () => {
+    expect(detectAction('just some selected text', def)).toBe(EditorAction.POST_PASTEBIN)
   })
 
-  it('handles whitespace-padded cipher text', () => {
-    expect(inferInitialAction('   C_TXT:data   ')).toBe(EditorAction.DECRYPT)
+  it('handles whitespace-padded ciphertext', () => {
+    expect(detectAction(`   {"${CIPHER_PREFIX}":"data"}   `, def)).toBe(EditorAction.DECRYPT)
+  })
+
+  it('routes prose mentioning C_TXT to the default action', () => {
+    expect(detectAction('C_TXT:iv:salt:ciphertext is the legacy shape', def)).toBe(EditorAction.POST_PASTEBIN)
   })
 })
 

@@ -20,36 +20,46 @@ export function isCiphertext(text: string): boolean {
   return trimmed.startsWith('{') && trimmed.includes(CIPHER_PREFIX)
 }
 
+// The whole text has to BE a paste link — pastebin.com/<id>, optionally
+// scheme/www/raw — not merely mention the domain somewhere in a sentence.
+const PASTEBIN_LINK_ONLY = /^(?:https?:\/\/)?(?:www\.)?pastebin\.com\/(?:raw\/)?\w+\/?$/i
+
 /**
- * Infers the most appropriate action based on text content and the user's
- * configured default action.
+ * The whole trimmed text is a securebin ciphertext or a Pastebin paste link,
+ * or null for anything else. This is deliberately strict — prose that merely
+ * mentions pastebin.com or C_TXT must never change the user's action.
+ */
+function detectContentAction(trimmed: string): EditorAction | null {
+  if (isCiphertext(trimmed)) return EditorAction.DECRYPT
+  // Open Paste covers encrypted pastes too — opening auto-detects a
+  // ciphertext and hands off to the decrypt flow
+  if (PASTEBIN_LINK_ONLY.test(trimmed)) return EditorAction.OPEN_PASTEBIN
+  return null
+}
+
+/**
+ * Infers the most appropriate action for a piece of text.
  *
- * - C_TXT prefix → always DECRYPT
- * - pastebin.com URL → OPEN_PASTEBIN (opening auto-detects an encrypted paste
- *   and hands off to the decrypt flow, so it covers both cases)
- * - plain text → returns defaultAction unchanged
+ * - securebin ciphertext blob → DECRYPT
+ * - a pastebin.com paste link → OPEN_PASTEBIN (opening auto-detects an
+ *   encrypted paste and hands off to the decrypt flow, so it covers both)
+ * - anything else → defaultAction unchanged
  */
 export function detectAction(text: string, defaultAction: EditorAction): EditorAction {
-  const trimmed = text.trim()
-
-  if (trimmed.includes(CIPHER_PREFIX)) {
-    return EditorAction.DECRYPT
-  }
-
-  // Match pastebin.com only when it appears as a whole domain, not as a
-  // substring of another hostname — neither "not-pastebin.com" (prefix) nor
-  // "pastebin.com.evil.com" / "pastebin.community" (suffix) should match.
-  if (/(?:^|[\s/:("'])pastebin\.com(?:[/\s:)"',]|$)/.test(trimmed)) {
-    return EditorAction.OPEN_PASTEBIN
-  }
-
-  return defaultAction
+  return detectContentAction(text.trim()) ?? defaultAction
 }
 
 // Actions that detectAction derives from the text itself rather than from the
 // user's default — the only ones auto-switching may enter or leave.
 const CONTENT_DETECTED_ACTIONS = new Set<EditorAction>([
   EditorAction.DECRYPT,
+  EditorAction.DECRYPT_PASTEBIN,
+  EditorAction.OPEN_PASTEBIN,
+])
+
+// Both are triggered by a Pastebin link — an explicit pick of one must not be
+// overridden by re-detection of the other while the text is still a link.
+const LINK_ACTIONS = new Set<EditorAction>([
   EditorAction.DECRYPT_PASTEBIN,
   EditorAction.OPEN_PASTEBIN,
 ])
@@ -61,28 +71,6 @@ const CONTENT_DETECTED_ACTIONS = new Set<EditorAction>([
  * matches — an explicit choice like "Encrypt Only" is never overridden while
  * the text stays plain.
  */
-// Both are triggered by a Pastebin link — an explicit pick of one must not be
-// overridden by re-detection of the other while the text is still a link.
-const LINK_ACTIONS = new Set<EditorAction>([
-  EditorAction.DECRYPT_PASTEBIN,
-  EditorAction.OPEN_PASTEBIN,
-])
-
-// On-change detection runs on every keystroke, so it must be much stricter
-// than detectAction (which classifies a context-menu selection once): the
-// whole text has to BE a paste link — not merely mention pastebin.com in a
-// sentence — before we take the action button away from the user.
-const PASTEBIN_LINK_ONLY = /^(?:https?:\/\/)?(?:www\.)?pastebin\.com\/(?:raw\/)?\w+\/?$/i
-
-/** The whole trimmed text is a securebin ciphertext or a Pastebin paste link. */
-function detectContentAction(trimmed: string): EditorAction | null {
-  if (isCiphertext(trimmed)) return EditorAction.DECRYPT
-  // Open Paste covers encrypted pastes too — opening auto-detects a
-  // ciphertext and hands off to the decrypt flow
-  if (PASTEBIN_LINK_ONLY.test(trimmed)) return EditorAction.OPEN_PASTEBIN
-  return null
-}
-
 export function detectActionOnChange(
   text: string,
   currentAction: EditorAction,

@@ -5,7 +5,6 @@ import { Copy, Check, Loader2, LogIn, Globe, EyeOff, Lock, Clock, Pencil, Send, 
 import { useStore, resolveTheme } from '@/lib/store'
 import { EditorAction, hasCustomApiKey } from '@/lib/constants'
 import { deletePastebin, extractPasteKey } from '@/lib/pastebin'
-import { emitPanelEvent } from '@/lib/panel-bus'
 import PageHeader from '@/components/common/PageHeader'
 import CopyBox from '@/components/common/CopyBox'
 import CodePreview from '@/components/common/CodePreview'
@@ -24,12 +23,11 @@ const CODE_BG_DARK = '#2c313c'
 export default function Result() {
   const { index } = useParams()
   const navigate = useNavigate()
-  const { history, removeFromHistory, settings, updateDraft } = useStore()
+  const { history, removeFromHistory, settings, updateDraft, setDecryptRequest } = useStore()
   const isDark = resolveTheme(settings.theme) === 'dark'
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState('')
-  const [shareCopied, setShareCopied] = useState(false)
   const [contentCopied, setContentCopied] = useState(false)
   const [postDropdownOpen, setPostDropdownOpen] = useState(false)
 
@@ -87,18 +85,9 @@ export default function Result() {
   }
 
   const handleDecrypt = () => {
-    const ciphertext = item.encText ?? ''
-    emitPanelEvent('securebin:load-for-decrypt', { ciphertext })
+    // Via the store, not an event — the editor isn't mounted yet
+    setDecryptRequest(item.encText ?? '')
     navigate('/home')
-  }
-
-  const handleCopyShareLink = async () => {
-    if (!hasPastebin || !item.key) return
-    const pasteKey = extractPasteKey(item.pastebinLink)
-    const shareLink = `https://securebin.org/view#key=${encodeURIComponent(item.key)}&paste=${pasteKey}`
-    await navigator.clipboard.writeText(shareLink)
-    setShareCopied(true)
-    setTimeout(() => setShareCopied(false), 2000)
   }
 
   // Load draft content into editor with the chosen action, then navigate to editor
@@ -212,22 +201,6 @@ export default function Result() {
 
         {/* Passkey */}
         {item.key && <CopyBox label="Passkey" value={item.key} masked />}
-
-        {/* Share link */}
-        {hasPastebin && item.key && (
-          <button
-            onClick={handleCopyShareLink}
-            className={cn(
-              'w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border text-sm font-medium transition-all',
-              shareCopied
-                ? 'border-success/30 bg-success/5 text-success'
-                : 'border-border text-text-secondary hover:bg-surface-hover',
-            )}
-          >
-            {shareCopied ? <Check size={14} /> : <Copy size={14} />}
-            {shareCopied ? 'Share link copied!' : 'Copy Share Link'}
-          </button>
-        )}
 
         {/* Actions */}
         <div className="pt-2 space-y-2">
