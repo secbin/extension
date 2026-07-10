@@ -226,7 +226,9 @@ try {
   await page2.goto('https://pastebin.com/', { waitUntil: 'networkidle2' })
   await page2.evaluate(pageHelpers)
 
-  const marker = 'context menu selection 8814'
+  // Prose that MENTIONS pastebin.com — must open as plain text, not as a
+  // paste link (regression: loose detection flipped the action to Open Paste)
+  const marker = 'context menu selection 8814 — mentioning pastebin.com in a note'
   const st = await injectAndSend('https://pastebin.com/', { type: 'SB_OPEN', pendingText: marker })
   check('set-text SB_OPEN delivered to fresh injection', !st.error, st.error)
   const textShown = await page2.evaluate(async m => {
@@ -235,6 +237,13 @@ try {
   }, marker)
   await shot(page2, '3-open-in-editor')
   check('pending text appears in the editor (event survived the mount race)', textShown)
+
+  const proseLabel = await page2.evaluate(() => window.__sb.waitActionLabel('Post to Pastebin'))
+  check(
+    'prose mentioning pastebin.com opens as plain text, not Open Paste',
+    proseLabel === true,
+    proseLabel === true ? '' : `label: "${proseLabel}"`,
+  )
 
   // ── 3. Decrypt flow: paste ciphertext → Decrypt button → decrypted view ───
   const secret = 'attack at dawn — securebin ui verification'
