@@ -4,7 +4,7 @@ import { useStore } from '@/lib/store'
 import { encrypt, decrypt as decryptText } from '@/lib/crypto'
 import { postPastebin, getPastebin } from '@/lib/pastebin'
 import { EditorAction } from '@/lib/constants'
-import { detectAction } from '@/lib/editor-utils'
+import { detectAction, isCiphertext } from '@/lib/editor-utils'
 import { panelBus } from '@/lib/panel-bus'
 import TextEditor from '@/components/editor/TextEditor'
 import ActionBar from '@/components/editor/ActionBar'
@@ -158,10 +158,17 @@ export default function Editor() {
           navigate('/decrypted')
         } else if (action === EditorAction.OPEN_PASTEBIN) {
           const pasteText = await getPastebin(plaintext)
-          updateDraft({
-            plaintext: pasteText,
-            action: detectAction(pasteText, settings.default_action),
-          })
+          if (isCiphertext(pasteText)) {
+            // Encrypted paste — load the ciphertext and go straight to the
+            // passkey prompt; confirming lands on the decrypted view
+            updateDraft({ plaintext: pasteText, action: EditorAction.DECRYPT })
+            setDecDialogOpen(true)
+          } else {
+            updateDraft({
+              plaintext: pasteText,
+              action: detectAction(pasteText, settings.default_action),
+            })
+          }
         }
       } catch (err) {
         addToHistory({

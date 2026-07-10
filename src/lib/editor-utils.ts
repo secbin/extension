@@ -12,11 +12,21 @@ export function isEncryptionAction(action: EditorAction): boolean {
 }
 
 /**
+ * True when the text is a securebin ciphertext — the JSON blob produced by
+ * encrypt() — rather than prose that merely mentions the C_TXT marker.
+ */
+export function isCiphertext(text: string): boolean {
+  const trimmed = text.trim()
+  return trimmed.startsWith('{') && trimmed.includes(CIPHER_PREFIX)
+}
+
+/**
  * Infers the most appropriate action based on text content and the user's
  * configured default action.
  *
  * - C_TXT prefix → always DECRYPT
- * - pastebin.com URL → DECRYPT_PASTEBIN if default is an encryption action, else OPEN_PASTEBIN
+ * - pastebin.com URL → OPEN_PASTEBIN (opening auto-detects an encrypted paste
+ *   and hands off to the decrypt flow, so it covers both cases)
  * - plain text → returns defaultAction unchanged
  */
 export function detectAction(text: string, defaultAction: EditorAction): EditorAction {
@@ -30,7 +40,7 @@ export function detectAction(text: string, defaultAction: EditorAction): EditorA
   // substring of another hostname — neither "not-pastebin.com" (prefix) nor
   // "pastebin.com.evil.com" / "pastebin.community" (suffix) should match.
   if (/(?:^|[\s/:("'])pastebin\.com(?:[/\s:)"',]|$)/.test(trimmed)) {
-    return isEncryptionAction(defaultAction) ? EditorAction.DECRYPT_PASTEBIN : EditorAction.OPEN_PASTEBIN
+    return EditorAction.OPEN_PASTEBIN
   }
 
   return defaultAction
@@ -65,13 +75,11 @@ const LINK_ACTIONS = new Set<EditorAction>([
 const PASTEBIN_LINK_ONLY = /^(?:https?:\/\/)?(?:www\.)?pastebin\.com\/(?:raw\/)?\w+\/?$/i
 
 /** The whole trimmed text is a securebin ciphertext or a Pastebin paste link. */
-function detectContentAction(trimmed: string, defaultAction: EditorAction): EditorAction | null {
-  // Ciphertexts are the JSON blob produced by encrypt() — require the shape,
-  // not just the C_TXT marker somewhere in prose
-  if (trimmed.startsWith('{') && trimmed.includes(CIPHER_PREFIX)) return EditorAction.DECRYPT
-  if (PASTEBIN_LINK_ONLY.test(trimmed)) {
-    return isEncryptionAction(defaultAction) ? EditorAction.DECRYPT_PASTEBIN : EditorAction.OPEN_PASTEBIN
-  }
+function detectContentAction(trimmed: string): EditorAction | null {
+  if (isCiphertext(trimmed)) return EditorAction.DECRYPT
+  // Open Paste covers encrypted pastes too — opening auto-detects a
+  // ciphertext and hands off to the decrypt flow
+  if (PASTEBIN_LINK_ONLY.test(trimmed)) return EditorAction.OPEN_PASTEBIN
   return null
 }
 
@@ -80,7 +88,7 @@ export function detectActionOnChange(
   currentAction: EditorAction,
   defaultAction: EditorAction,
 ): EditorAction | undefined {
-  const detected = detectContentAction(text.trim(), defaultAction)
+  const detected = detectContentAction(text.trim())
   if (detected !== null) {
     if (detected === currentAction) return undefined
     if (LINK_ACTIONS.has(detected) && LINK_ACTIONS.has(currentAction)) return undefined

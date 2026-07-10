@@ -39,11 +39,11 @@ describe('Pastebin link detection via detectAction', () => {
     })
   })
 
-  describe('ENCRYPT_PASTEBIN default → DECRYPT_PASTEBIN for Pastebin URLs', () => {
+  describe('ENCRYPT_PASTEBIN default → OPEN_PASTEBIN for Pastebin URLs (open hands off to decrypt)', () => {
     const def = EditorAction.ENCRYPT_PASTEBIN
     pastebinUrls.forEach((url) => {
-      it(`detects DECRYPT_PASTEBIN for: "${url.trim()}"`, () => {
-        expect(detectAction(url, def)).toBe(EditorAction.DECRYPT_PASTEBIN)
+      it(`detects OPEN_PASTEBIN for: "${url.trim()}"`, () => {
+        expect(detectAction(url, def)).toBe(EditorAction.OPEN_PASTEBIN)
       })
     })
   })
@@ -113,10 +113,12 @@ describe('Open in SecureBin — initial action inference', () => {
 })
 
 // ---------------------------------------------------------------------------
-// isEncryptionAction drives Pastebin link routing
+// Pastebin links always route to OPEN_PASTEBIN — opening auto-detects an
+// encrypted paste and hands off to the decrypt flow, so the user's default
+// action no longer changes how a link is handled
 // ---------------------------------------------------------------------------
 
-describe('isEncryptionAction drives DECRYPT_PASTEBIN vs OPEN_PASTEBIN', () => {
+describe('Pastebin links route to OPEN_PASTEBIN regardless of default action', () => {
   const url = 'pastebin.com/abc123'
 
   it('POST default → OPEN_PASTEBIN for Pastebin links', () => {
@@ -124,13 +126,13 @@ describe('isEncryptionAction drives DECRYPT_PASTEBIN vs OPEN_PASTEBIN', () => {
     expect(detectAction(url, EditorAction.POST_PASTEBIN)).toBe(EditorAction.OPEN_PASTEBIN)
   })
 
-  it('ENCRYPT default → DECRYPT_PASTEBIN for Pastebin links', () => {
+  it('ENCRYPT default → OPEN_PASTEBIN for Pastebin links', () => {
     expect(isEncryptionAction(EditorAction.ENCRYPT)).toBe(true)
-    expect(detectAction(url, EditorAction.ENCRYPT)).toBe(EditorAction.DECRYPT_PASTEBIN)
+    expect(detectAction(url, EditorAction.ENCRYPT)).toBe(EditorAction.OPEN_PASTEBIN)
   })
 
-  it('ENCRYPT_PASTEBIN default → DECRYPT_PASTEBIN for Pastebin links', () => {
+  it('ENCRYPT_PASTEBIN default → OPEN_PASTEBIN for Pastebin links', () => {
     expect(isEncryptionAction(EditorAction.ENCRYPT_PASTEBIN)).toBe(true)
-    expect(detectAction(url, EditorAction.ENCRYPT_PASTEBIN)).toBe(EditorAction.DECRYPT_PASTEBIN)
+    expect(detectAction(url, EditorAction.ENCRYPT_PASTEBIN)).toBe(EditorAction.OPEN_PASTEBIN)
   })
 })

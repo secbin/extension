@@ -11,12 +11,18 @@
  *   3. Decrypt: pasting a ciphertext must flip the action button to
  *      "Decrypt"; confirming the passkey must open the decrypted-content view
  *      with the plaintext.
+ *   4. Paste link (needs PASTEBIN_API_KEY): pasting a pastebin.com link must
+ *      default the button to "Open Paste"; opening an encrypted paste must
+ *      hand off to the passkey prompt and land on the decrypted view; opening
+ *      a plain paste must load its content into the editor.
  *
  * Requires:
  *   npm run build
  *   CHROME_PATH=<Chrome for Testing binary> (branded Chrome ≥137 ignores
  *     --load-extension; npx @puppeteer/browsers install chrome@stable)
  * Optional:
+ *   PASTEBIN_API_KEY=<key> to run the live paste-link checks (posts two
+ *     unlisted pastes)
  *   UI_SHOTS_DIR=<dir> to save screenshots of each verified state
  * Run:
  *   npm run test:ui
@@ -30,6 +36,7 @@ import fs from 'node:fs'
 const DIST = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../dist')
 const CHROME = process.env.CHROME_PATH
 const SHOTS = process.env.UI_SHOTS_DIR ?? ''
+const API_KEY = process.env.PASTEBIN_API_KEY ?? ''
 
 if (!CHROME || !fs.existsSync(CHROME)) {
   console.error('Set CHROME_PATH to a Chrome for Testing binary (npx @puppeteer/browsers install chrome@stable)')
@@ -127,6 +134,20 @@ const pageHelpers = `
       // Primary ActionBar button = the rounded-left half of the split button
       const b = this.buttons().find(b => b.className.includes('rounded-l-full'))
       return b ? b.textContent.trim() : ''
+    },
+    async waitActionLabel(label, timeoutMs = 4000) {
+      const start = Date.now()
+      while (Date.now() - start < timeoutMs) {
+        if (this.actionLabel() === label) return true
+        await new Promise(r => setTimeout(r, 100))
+      }
+      return this.actionLabel()
+    },
+    clickAction() {
+      const b = this.buttons().find(b => b.className.includes('rounded-l-full'))
+      if (!b) return false
+      b.click()
+      return true
     },
   }
 `
@@ -306,6 +327,77 @@ try {
   }, secret)
   await shot(page2, '6-open-in-editor-roundtrip')
   check('Open in Editor loads the plaintext back into the editor', roundTripped)
+
+  // ── 4. Paste link → Open Paste → auto-decrypt handoff (needs API key) ─────
+  if (API_KEY) {
+    const postViaSW = (code) => sw.evaluate(async (apiKey, pasteCode) => {
+      const body = new URLSearchParams({
+        api_dev_key: apiKey, api_paste_code: pasteCode, api_option: 'paste', api_paste_private: '1',
+      })
+      const r = await fetch('https://pastebin.com/api/api_post.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: body.toString(),
+      })
+      return (await r.text()).trim()
+    }, API_KEY, code)
+    const isPasteUrl = u => /^https:\/\/pastebin\.com\//.test(u)
+
+    // Encrypted paste: link → Open Paste → passkey prompt → decrypted view
+    const linkSecret = 'link secret — securebin ui verification'
+    const linkPass = 'link-verify-pass'
+    const encUrl = await postViaSW(await makeCiphertext(linkSecret, linkPass))
+    check('encrypted paste posted for the link test', isPasteUrl(encUrl), encUrl.slice(0, 80))
+
+    if (isPasteUrl(encUrl)) {
+      await page2.evaluate(u => window.__sb.setTextarea(u), encUrl)
+      const openLabel = await page2.evaluate(() => window.__sb.waitActionLabel('Open Paste'))
+      check('pasted link defaults the button to Open Paste', openLabel === true, openLabel === true ? '' : `label: "${openLabel}"`)
+
+      await page2.evaluate(() => window.__sb.clickAction())
+      const autoDialog = await page2.evaluate(() => window.__sb.waitForText('Decryption Key', 10000))
+      await shot(page2, '7-open-link-auto-decrypt')
+      check('opening an encrypted paste auto-opens the passkey prompt', autoDialog)
+
+      await page2.evaluate(k => window.__sb.setInput('decryption key', k), linkPass)
+      await page2.evaluate(() => {
+        const buttons = window.__sb.buttons().filter(b => b.textContent.trim() === 'Decrypt')
+        buttons[buttons.length - 1]?.click()
+      })
+      const linkDecrypted = await page2.evaluate(async s => {
+        const ok = await window.__sb.waitForText('Decrypted successfully')
+        return ok && window.__sb.text().includes(s)
+      }, linkSecret)
+      await shot(page2, '8-link-decrypted')
+      check('link → open → decrypt lands on the decrypted view', linkDecrypted)
+      // Back to the editor for the plain-paste check
+      await page2.evaluate(() => window.__sb.clickButton('Open in Editor'))
+    }
+
+    // Plain paste: link → Open Paste → content loads into the editor
+    const plainBody = 'plain paste body 4471'
+    const plainUrl = await postViaSW(plainBody)
+    check('plain paste posted for the link test', isPasteUrl(plainUrl), plainUrl.slice(0, 80))
+
+    if (isPasteUrl(plainUrl)) {
+      await page2.evaluate(u => window.__sb.setTextarea(u), plainUrl)
+      await page2.evaluate(() => window.__sb.waitActionLabel('Open Paste'))
+      await page2.evaluate(() => window.__sb.clickAction())
+      const opened = await page2.evaluate(async b => {
+        const start = Date.now()
+        while (Date.now() - start < 10000) {
+          const ta = window.__sb.root()?.querySelector('textarea')
+          if (ta && ta.value.trim() === b) return true
+          await new Promise(r => setTimeout(r, 100))
+        }
+        return false
+      }, plainBody)
+      await shot(page2, '9-open-plain-paste')
+      check('opening a plain paste loads its content into the editor', opened)
+    }
+  } else {
+    console.log('⏭  PASTEBIN_API_KEY not set — skipping the live paste-link checks')
+  }
 } finally {
   await browser.close()
 }

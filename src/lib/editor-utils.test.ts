@@ -5,6 +5,7 @@ import {
   getMaxLength,
   isWithinLimit,
   isEncryptionAction,
+  isCiphertext,
 } from './editor-utils'
 import {
   EditorAction,
@@ -142,8 +143,8 @@ describe('detectAction with ENCRYPT_PASTEBIN default', () => {
     expect(detectAction('hello world', def)).toBe(EditorAction.ENCRYPT_PASTEBIN)
   })
 
-  it('detects DECRYPT_PASTEBIN for a pastebin.com link', () => {
-    expect(detectAction('https://pastebin.com/abc123', def)).toBe(EditorAction.DECRYPT_PASTEBIN)
+  it('detects OPEN_PASTEBIN for a pastebin.com link (open hands off to decrypt for encrypted pastes)', () => {
+    expect(detectAction('https://pastebin.com/abc123', def)).toBe(EditorAction.OPEN_PASTEBIN)
   })
 
   it('detects DECRYPT for cipher prefix regardless of default', () => {
@@ -162,8 +163,28 @@ describe('detectAction with ENCRYPT default', () => {
     expect(detectAction('hello world', def)).toBe(EditorAction.ENCRYPT)
   })
 
-  it('detects DECRYPT_PASTEBIN for a pastebin.com link (encryption action default)', () => {
-    expect(detectAction('https://pastebin.com/abc123', def)).toBe(EditorAction.DECRYPT_PASTEBIN)
+  it('detects OPEN_PASTEBIN for a pastebin.com link (encryption action default)', () => {
+    expect(detectAction('https://pastebin.com/abc123', def)).toBe(EditorAction.OPEN_PASTEBIN)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// isCiphertext
+// ---------------------------------------------------------------------------
+
+describe('isCiphertext', () => {
+  it('accepts the JSON blob produced by encrypt()', () => {
+    expect(isCiphertext('{"C_TXT":"abc","IV":"def","Mode":"AES-GCM","Tag":"ghi"}')).toBe(true)
+    expect(isCiphertext('  {"C_TXT":"abc"}  ')).toBe(true)
+  })
+
+  it('rejects prose that merely mentions C_TXT', () => {
+    expect(isCiphertext('the C_TXT field holds the ciphertext')).toBe(false)
+  })
+
+  it('rejects plain text and JSON without the marker', () => {
+    expect(isCiphertext('hello world')).toBe(false)
+    expect(isCiphertext('{"foo":"bar"}')).toBe(false)
   })
 })
 
@@ -187,8 +208,8 @@ describe('detectActionOnChange', () => {
     expect(detectActionOnChange('https://pastebin.com/abc123', EditorAction.POST_PASTEBIN, def)).toBe(EditorAction.OPEN_PASTEBIN)
   })
 
-  it('switches to DECRYPT_PASTEBIN when a pastebin link is pasted (encryption default)', () => {
-    expect(detectActionOnChange('https://pastebin.com/abc123', EditorAction.ENCRYPT_PASTEBIN, EditorAction.ENCRYPT_PASTEBIN)).toBe(EditorAction.DECRYPT_PASTEBIN)
+  it('switches to OPEN_PASTEBIN when a pastebin link is pasted (encryption default)', () => {
+    expect(detectActionOnChange('https://pastebin.com/abc123', EditorAction.ENCRYPT_PASTEBIN, EditorAction.ENCRYPT_PASTEBIN)).toBe(EditorAction.OPEN_PASTEBIN)
   })
 
   it('switches back to the default when the ciphertext is removed', () => {
