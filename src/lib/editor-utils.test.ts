@@ -94,6 +94,7 @@ describe('getMaxLength', () => {
 
 describe('detectAction with POST_PASTEBIN default', () => {
   const def = EditorAction.POST_PASTEBIN
+  const cipher = '{"C_TXT":"abc","IV":"def","Mode":"AES-GCM","Tag":"ghi"}'
 
   it('returns default for plain text', () => {
     expect(detectAction('hello world', def)).toBe(EditorAction.POST_PASTEBIN)
@@ -107,12 +108,26 @@ describe('detectAction with POST_PASTEBIN default', () => {
     expect(detectAction('pastebin.com/xyz', def)).toBe(EditorAction.OPEN_PASTEBIN)
   })
 
-  it('detects DECRYPT for text containing the cipher prefix', () => {
-    expect(detectAction('C_TXT:abc:def:ghi', def)).toBe(EditorAction.DECRYPT)
+  it('detects DECRYPT for a ciphertext blob', () => {
+    expect(detectAction(cipher, def)).toBe(EditorAction.DECRYPT)
   })
 
-  it('cipher prefix takes priority over pastebin URL', () => {
-    expect(detectAction('C_TXT pastebin.com/abc', def)).toBe(EditorAction.DECRYPT)
+  it('ciphertext takes priority over a pastebin URL inside it', () => {
+    expect(detectAction('{"C_TXT":"abc","src":"pastebin.com/abc"}', def)).toBe(EditorAction.DECRYPT)
+  })
+
+  it('does NOT match prose that merely mentions pastebin.com', () => {
+    // The exact failure the user hit: selected release notes mentioning the
+    // domain flipped the action to Open Paste
+    expect(detectAction('just mentioning pastebin.com in a note never changes your selected action', def)).toBe(EditorAction.POST_PASTEBIN)
+  })
+
+  it('does NOT match prose with an embedded pastebin link', () => {
+    expect(detectAction('Check this out: pastebin.com/abc123 for more', def)).toBe(EditorAction.POST_PASTEBIN)
+  })
+
+  it('does NOT match prose mentioning C_TXT', () => {
+    expect(detectAction('the C_TXT field holds the ciphertext', def)).toBe(EditorAction.POST_PASTEBIN)
   })
 
   it('does NOT match not-pastebin.com', () => {
@@ -127,8 +142,8 @@ describe('detectAction with POST_PASTEBIN default', () => {
     expect(detectAction('https://pastebin.community/fake', def)).toBe(EditorAction.POST_PASTEBIN)
   })
 
-  it('matches a bare pastebin.com domain with no path', () => {
-    expect(detectAction('pastebin.com', def)).toBe(EditorAction.OPEN_PASTEBIN)
+  it('does NOT match the bare domain with no paste id', () => {
+    expect(detectAction('pastebin.com', def)).toBe(EditorAction.POST_PASTEBIN)
   })
 })
 
@@ -147,8 +162,8 @@ describe('detectAction with ENCRYPT_PASTEBIN default', () => {
     expect(detectAction('https://pastebin.com/abc123', def)).toBe(EditorAction.OPEN_PASTEBIN)
   })
 
-  it('detects DECRYPT for cipher prefix regardless of default', () => {
-    expect(detectAction('C_TXT:abc:def:ghi', def)).toBe(EditorAction.DECRYPT)
+  it('detects DECRYPT for a ciphertext blob regardless of default', () => {
+    expect(detectAction('{"C_TXT":"abc","IV":"def","Mode":"AES-GCM","Tag":"ghi"}', def)).toBe(EditorAction.DECRYPT)
   })
 })
 

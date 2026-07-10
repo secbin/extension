@@ -328,7 +328,66 @@ try {
   await shot(page2, '6-open-in-editor-roundtrip')
   check('Open in Editor loads the plaintext back into the editor', roundTripped)
 
-  // ── 4. Paste link → Open Paste → auto-decrypt handoff (needs API key) ─────
+  // ── 4. Encrypt Only → history result → Decrypt → decrypted view ───────────
+  // Covers the Result-page Decrypt button, which must load the ciphertext AND
+  // open the passkey prompt (it used to fire an event before the editor
+  // mounted, dropping the request entirely).
+  const histPass = 'history-verify-pass'
+  await page2.evaluate(() => {
+    // Open the action dropdown (rounded-right half of the split button)
+    window.__sb.buttons().find(b => b.className.includes('rounded-r-full'))?.click()
+  })
+  const encryptOnly = await page2.evaluate(async () => {
+    const start = Date.now()
+    while (Date.now() - start < 4000) {
+      if (window.__sb.clickButton('Encrypt Only')) return true
+      await new Promise(r => setTimeout(r, 100))
+    }
+    return false
+  })
+  check('Encrypt Only picked from the dropdown', encryptOnly)
+
+  const encDialog = await page2.evaluate(() => window.__sb.waitForText('Encryption Passkey'))
+  check('encryption passkey dialog opens', encDialog)
+  await page2.evaluate(k => window.__sb.setInput('passkey', k), histPass)
+  await page2.evaluate(() => {
+    const buttons = window.__sb.buttons().filter(b => b.textContent.trim() === 'Encrypt')
+    buttons[buttons.length - 1]?.click()
+  })
+  const onResult = await page2.evaluate(() => window.__sb.waitForText('Ciphertext'))
+  check('encryption lands on the result page', onResult)
+
+  const shareLinkGone = await page2.evaluate(() => !window.__sb.text().includes('Copy Share Link'))
+  check('Copy Share Link button is removed', shareLinkGone)
+
+  await page2.evaluate(() => window.__sb.clickButton('Decrypt'))
+  const resultDecryptDialog = await page2.evaluate(() => window.__sb.waitForText('Decryption Key'))
+  await shot(page2, '6b-history-decrypt-dialog')
+  check('Decrypt on a history item opens the passkey prompt', resultDecryptDialog)
+
+  await page2.evaluate(k => window.__sb.setInput('decryption key', k), histPass)
+  await page2.evaluate(() => {
+    const buttons = window.__sb.buttons().filter(b => b.textContent.trim() === 'Decrypt')
+    buttons[buttons.length - 1]?.click()
+  })
+  const historyDecrypted = await page2.evaluate(async s => {
+    const ok = await window.__sb.waitForText('Decrypted successfully')
+    return ok && window.__sb.text().includes(s)
+  }, secret)
+  await shot(page2, '6c-history-decrypted')
+  check('history item decrypts to the decrypted view', historyDecrypted)
+
+  // Back to the editor for the sections below
+  await page2.evaluate(() => window.__sb.clickButton('Open in Editor'))
+  await page2.evaluate(async () => {
+    const start = Date.now()
+    while (Date.now() - start < 4000) {
+      if (window.__sb.root()?.querySelector('textarea')) return
+      await new Promise(r => setTimeout(r, 100))
+    }
+  })
+
+  // ── 5. Paste link → Open Paste → auto-decrypt handoff (needs API key) ─────
   if (API_KEY) {
     const postViaSW = (code) => sw.evaluate(async (apiKey, pasteCode) => {
       const body = new URLSearchParams({

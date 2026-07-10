@@ -5,7 +5,6 @@ import { encrypt, decrypt as decryptText } from '@/lib/crypto'
 import { postPastebin, getPastebin } from '@/lib/pastebin'
 import { EditorAction } from '@/lib/constants'
 import { detectAction, isCiphertext } from '@/lib/editor-utils'
-import { panelBus } from '@/lib/panel-bus'
 import TextEditor from '@/components/editor/TextEditor'
 import ActionBar from '@/components/editor/ActionBar'
 import PasteMetadata from '@/components/editor/PasteMetadata'
@@ -14,25 +13,22 @@ import DecryptDialog from '@/components/dialog/DecryptDialog'
 
 export default function Editor() {
   const navigate = useNavigate()
-  const { draft, settings, updateDraft, resetDraft, addToHistory, setDecryptResult } = useStore()
+  const { draft, settings, updateDraft, resetDraft, addToHistory, setDecryptResult, decryptRequest, setDecryptRequest } = useStore()
   const [encDialogOpen, setEncDialogOpen] = useState(false)
   const [decDialogOpen, setDecDialogOpen] = useState(false)
   const [loading, setLoading] = useState(false)
 
   // Context-menu text ("Open in Editor") is handled centrally in App.tsx —
-  // via chrome.storage.session in popup mode and window events when injected.
+  // via chrome.storage.session in popup mode and panelBus events when injected.
 
+  // Decrypt requested from a history item / result page: load the ciphertext
+  // and go straight to the passkey prompt
   useEffect(() => {
-    const handler = (e: Event) => {
-      const { ciphertext } = (e as CustomEvent).detail
-      updateDraft({
-        plaintext: ciphertext,
-        action: EditorAction.DECRYPT,
-      })
-    }
-    panelBus.addEventListener('securebin:load-for-decrypt', handler)
-    return () => panelBus.removeEventListener('securebin:load-for-decrypt', handler)
-  }, [updateDraft])
+    if (!decryptRequest) return
+    updateDraft({ plaintext: decryptRequest, action: EditorAction.DECRYPT })
+    setDecryptRequest(null)
+    setDecDialogOpen(true)
+  }, [decryptRequest, updateDraft, setDecryptRequest])
 
 
   const handleAction = useCallback((overrideAction?: EditorAction) => {
