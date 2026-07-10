@@ -2,6 +2,7 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { MemoryRouter } from 'react-router-dom';
 import App from '../App';
+import { panelBus, emitPanelEvent } from '../lib/panel-bus';
 import styles from '../index.css?inline';
 
 // Injected on demand via chrome.scripting.executeScript (activeTab gesture),
@@ -175,26 +176,48 @@ ReactDOM.createRoot(appRoot).render(
   </MemoryRouter>
 );
 
+// The panel is injected at gesture time, so background messages (quick-post
+// loading, pending text) usually arrive before React has mounted App's
+// listeners. Buffer app-bound events until App signals readiness. All of this
+// rides panelBus, not window events — see panel-bus.ts for why.
+let appReady = false;
+const pendingAppEvents: Array<{ name: string; detail?: unknown }> = [];
+function dispatchToApp(name: string, detail?: unknown) {
+  if (appReady) emitPanelEvent(name, detail);
+  else pendingAppEvents.push({ name, detail });
+}
+panelBus.addEventListener('securebin:app-ready', () => {
+  appReady = true;
+  while (pendingAppEvents.length) {
+    const { name, detail } = pendingAppEvents.shift()!;
+    emitPanelEvent(name, detail);
+  }
+});
+
+function hidePanel() {
+  panel.style.display = 'none';
+  // Let the app drop sensitive transient state (the decrypted-content view)
+  emitPanelEvent('securebin:panel-hidden');
+}
+
 // Panel show/hide + context menu pending text
 chrome.runtime.onMessage.addListener(message => {
   if (message.type === 'SB_TOGGLE') {
     // Toolbar icon — toggle open/closed
-    const isOpening = panel.style.display === 'none';
-    panel.style.display = isOpening ? 'block' : 'none';
+    if (panel.style.display === 'none') panel.style.display = 'block';
+    else hidePanel();
   } else if (message.type === 'SB_OPEN') {
     panel.style.display = 'block';
     if (message.quickPostLoading) {
-      window.dispatchEvent(new CustomEvent('securebin:quick-post-loading'));
+      dispatchToApp('securebin:quick-post-loading');
     } else if (message.pendingText) {
-      window.dispatchEvent(new CustomEvent('securebin:set-text', { detail: message.pendingText }));
+      dispatchToApp('securebin:set-text', message.pendingText);
     }
   } else if (message.type === 'SB_QUICK_POST_RESULT') {
-    window.dispatchEvent(new CustomEvent('securebin:quick-post-result', { detail: message.payload }));
+    dispatchToApp('securebin:quick-post-result', message.payload);
   }
 });
 
-window.addEventListener('securebin:close', () => {
-  panel.style.display = 'none';
-});
+panelBus.addEventListener('securebin:close', hidePanel);
 
 } // end single-injection guard

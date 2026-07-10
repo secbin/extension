@@ -2,6 +2,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { PenLine, Files, Settings, X } from 'lucide-react'
 import { cn } from '@/lib/cn'
 import { useStore, resolveTheme } from '@/lib/store'
+import { emitPanelEvent } from '@/lib/panel-bus'
 import { isInjected } from '../App'
 import SecurebinLogo from './common/SecurebinLogo'
 
@@ -51,7 +52,7 @@ export default function NavBar() {
         })}
         {isInjected() && (
           <button
-            onClick={() => window.dispatchEvent(new CustomEvent('securebin:close'))}
+            onClick={() => emitPanelEvent('securebin:close')}
             className="p-2 rounded-lg text-text-muted hover:text-text-secondary hover:bg-surface-hover transition-all duration-150"
             title="Close"
           >

@@ -4,7 +4,8 @@ import { useStore } from '@/lib/store'
 import { encrypt, decrypt as decryptText } from '@/lib/crypto'
 import { postPastebin, getPastebin } from '@/lib/pastebin'
 import { EditorAction } from '@/lib/constants'
-import { detectAction } from '@/lib/editor-utils'
+import { detectAction, isCiphertext } from '@/lib/editor-utils'
+import { panelBus } from '@/lib/panel-bus'
 import TextEditor from '@/components/editor/TextEditor'
 import ActionBar from '@/components/editor/ActionBar'
 import PasteMetadata from '@/components/editor/PasteMetadata'
@@ -13,7 +14,7 @@ import DecryptDialog from '@/components/dialog/DecryptDialog'
 
 export default function Editor() {
   const navigate = useNavigate()
-  const { draft, settings, updateDraft, resetDraft, addToHistory } = useStore()
+  const { draft, settings, updateDraft, resetDraft, addToHistory, setDecryptResult } = useStore()
   const [encDialogOpen, setEncDialogOpen] = useState(false)
   const [decDialogOpen, setDecDialogOpen] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -29,8 +30,8 @@ export default function Editor() {
         action: EditorAction.DECRYPT,
       })
     }
-    window.addEventListener('securebin:load-for-decrypt', handler)
-    return () => window.removeEventListener('securebin:load-for-decrypt', handler)
+    panelBus.addEventListener('securebin:load-for-decrypt', handler)
+    return () => panelBus.removeEventListener('securebin:load-for-decrypt', handler)
   }, [updateDraft])
 
 
@@ -146,23 +147,28 @@ export default function Editor() {
           navigate('/result')
         } else if (action === EditorAction.DECRYPT && passkey) {
           const decrypted = await decryptText(plaintext, passkey)
-          updateDraft({
-            plaintext: decrypted,
-            action: detectAction(decrypted, settings.default_action),
-          })
+          // Show the plaintext on its own page; the ciphertext stays in the
+          // editor so nothing is lost if the user navigates back.
+          setDecryptResult({ plaintext: decrypted, date: Date.now() })
+          navigate('/decrypted')
         } else if (action === EditorAction.DECRYPT_PASTEBIN && passkey) {
           const pasteText = await getPastebin(plaintext)
           const decrypted = await decryptText(pasteText, passkey)
-          updateDraft({
-            plaintext: decrypted,
-            action: detectAction(decrypted, settings.default_action),
-          })
+          setDecryptResult({ plaintext: decrypted, date: Date.now() })
+          navigate('/decrypted')
         } else if (action === EditorAction.OPEN_PASTEBIN) {
           const pasteText = await getPastebin(plaintext)
-          updateDraft({
-            plaintext: pasteText,
-            action: detectAction(pasteText, settings.default_action),
-          })
+          if (isCiphertext(pasteText)) {
+            // Encrypted paste — load the ciphertext and go straight to the
+            // passkey prompt; confirming lands on the decrypted view
+            updateDraft({ plaintext: pasteText, action: EditorAction.DECRYPT })
+            setDecDialogOpen(true)
+          } else {
+            updateDraft({
+              plaintext: pasteText,
+              action: detectAction(pasteText, settings.default_action),
+            })
+          }
         }
       } catch (err) {
         addToHistory({
@@ -181,7 +187,7 @@ export default function Editor() {
         setLoading(false)
       }
     },
-    [draft, settings, addToHistory, resetDraft, updateDraft, navigate],
+    [draft, settings, addToHistory, resetDraft, updateDraft, setDecryptResult, navigate],
   )
 
   return (

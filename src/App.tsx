@@ -1,6 +1,7 @@
-import { useEffect, useCallback } from 'react'
+import { useEffect, useCallback, useRef } from 'react'
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import { useStore, resolveTheme, type HistoryItem } from './lib/store'
+import { panelBus, emitPanelEvent } from './lib/panel-bus'
 import { EditorAction } from './lib/constants'
 import { detectAction } from './lib/editor-utils'
 import { detectLanguage } from './lib/detect-language'
@@ -17,6 +18,7 @@ import PastebinAccount from './routes/PastebinAccount'
 import CloudPasteDetail from './routes/CloudPasteDetail'
 import PasteNameConfig from './routes/PasteNameConfig'
 import QuickPostLoading from './routes/QuickPostLoading'
+import DecryptResult from './routes/DecryptResult'
 
 // Evaluated at call-time (not module load) so content/index.tsx has set the
 // flag before any component renders, even though ES module imports hoist App
@@ -24,13 +26,16 @@ import QuickPostLoading from './routes/QuickPostLoading'
 export const isInjected = () => !!(window as any).__SECUREBIN_INJECTED__;
 
 // Routes we won't try to restore (transient pages)
-const NON_RESTORABLE_ROUTES = new Set(['/', '/home', '/result', '/quick-post-loading'])
+const NON_RESTORABLE_ROUTES = new Set(['/', '/home', '/result', '/quick-post-loading', '/decrypted'])
 
 export default function App() {
-  const { settings, initialized, initialize, addToHistory, updateDraft } = useStore()
+  const { settings, initialized, initialize, addToHistory, updateDraft, setDecryptResult } = useStore()
   const isDark = resolveTheme(settings.theme) === 'dark'
   const navigate = useNavigate()
   const location = useLocation()
+  // Current location for listeners that must not re-register on route change
+  const locationRef = useRef(location)
+  useEffect(() => { locationRef.current = location }, [location])
 
   useEffect(() => {
     initialize()
@@ -74,23 +79,45 @@ export default function App() {
   // Injected mode: event from content script
   useEffect(() => {
     const handler = (e: Event) => handleSetText((e as CustomEvent).detail ?? '')
-    window.addEventListener('securebin:set-text', handler)
-    return () => window.removeEventListener('securebin:set-text', handler)
+    panelBus.addEventListener('securebin:set-text', handler)
+    return () => panelBus.removeEventListener('securebin:set-text', handler)
   }, [handleSetText])
 
   // Quick-post: show loading overlay while background makes the API call
   useEffect(() => {
     const handler = () => navigate('/quick-post-loading', { replace: true })
-    window.addEventListener('securebin:quick-post-loading', handler)
-    return () => window.removeEventListener('securebin:quick-post-loading', handler)
+    panelBus.addEventListener('securebin:quick-post-loading', handler)
+    return () => panelBus.removeEventListener('securebin:quick-post-loading', handler)
   }, [navigate])
 
   // Quick-post result — injected mode
   useEffect(() => {
     const handler = (e: Event) => handleQuickPostResult((e as CustomEvent).detail)
-    window.addEventListener('securebin:quick-post-result', handler)
-    return () => window.removeEventListener('securebin:quick-post-result', handler)
+    panelBus.addEventListener('securebin:quick-post-result', handler)
+    return () => panelBus.removeEventListener('securebin:quick-post-result', handler)
   }, [handleQuickPostResult])
+
+  // Injected mode: the panel is only hidden, never unmounted, so drop the
+  // decrypted plaintext when it closes — reopening must not reveal it.
+  useEffect(() => {
+    const handler = () => {
+      setDecryptResult(null)
+      if (locationRef.current.pathname === '/decrypted') {
+        navigate('/home', { replace: true })
+      }
+    }
+    panelBus.addEventListener('securebin:panel-hidden', handler)
+    return () => panelBus.removeEventListener('securebin:panel-hidden', handler)
+  }, [setDecryptResult, navigate])
+
+  // Injected mode: the content script buffers app-bound events (quick-post
+  // loading, pending text) until this signal — declared after the listener
+  // effects above so they are registered before any buffered event replays.
+  useEffect(() => {
+    if (initialized && isInjected()) {
+      emitPanelEvent('securebin:app-ready')
+    }
+  }, [initialized])
 
   // Popup mode: read pending data from session after init. Injected mode gets
   // this via window events instead — content scripts can't read session storage.
@@ -174,6 +201,7 @@ export default function App() {
           <Route path="/cloud-paste" element={<CloudPasteDetail />} />
           <Route path="/paste-name" element={<PasteNameConfig />} />
           <Route path="/quick-post-loading" element={<QuickPostLoading />} />
+          <Route path="/decrypted" element={<DecryptResult />} />
         </Routes>
       </main>
     </div>

@@ -147,6 +147,8 @@ fabric.properties
 
 node_modules
 build
+# Chrome for Testing installed by the verify scripts
+.chrome/
 package-lock.json
 yarn.lock
 yarn.lock

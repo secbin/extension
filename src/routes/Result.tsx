@@ -5,6 +5,7 @@ import { Copy, Check, Loader2, LogIn, Globe, EyeOff, Lock, Clock, Pencil, Send, 
 import { useStore, resolveTheme } from '@/lib/store'
 import { EditorAction, hasCustomApiKey } from '@/lib/constants'
 import { deletePastebin, extractPasteKey } from '@/lib/pastebin'
+import { emitPanelEvent } from '@/lib/panel-bus'
 import PageHeader from '@/components/common/PageHeader'
 import CopyBox from '@/components/common/CopyBox'
 import CodePreview from '@/components/common/CodePreview'
@@ -87,7 +88,7 @@ export default function Result() {
 
   const handleDecrypt = () => {
     const ciphertext = item.encText ?? ''
-    window.dispatchEvent(new CustomEvent('securebin:load-for-decrypt', { detail: { ciphertext } }))
+    emitPanelEvent('securebin:load-for-decrypt', { ciphertext })
     navigate('/home')
   }
 

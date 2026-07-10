@@ -1,9 +1,11 @@
 import { describe, it, expect } from 'vitest'
 import {
   detectAction,
+  detectActionOnChange,
   getMaxLength,
   isWithinLimit,
   isEncryptionAction,
+  isCiphertext,
 } from './editor-utils'
 import {
   EditorAction,
@@ -141,8 +143,8 @@ describe('detectAction with ENCRYPT_PASTEBIN default', () => {
     expect(detectAction('hello world', def)).toBe(EditorAction.ENCRYPT_PASTEBIN)
   })
 
-  it('detects DECRYPT_PASTEBIN for a pastebin.com link', () => {
-    expect(detectAction('https://pastebin.com/abc123', def)).toBe(EditorAction.DECRYPT_PASTEBIN)
+  it('detects OPEN_PASTEBIN for a pastebin.com link (open hands off to decrypt for encrypted pastes)', () => {
+    expect(detectAction('https://pastebin.com/abc123', def)).toBe(EditorAction.OPEN_PASTEBIN)
   })
 
   it('detects DECRYPT for cipher prefix regardless of default', () => {
@@ -161,8 +163,108 @@ describe('detectAction with ENCRYPT default', () => {
     expect(detectAction('hello world', def)).toBe(EditorAction.ENCRYPT)
   })
 
-  it('detects DECRYPT_PASTEBIN for a pastebin.com link (encryption action default)', () => {
-    expect(detectAction('https://pastebin.com/abc123', def)).toBe(EditorAction.DECRYPT_PASTEBIN)
+  it('detects OPEN_PASTEBIN for a pastebin.com link (encryption action default)', () => {
+    expect(detectAction('https://pastebin.com/abc123', def)).toBe(EditorAction.OPEN_PASTEBIN)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// isCiphertext
+// ---------------------------------------------------------------------------
+
+describe('isCiphertext', () => {
+  it('accepts the JSON blob produced by encrypt()', () => {
+    expect(isCiphertext('{"C_TXT":"abc","IV":"def","Mode":"AES-GCM","Tag":"ghi"}')).toBe(true)
+    expect(isCiphertext('  {"C_TXT":"abc"}  ')).toBe(true)
+  })
+
+  it('rejects prose that merely mentions C_TXT', () => {
+    expect(isCiphertext('the C_TXT field holds the ciphertext')).toBe(false)
+  })
+
+  it('rejects plain text and JSON without the marker', () => {
+    expect(isCiphertext('hello world')).toBe(false)
+    expect(isCiphertext('{"foo":"bar"}')).toBe(false)
+  })
+})
+
+// ---------------------------------------------------------------------------
+// detectActionOnChange — auto-switching as the user types or pastes
+// ---------------------------------------------------------------------------
+
+describe('detectActionOnChange', () => {
+  const def = EditorAction.POST_PASTEBIN
+  const ciphertext = '{"C_TXT":"abc","IV":"def","Mode":"AES-GCM","Tag":"ghi"}'
+
+  it('switches to DECRYPT when a ciphertext is pasted', () => {
+    expect(detectActionOnChange(ciphertext, EditorAction.POST_PASTEBIN, def)).toBe(EditorAction.DECRYPT)
+  })
+
+  it('switches to DECRYPT even when the current action was chosen explicitly', () => {
+    expect(detectActionOnChange(ciphertext, EditorAction.ENCRYPT, def)).toBe(EditorAction.DECRYPT)
+  })
+
+  it('switches to OPEN_PASTEBIN when a pastebin link is pasted (plain default)', () => {
+    expect(detectActionOnChange('https://pastebin.com/abc123', EditorAction.POST_PASTEBIN, def)).toBe(EditorAction.OPEN_PASTEBIN)
+  })
+
+  it('switches to OPEN_PASTEBIN when a pastebin link is pasted (encryption default)', () => {
+    expect(detectActionOnChange('https://pastebin.com/abc123', EditorAction.ENCRYPT_PASTEBIN, EditorAction.ENCRYPT_PASTEBIN)).toBe(EditorAction.OPEN_PASTEBIN)
+  })
+
+  it('switches back to the default when the ciphertext is removed', () => {
+    expect(detectActionOnChange('plain text now', EditorAction.DECRYPT, def)).toBe(EditorAction.POST_PASTEBIN)
+  })
+
+  it('switches back to the default when the link is removed', () => {
+    expect(detectActionOnChange('plain text now', EditorAction.OPEN_PASTEBIN, def)).toBe(EditorAction.POST_PASTEBIN)
+  })
+
+  it('keeps the current action when nothing content-specific is detected', () => {
+    expect(detectActionOnChange('plain text', EditorAction.POST_PASTEBIN, def)).toBeUndefined()
+  })
+
+  it('never overrides an explicit non-default choice with plain text', () => {
+    // User picked "Encrypt Only", keeps typing plain text — action must not snap back
+    expect(detectActionOnChange('plain text', EditorAction.ENCRYPT, def)).toBeUndefined()
+    expect(detectActionOnChange('plain text', EditorAction.SAVE_DRAFT, def)).toBeUndefined()
+  })
+
+  it('returns undefined when the detected action equals the current one', () => {
+    expect(detectActionOnChange(ciphertext, EditorAction.DECRYPT, def)).toBeUndefined()
+    expect(detectActionOnChange('https://pastebin.com/abc', EditorAction.OPEN_PASTEBIN, def)).toBeUndefined()
+  })
+
+  it('switches between content actions when the content kind changes', () => {
+    // Ciphertext replaced by a pastebin link
+    expect(detectActionOnChange('https://pastebin.com/abc', EditorAction.DECRYPT, def)).toBe(EditorAction.OPEN_PASTEBIN)
+  })
+
+  it('keeps an explicit link-action pick while the text is still a link', () => {
+    // User picked "Decrypt from Link" over the detected "Open Paste" (or vice
+    // versa) — editing the link must not flip it back
+    expect(detectActionOnChange('https://pastebin.com/abc1', EditorAction.DECRYPT_PASTEBIN, def)).toBeUndefined()
+    expect(detectActionOnChange('https://pastebin.com/abc1', EditorAction.OPEN_PASTEBIN, EditorAction.ENCRYPT_PASTEBIN)).toBeUndefined()
+  })
+
+  it('does NOT hijack the action when pastebin.com is merely mentioned in prose', () => {
+    expect(detectActionOnChange('remember to check pastebin.com for the logs', EditorAction.POST_PASTEBIN, def)).toBeUndefined()
+    expect(detectActionOnChange('remember to check pastebin.com for the logs', EditorAction.ENCRYPT, def)).toBeUndefined()
+    expect(detectActionOnChange('see pastebin.com/abc123 in the docs', EditorAction.SAVE_DRAFT, def)).toBeUndefined()
+  })
+
+  it('does NOT hijack the action when C_TXT appears in prose', () => {
+    expect(detectActionOnChange('the C_TXT field holds the ciphertext', EditorAction.POST_PASTEBIN, def)).toBeUndefined()
+  })
+
+  it('accepts raw links and bare-domain paste links', () => {
+    expect(detectActionOnChange('pastebin.com/xyz9', EditorAction.POST_PASTEBIN, def)).toBe(EditorAction.OPEN_PASTEBIN)
+    expect(detectActionOnChange('https://pastebin.com/raw/xyz9', EditorAction.POST_PASTEBIN, def)).toBe(EditorAction.OPEN_PASTEBIN)
+  })
+
+  it('does NOT treat a lookalike domain as a paste link', () => {
+    expect(detectActionOnChange('https://pastebin.com.evil.com/abc', EditorAction.POST_PASTEBIN, def)).toBeUndefined()
+    expect(detectActionOnChange('https://pastebin.community/abc', EditorAction.POST_PASTEBIN, def)).toBeUndefined()
   })
 })
 
