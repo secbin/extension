@@ -367,7 +367,7 @@ try {
   check('encryption lands on the result page', onResult)
 
   const shareLinkGone = await page2.evaluate(() => !window.__sb.text().includes('Copy Share Link'))
-  check('Copy Share Link button is removed', shareLinkGone)
+  check('share link not offered for local-only encryption (no pastebin link)', shareLinkGone)
 
   await page2.evaluate(() => window.__sb.clickButton('Decrypt'))
   const resultDecryptDialog = await page2.evaluate(() => window.__sb.waitForText('Decryption Key'))
@@ -463,9 +463,73 @@ try {
       await shot(page2, '9-open-plain-paste')
       check('opening a plain paste loads its content into the editor', opened)
     }
+
   } else {
     console.log('⏭  PASTEBIN_API_KEY not set — skipping the live paste-link checks')
   }
+
+  // ── 6. Copy Share Link → securebin.org viewer URL (offline via seeded history)
+  await sw.evaluate(async (encText) => {
+    await chrome.storage.local.set({
+      history: [{
+        id: 'sharetest1',
+        action: 'Encrypt to Pastebin',
+        pastebinLink: 'https://pastebin.com/SHARE123',
+        key: 'share-verify-pass',
+        encText,
+        encMode: 'AES-GCM',
+        keyLength: 16,
+        date: Date.now(),
+        title: 'Share Test 8814',
+        format: 'text',
+        privacy: '1',
+        expiry: 'N',
+      }],
+    })
+  }, ciphertext)
+
+  const page3 = await browser.newPage()
+  await page3.goto('https://pastebin.com/doc_api', { waitUntil: 'networkidle2' })
+  await page3.evaluate(pageHelpers)
+  const sl = await injectAndSend('https://pastebin.com/doc_api', { type: 'SB_OPEN' })
+  check('panel opens for the share-link flow', !sl.error, sl.error)
+
+  await page3.evaluate(async () => {
+    const start = Date.now()
+    while (Date.now() - start < 4000) {
+      const nav = window.__sb.buttons().find(b => b.title === 'Pastes')
+      if (nav) { nav.click(); return }
+      await new Promise(r => setTimeout(r, 100))
+    }
+  })
+  // History rows are labeled by their pastebin link
+  const historyShown = await page3.evaluate(() => window.__sb.waitForText('SHARE123'))
+  check('seeded history item appears', historyShown)
+
+  await page3.evaluate(() => {
+    const leaf = [...(window.__sb.root()?.querySelectorAll('*') ?? [])]
+      .reverse()
+      .find(el => el.childElementCount === 0 && (el.textContent ?? '').includes('SHARE123'))
+    leaf?.click()
+  })
+  const shareBtnShown = await page3.evaluate(() => window.__sb.waitForText('Copy Share Link'))
+  check('result page offers Copy Share Link', shareBtnShown)
+
+  try {
+    await browser.defaultBrowserContext().overridePermissions('https://pastebin.com', ['clipboard-read', 'clipboard-write', 'clipboard-sanitized-write'])
+  } catch {
+    await browser.defaultBrowserContext().overridePermissions('https://pastebin.com', ['clipboard-read', 'clipboard-write'])
+  }
+  await page3.bringToFront()
+  await page3.evaluate(() => window.__sb.clickButton('Copy Share Link'))
+  await new Promise(r => setTimeout(r, 400))
+  const copied = await page3.evaluate(() => navigator.clipboard.readText().catch(() => ''))
+  await shot(page3, '10-share-link')
+  check(
+    'share link is the securebin.org viewer URL with the key in the fragment',
+    copied === 'https://securebin.org/SHARE123#key=share-verify-pass',
+    copied || 'clipboard empty',
+  )
 } finally {
   await browser.close()
 }

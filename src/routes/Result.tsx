@@ -28,6 +28,7 @@ export default function Result() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState('')
+  const [shareCopied, setShareCopied] = useState(false)
   const [contentCopied, setContentCopied] = useState(false)
   const [postDropdownOpen, setPostDropdownOpen] = useState(false)
 
@@ -88,6 +89,18 @@ export default function Result() {
     // Via the store, not an event — the editor isn't mounted yet
     setDecryptRequest(item.encText ?? '')
     navigate('/home')
+  }
+
+  const handleCopyShareLink = async () => {
+    if (!hasPastebin || !item.key) return
+    // Opens in the securebin.org viewer (same path as pastebin.com); the
+    // passkey rides in the fragment, which browsers never send to servers —
+    // decryption happens in the recipient's browser
+    const pasteKey = extractPasteKey(item.pastebinLink)
+    const shareLink = `https://securebin.org/${pasteKey}#key=${encodeURIComponent(item.key)}`
+    await navigator.clipboard.writeText(shareLink)
+    setShareCopied(true)
+    setTimeout(() => setShareCopied(false), 2000)
   }
 
   // Load draft content into editor with the chosen action, then navigate to editor
@@ -201,6 +214,27 @@ export default function Result() {
 
         {/* Passkey */}
         {item.key && <CopyBox label="Passkey" value={item.key} masked />}
+
+        {/* Share link — one URL that fetches AND decrypts in the recipient's browser */}
+        {hasPastebin && item.key && (
+          <div className="space-y-1">
+            <button
+              onClick={handleCopyShareLink}
+              className={cn(
+                'w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border text-sm font-medium transition-all',
+                shareCopied
+                  ? 'border-success/30 bg-success/5 text-success'
+                  : 'border-border text-text-secondary hover:bg-surface-hover',
+              )}
+            >
+              {shareCopied ? <Check size={14} /> : <Copy size={14} />}
+              {shareCopied ? 'Share link copied!' : 'Copy Share Link'}
+            </button>
+            <p className="text-[11px] text-text-muted/70 leading-snug text-center">
+              Link + passkey in one URL — decrypts on securebin.org, no extension needed. Anyone with the link can read the paste.
+            </p>
+          </div>
+        )}
 
         {/* Actions */}
         <div className="pt-2 space-y-2">
