@@ -53,15 +53,26 @@ export default function ActionBar({ onAction, loading = false }: ActionBarProps)
         { action: EditorAction.POST_PASTEBIN, icon: Send, label: 'Post (Unencrypted)', disabled: !hasPostKey },
         { action: EditorAction.ENCRYPT, icon: Lock, label: 'Encrypt Only' },
         { action: EditorAction.SAVE_DRAFT, icon: Save, label: 'Save Draft', divider: true },
-        { action: EditorAction.DECRYPT, icon: Unlock, label: 'Decrypt' },
-        ...(isPastebinLink ? [{ action: EditorAction.DECRYPT_PASTEBIN, icon: Unlock, label: 'Decrypt from Link' }] : []),
+        { action: EditorAction.DECRYPT, icon: Unlock, label: 'Decrypt', divider: true },
+        ...(isPastebinLink
+          ? [
+              { action: EditorAction.DECRYPT_PASTEBIN, icon: Unlock, label: 'Decrypt from Link' },
+              { action: EditorAction.OPEN_PASTEBIN, icon: Link, label: 'Open Paste' },
+            ]
+          : []),
       ]
     : [
         { action: EditorAction.POST_PASTEBIN, icon: Send, label: 'Post to Pastebin', disabled: !hasPostKey },
         { action: EditorAction.ENCRYPT_PASTEBIN, icon: KeyRound, label: 'Encrypt & Post', disabled: !hasPostKey },
         { action: EditorAction.ENCRYPT, icon: Lock, label: 'Encrypt Only' },
         { action: EditorAction.SAVE_DRAFT, icon: Save, label: 'Save Draft', divider: true },
-        ...(isPastebinLink ? [{ action: EditorAction.OPEN_PASTEBIN, icon: Link, label: 'Open Paste', divider: true }] : []),
+        { action: EditorAction.DECRYPT, icon: Unlock, label: 'Decrypt', divider: true },
+        ...(isPastebinLink
+          ? [
+              { action: EditorAction.DECRYPT_PASTEBIN, icon: Unlock, label: 'Decrypt from Link' },
+              { action: EditorAction.OPEN_PASTEBIN, icon: Link, label: 'Open Paste' },
+            ]
+          : []),
       ]
 
   const dropdownContent = (

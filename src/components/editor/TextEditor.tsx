@@ -2,6 +2,7 @@ import { useRef, useEffect, useCallback } from 'react'
 import { useStore, resolveTheme, type Draft } from '@/lib/store'
 import { EditorAction } from '@/lib/constants'
 import { detectLanguage } from '@/lib/detect-language'
+import { detectActionOnChange } from '@/lib/editor-utils'
 import {
   EditorView,
   EditorState,
@@ -50,6 +51,10 @@ export default function TextEditor() {
   const handleChange = useCallback(
     (text: string) => {
       const partial: Partial<Draft> = { plaintext: text }
+      // Pasted a ciphertext or Pastebin link → flip the action to Decrypt /
+      // Open Paste (and back once the content no longer matches).
+      const action = detectActionOnChange(text, draft.action, settings.default_action)
+      if (action !== undefined) partial.action = action
       // Auto-detect a code language, but never override a format the user
       // picked explicitly (formatLocked) — including an explicit "Plain Text".
       if (draft.format === 'text' && !draft.formatLocked && text.length > 80) {
@@ -62,7 +67,7 @@ export default function TextEditor() {
       }
       updateDraft(partial)
     },
-    [draft.format, draft.formatLocked, updateDraft],
+    [draft.format, draft.formatLocked, draft.action, settings.default_action, updateDraft],
   )
 
   // The CodeMirror update listener is registered once per view, so it must

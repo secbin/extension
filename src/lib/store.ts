@@ -81,6 +81,11 @@ interface AppState {
   clearHistory: () => void
   loadHistory: () => Promise<void>
 
+  // Decrypt result — in-memory only. Decrypted plaintext is deliberately never
+  // written to extension storage (history stores ciphertext, not plaintext).
+  decryptResult: { plaintext: string; date: number } | null
+  setDecryptResult: (result: { plaintext: string; date: number } | null) => void
+
   // Dialog
   activeDialog: string | null
   openDialog: (id: string) => void
@@ -288,6 +293,10 @@ export const useStore = create<AppState>((set, get) => ({
       set({ history: items.reverse() })
     }
   },
+
+  // Decrypt result
+  decryptResult: null,
+  setDecryptResult: (result) => set({ decryptResult: result }),
 
   // Dialog
   activeDialog: null,

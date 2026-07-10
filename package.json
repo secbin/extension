@@ -10,7 +10,8 @@
     "lint": "eslint . --fix",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:relay": "node scripts/verify-relay.mjs"
+    "test:relay": "node scripts/verify-relay.mjs",
+    "test:ui": "node scripts/verify-ui.mjs"
   },
   "dependencies": {
     "@codemirror/commands": "^6.10.3",
